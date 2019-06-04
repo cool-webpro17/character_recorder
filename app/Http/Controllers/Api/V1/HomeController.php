@@ -2,268 +2,349 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Specimen;
-use App\Header;
-use App\Character;
-use App\Value;
-use App\ActionLog;
-use App\ActivityLog;
-use App\MetaLog;
-use App\UserLog;
-use App\CharaUser;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Auth;
+use App\StandardCharacter;
+use App\Character;
+use App\UserTag;
+use App\User;
+use App\Header;
+use App\Value;
 
 class HomeController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->only(['getArrayCharacters', 'delete', 'addHeader', 'deleteHeader', 'getHeaders', 'store']);
+        $this->middleware('auth')->only([
+            'getStandardCharacters',
+            'getArrayCharacters',
+            'delete',
+            'addHeader',
+            'deleteHeader',
+            'getHeaders',
+            'store',
+            'storeCharacter',
+            'getUserTags',
+            'createUserTag',
+            'getCharacter',
+            'removeUserTag',
+            'storeMatrix',
+            'deleteHeader',
+            'changeTaxon',
+            'addMoreColumn',
+            'addCharacter',
+            'updateCharacter',
+        ]);
     }
+
+    public function getHeaders() {
+        return Header::where('user_id', Auth::id())
+            ->orWhere('user_id', NULL)
+            ->orderBy('id', 'asc')->get();
+    }
+
     public function getValuesByCharacter()
     {
-        $all = Character::all();
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+
+        $allCharacters = Character::where('username', '=', $username)->orderBy('standard_tag', 'ASC')->get();
         $headers = $this->getHeaders();
         $characters = [];
-        foreach ($all as $c) {
+        foreach ($allCharacters as $eachCharacter) {
             $value_array = [];
-            $min = -1; $max = 0;
-            $range_exist = false;
-            foreach ($headers as $h) {
-                $v = Value::where(['character_id'=>$c->id, 'header_id'=>$h->id])->first();
-                
-                if ($h->id >= 4 && is_numeric($v->value)) {
-                    $range_exist = true;
-                    if ($min < 0 || $min > $v->value) $min = $v->value;
-                    if ($max < $v->value) $max = $v->value;
-                }
+            foreach ($headers as $header) {
+                $value = Value::where(['character_id'=>$eachCharacter->id, 'header_id'=>$header->id])->first();
 
-                $v->username = $c->username;
-                $v->unit = $c->unit;
-                array_push($value_array, $v);
+                $value->username = $eachCharacter->username;
+                $value->unit = $eachCharacter->unit;
+                array_push($value_array, $value);
             }
-            array_push($value_array, [
-                'character_id' => $c->id, 
-                'header_id' => 0,
-                'username' => $c->username,
-                'unit' => $c->unit,
-                'value' => $range_exist ? ($min.' - '.$max) : '0 - 0'
-            ]);
             array_push($characters, $value_array);
         }
 
         return $characters;
     }
 
-    public function getCharacter(Request $request, $id)
-    {
-        $character = Character::where('id', '=', $id)->first();
+    public function getArrayCharacters() {
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+        $arrayCharacters = Character::where('username', '=', $username)->orderBy('standard_tag', 'ASC')->get();
+        foreach ($arrayCharacters as $c) {
 
-        return $character;
+            $usageCount = Value::where('character_id', '=', $c->id)
+                ->where('header_id', '>=', 2)
+                ->where('value', '<>', '')
+                ->count();
+            $c->usage_count = $usageCount;
+        }
+        return $arrayCharacters;
     }
 
-    public function store(Request $request)
-    {
-        $charauser = NULL;
-        if ($request->has('id')) {
-            $charauser = CharaUser::firstOrNew(['character_id'=>$request->input('id'), 'user_id'=>Auth::id()]);
-            $character = Character::where('id', '=', $request->input('id'))->first();
-            $character->name = $request->input('name');
-            $character->method_as = $request->input('method_as');
-            $character->method_from = $request->input('method_from');
-            $character->method_to = $request->input('method_to');
-            $character->method_include = $request->input('method_include');
-            $character->method_exclude = $request->input('method_exclude');
-            $character->method_at = $request->input('method_at');
-            $character->unit = $request->input('unit');
-            $character->measure_semantic = $request->input('measure_semantic');
-            $character->entity_semantic = $request->input('entity_semantic');
-            $character->creator = $request->input('creator');
-            $character->username = $request->input('username');
-            $character->usage_count = $request->input('usage_count');
-            $character->show_flag = $request->input('show_flag');
-            $character->save();
-        } else {
-            $charauser = new CharaUser;
-            $tmp_username = '';
-            if ($request->has('clone_id')) {
-                $original_username = Character::find($request->input('clone_id'))->username;
-                if (!empty($original_username)) {
-                    $input_username = $request->input('username');
-                    if (strpos($original_username, $input_username)===false && strpos($input_username, $original_username)===false) {
-                        $tmp_username = $original_username.';'.$request->input('username');
-                    }
-                }
-            }
-            if (empty($tmp_username))
-                $tmp_username = $request->input('username');
+    public function getStandardCharacters() {
+        $standardCharacters = StandardCharacter::all();
 
-            $character = Character::create([
-                'name' => $request->input('name'),
-                'method_as' => $request->input('method_as'),
-                'method_from' => $request->input('method_from'),
-                'method_to' => $request->input('method_to'),
-                'method_include' => $request->input('method_include'),
-                'method_exclude' => $request->input('method_exclude'),
-                'method_at' => $request->input('method_at'),
-                'unit' => $request->input('unit'),
-                'measure_semantic' => $request->input('measure_semantic'),
-                'entity_semantic' => $request->input('entity_semantic'),
-                'creator' => $request->input('creator'),
-                'username' => $tmp_username,
-                'usage_count' => $request->input('usage_count'),
-                'show_flag' => $request->input('show_flag'),
-            ]);
-            $charauser->character_id = $character->id;
-            $charauser->user_id = Auth::id();
+        return $standardCharacters;
+    }
 
-            $headers = Header::all();
-            foreach ($headers as $header) {
-                Value::create([
-                    'character_id' => $character->id,
-                    'header_id' => $header->id,
-                    'value' => ''
+    public function getUserTags(Request $request, $userId) {
+        $userTags = UserTag::where('user_id', '=', $userId)->get();
+
+        return $userTags;
+    }
+
+    public function createUserTag(Request $request) {
+        $userTag = new UserTag([
+            'tag_name' => $request->input('user_tag'),
+            'user_id' => $request->input('user_id')
+        ]);
+        $userTag->save();
+
+        return $userTag;
+    }
+
+    public function removeUserTag(Request $request) {
+        $userTag = UserTag::where([
+            ['tag_name', '=', $request->input('user_tag')],
+            ['user_id', '=', $request->input('user_id')],
+        ])->delete();
+
+        $userTags = UserTag::where('user_id', '=', $request->input('user_id'))->get();
+        return $userTags;
+    }
+
+    public function deleteHeader(Request $request, $headerId) {
+        $headers = Header::where('id', '=', $headerId)->delete();
+        $values = Value::where('header_id', '=', $headerId)->delete();
+
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues
+        ];
+
+        return $data;
+    }
+    public function changeTaxon(Request $request, $taxon) {
+        $user = User::where('id', '=', Auth::id())->first();
+        $user->taxon = $taxon;
+        $user->save();
+
+        $data = [
+            'taxon' => $user->taxon
+        ];
+
+        return $data;
+    }
+
+    public function storeCharacter(Request $request) {
+        $character = new Character([
+            'name' => $request->input('name'),
+            'method_from' => $request->input('method_from'),
+            'method_to' => $request->input('method_to'),
+            'method_include' => $request->input('method_include'),
+            'method_exclude' => $request->input('method_exclude'),
+            'method_where' => $request->input('method_where'),
+            'unit' => $request->input('unit'),
+            'creator' => $request->input('creator'),
+            'username' => $request->input('username'),
+            'usage_count' => $request->input('usage_count'),
+            'show_flag' => $request->input('show_flag'),
+            'standard_tag' => $request->input('standard_tag'),
+            'summary' => $request->input('summary'),
+        ]);
+
+        $character->save();
+
+        $characters = Character::where('username', '=', $character['username'])->orderBy('standard_tag', 'ASC')->get();
+
+        return $characters;
+
+    }
+    public function getCharacter(Request $request, $userId) {
+        $user = User::where('id', '=', $userId)->first();
+        $username = explode('@', $user['email'])[0];
+        $characters = Character::where('username', '=', $username)->orderBy('standard_tag', 'ASC')->get();
+
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $returnTaxon = $user->taxon;
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+            'taxon' => $returnTaxon
+        ];
+
+        return $data;
+    }
+
+    public function deleteCharacter(Request $request, $userId, $characterId) {
+        $character = Character::where('id', '=', $characterId)->delete();
+
+        $user = User::where('id', '=', $userId)->first();
+        $username = explode('@', $user['email'])[0];
+        $characters = Character::where('username', '=', $username)->orderBy('standard_tag', 'ASC')->get();
+
+
+        return $characters;
+    }
+
+    public function storeMatrix(Request $request) {
+        $user = User::where('id', '=', $request->input('user_id'))->first();
+        $username = explode('@', $user['email'])[0];
+        $characters = Character::where('username', '=', $username)->get();
+        $columnCount = (int)$request->input('column_count');
+        $user->taxon = $request->input('taxon');
+        $user->save();
+        $previousHeaderCount = Header::where('user_id', '=', $request->input('user_id'))->count();
+        if ($previousHeaderCount < $columnCount) {
+            for ($i = 0; $i < ($columnCount - $previousHeaderCount); $i++) {
+                $header = Header::create([
+                    'user_id' => $request->input('user_id'),
+                    'header' => 'Specimen' . ($previousHeaderCount + $i + 1)
                 ]);
             }
         }
 
-        $charauser->show_flag = 1;
-        $charauser->save();
+        $headers = Header::where('user_id', '=', $request->input('user_id'))->get();
 
-        // update character header in Value Model
-        $value = Value::where('character_id', '=', $character->id)->where('header_id', '=', 1)->first();
-        $value->value = $character->name;
-        $value->save();
+        foreach ($characters as $eachCharacter) {
+            $value = Value::where('character_id', '=', $eachCharacter->id)
+                ->where('header_id', '=', 1)
+                ->first();
+            if ($value == null) {
+                Value::create([
+                    'character_id' => $eachCharacter->id,
+                    'header_id' => 1,
+                    'value' => $eachCharacter->name
+                ]);
 
-        $characters = $this->getValuesByCharacter();
-        $arrayCharacters = $this->getArrayCharacters();
-
-        $data = [
-            'character'  => $character,
-            'value'       => $value,
-            'characters'    => $characters,
-            'arrayCharacters' => $arrayCharacters
-        ];
-
-        return $data;
-    }
-
-    public function history(Request $request, $characterId)
-    {
-        $history = ActionLog::select('created_at')
-            ->where('model_id', '=', $characterId)
-            ->whereIn('action_type', ['update', 'create'])
-            ->get();
-
-        return $history;
-    }
-
-    public function getName(Request $request)
-    {
-        $characterName = Character::select('name')->get();
-
-        return $characterName;
-    }
-
-    public function usage(Request $request, $characterId)
-    {
-        $values = Value::where('character_id', '=', $characterId)
-            ->where('header_id', '>=', 4)
-            ->where('value', '<>', '')
-            ->get();
-
-        $usage = [];
-
-        if (count($values) > 0) {
-            foreach ($values as $each) {
-                $tpUsage = Header::select('header')
-                    ->where('id', '=', $each->header_id)
+            }
+            foreach($headers as $header) {
+                $value = Value::where('character_id', '=', $eachCharacter->id)
+                    ->where('header_id', '=', $header->id)
                     ->first();
-                $usage []= $tpUsage;
+                if ($value == null) {
+                    Value::create([
+                        'character_id' => $eachCharacter->id,
+                        'header_id' => $header->id,
+                        'value' => ''
+                    ]);
+                }
             }
         }
 
-        return $usage;
-    }
-
-    public function log(Request $request)
-    {
-        $actionLog = ActionLog::create($request->all());
-
-        return $actionLog;
-    }
-
-    public function saveUserLog(Request $request) {
-        $userLog = UserLog::create($request->all());
-
-        return $userLog;
-    }
-
-    public function all(Request $request)
-    {
-        $headers = $this->getHeaders();
-        $characters = $this->getValuesByCharacter();
-        $arrayCharacters = $this->getArrayCharacters();
-
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $returnTaxon = $user->taxon;
         $data = [
-            'headers'               => $headers,
-            'characters'            => $characters,
-            'arrayCharacters'       => $arrayCharacters
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+            'taxon' => $returnTaxon
         ];
 
         return $data;
     }
 
-    public function addHeader(Request $request) {
-        $user_id = Auth::id();
-        $header = new Header;
-        $header->header = $request->input('header');
-        $header->user_id = $user_id;
-        $header->save();
+    public function addMoreColumn(Request $request, $columnCount) {
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+        $oldHeaderCount = Header::where('user_id', '=', Auth::id())->count();
+        $characters = Character::where('username', '=', $username)->get();
+        for ($i = 0; $i < ($columnCount - $oldHeaderCount); $i++) {
+            for ($j = 0; $j < $columnCount; $j++) {
+                if (!Header::where('header', '=', ('Specimen' . ($j + 1)))->first()) {
+                    $header = Header::create([
+                        'user_id' => Auth::id(),
+                        'header' => 'Specimen' . ($j + 1)
+                    ]);
+                    foreach ($characters as $eachCharacter) {
+                        Value::create([
+                            'character_id' => $eachCharacter->id,
+                            'header_id' => $header->id,
+                            'value' => ''
+                        ]);
+                    }
+                    break;
+                }
+            }
+        }
 
-        $characters = Character::all();
-        foreach ($characters as $character) {
-            Value::create([
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $returnTaxon = $user->taxon;
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+            'taxon' => $returnTaxon
+        ];
+
+        return $data;
+    }
+
+    public function addCharacter(Request $request) {
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+
+        $character = new Character([
+            'name' => $request->input('name'),
+            'method_from' => $request->input('method_from'),
+            'method_to' => $request->input('method_to'),
+            'method_include' => $request->input('method_include'),
+            'method_exclude' => $request->input('method_exclude'),
+            'method_where' => $request->input('method_where'),
+            'unit' => $request->input('unit'),
+            'creator' => $request->input('creator'),
+            'username' => $request->input('username'),
+            'usage_count' => $request->input('usage_count'),
+            'show_flag' => $request->input('show_flag'),
+            'standard_tag' => $request->input('standard_tag'),
+            'summary' => $request->input('summary'),
+        ]);
+
+        $character->save();
+        $headers = Header::where('user_id', '=', Auth::id())->get();
+
+        $value = Value::create([
+            'header_id' => 1,
+            'character_id' => $character->id,
+            'value' => $character->name
+        ]);
+        foreach ($headers as $eachHeader) {
+            $value = Value::create([
+                'header_id' => $eachHeader->id,
                 'character_id' => $character->id,
-                'header_id' => $header->id,
                 'value' => ''
             ]);
         }
 
-        $headers = $this->getHeaders();
-        $characters = $this->getValuesByCharacter();
-        $arrayCharacters = $this->getArrayCharacters();
-
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $returnTaxon = $user->taxon;
         $data = [
-            'headers'       => $headers,
-            'characters'    => $characters,
-            'arrayCharacters'       => $arrayCharacters
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+            'taxon' => $returnTaxon
         ];
 
         return $data;
     }
 
-    public function deleteHeader(Request $request, $headerId) {
-        Header::where('id', '=', $headerId)->delete();
-        Value::where('header_id', '=', $headerId)->delete();
-
-        $characters = $this->getValuesByCharacter();
-        $arrayCharacters = $this->getArrayCharacters();
-        $headers = $this->getHeaders();
-
-        $data = [
-            'headers'               => $headers,
-            'characters'            => $characters,
-            'arrayCharacters'       => $arrayCharacters
-        ];
-
-        return $data;
-    }
-
-    public function update(Request $request) {
+    public function updateCharacter(Request $request) {
         $value = Value::where('id', '=', $request->input('id'))->first();
-        
+
         $v = $request->input('value');
 
         if (is_numeric($v)) {
@@ -282,101 +363,16 @@ class HomeController extends Controller
 
         $value->save();
 
-        $characters = $this->getValuesByCharacter();
-        $arrayCharacters = $this->getArrayCharacters();
-
-        return [
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $data = [
             'error_input' => 0,
-            'updatedCharacter' => $value,
-            'characters' => $characters,
-            'arrayCharacters' => $arrayCharacters
-        ];
-    }
-
-    public function delete(Request $request) {
-        $character_id = $request->input('character_id');
-        
-        $charauser = CharaUser::firstOrNew(['character_id'=>$character_id, 'user_id'=>Auth::id()]);
-        $charauser->show_flag = 0;
-        $charauser->save();
-        // Character::where('id', '=', $character_id)->update(['show_flag' => false]);
-        // Value::where('character_id', '=', $character_id)->delete();
-        $arrayCharacters = $this->getArrayCharacters();
-        $characters = $this->getValuesByCharacter();
-        $data = [
-            'characters'    => $characters,
-            'arrayCharacters' => $arrayCharacters
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
         ];
 
         return $data;
-    }
-
-    public function getArrayCharacters() {
-        $user_id = Auth::id();
-        $arrayCharacters = Character::all();        
-        foreach ($arrayCharacters as $c) {
-            $charauser = CharaUser::where(['character_id'=>$c->id, 'user_id'=>$user_id])->first();
-            if ($charauser) {
-                $c->show_flag = $charauser->show_flag;
-            } else {
-                $c->show_flag = 0;
-            }
-            $usageCount = Value::where('character_id', '=', $c->id)
-                ->where('header_id', '>=', 4)
-                ->where('value', '<>', '')
-                ->count();
-            $c->usage_count = $usageCount;
-        }
-        return $arrayCharacters;
-    }
-
-    public function getHeaders() {
-        return Header::where('user_id', Auth::id())
-                ->orWhere('user_id', NULL)
-                ->orderBy('id', 'desc')->get();
-    }
-
-    public function undelete(Request $request) {
-        $character_id = $request->input('character_id');
-        Character::find($character_id)->update(['show_flag'=>true]);
-    }
-
-    public function activity_log(Request $request) {
-        
-        $actLog = ActivityLog::create($request->all());
-
-        return $actLog;
-    }
-
-    public function saveMetaLog(Request $request) {
-        $metaLog = MetaLog::create($request->all());
-
-        return $metaLog;
-    }
-
-    public function getMetaLog(Request $request, $characterId) {
-        $metaLogs = MetaLog::where('character_id', '=', $characterId)->orderBy('created_at', 'asc')->get();
-
-
-        $metaHistory = [];
-        foreach ($metaLogs as $eachLog) {
-            $tpValue = $eachLog->created_at . ' ' . $eachLog->username . ' ' . $eachLog->description;
-            $metaHistory []= $tpValue;
-        }
-
-        $data = [
-            'metaHistory'   =>  $metaHistory
-        ];
-
-        return $data;
-    }
-
-    public function setCharashow(Request $request) {
-        $character_id = $request->input('character_id');
-        $user_id = $request->input('user_id');
-        $show_flag = $request->input('show_flag');
-        $record = CharaUser::firstOrNew(['character_id'=>$character_id, 'user_id'=>$user_id]);
-        $record->show_flag = $show_flag;
-        $record->save();
     }
 }

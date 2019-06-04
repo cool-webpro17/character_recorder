@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Measurement Recorder'),
+    'name' => env('APP_NAME', 'Character Recorder'),
 
     /*
     |--------------------------------------------------------------------------

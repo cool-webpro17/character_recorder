@@ -189,7 +189,6 @@
                 common.pointerAdjust(this)
             },
             mousedownItem () {
-                console.log('this', this);
                 common.mousedownItem(this)
             },
             selectItem (option) {

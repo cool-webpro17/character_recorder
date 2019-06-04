@@ -1,14 +1,13 @@
 <template>
     <div class="row">
         <div class="col-md-12" style="font-size: 20px;">
-            "{{ character_name }}" uses unit:
+            "{{ character_name }}" uses summary:
         </div>
         <div class="col-md-12">
             <select v-if="viewFlag == false" style="width: 100%;" v-model="childData" @change="handleDataFc()" :disabled="edit_created_other">
-                <option value="m">m</option>
-                <option value="dm">dm</option>
-                <option value="cm">cm</option>
-                <option value="mm">mm</option>
+                <option value="range-percentile">range-percentile</option>
+                <option value="mean">mean</option>
+                <option value="median">median</option>
             </select>
             <div v-if="viewFlag == true" style="border: 1px solid grey;">
                 {{ childData ? childData : '&nbsp;' }}

@@ -5,9 +5,9 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="panel panel-default">
-                    <div class="panel-heading">Measurements</div>
+                    {{--<div class="panel-heading">Character</div>--}}
 
-                    <div class="panel-body table-responsive">
+                    <div class="panel-body">
 
                         {{--<router-view name="measurementsIndex"></router-view>--}}
                         <router-view :user="{{ Auth::user()->toJson() }}"></router-view>

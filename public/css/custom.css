@@ -304,7 +304,7 @@ button[aria-disabled="true"] {
 .wheelnav-piemenu-spreadertitle-in,
 .wheelnav-piemenu-spreadertitle-out { fill: #000000; stroke: #d1e02e; cursor: pointer; font-size: 15px !important; }
 
-.measure-table th {
+.cr-table th {
     padding: 0 !important;
 }
 .th-input {
@@ -333,12 +333,12 @@ input.display-block {
     height: 43px;
 }
 
-.measure-table > tbody > tr > td {
+.cr-table > tbody > tr > td {
     padding: 0;
     /*line-height: 44px;*/
 }
 
-.measure-table > tbody > tr > td:last-child {
+.cr-table > tbody > tr > td:last-child {
     padding: 0px 8px;
 }
 
@@ -730,3 +730,11 @@ p a {
     opacity: 1;
     transition: opacity .15s;
 }
+
+.margin-top-10 {
+    margin-top: 10px;
+}
+
+/*.container .table-responsive {*/
+    /*min-height: 500px;*/
+/*}*/

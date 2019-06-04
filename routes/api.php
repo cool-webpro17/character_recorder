@@ -1,13 +1,5 @@
 <?php
 
-Route::group([
-        'prefix' => '/v1',
-        'namespace' => 'Api\V1',
-        'middleware' => ['cors'],
-        'as' => 'api.'
-    ], function () {
-    Route::resource('companies', 'CompaniesController', ['except' => ['create', 'edit']]);
-});
 
 Route::group([
         'prefix' => '/v1',
@@ -15,29 +7,29 @@ Route::group([
         'middleware' => ['cors'],
         'as' => 'api.'
     ], function () {
-    Route::post('log',                          ['as' => 'log',                         'uses' => 'HomeController@log']);
-    Route::get('activity_log',                  ['as' => 'activity_log',                'uses' => 'HomeController@activity_log']);
+    Route::post('log',                                  ['as' => 'log',                         'uses' => 'HomeController@log']);
+    Route::get('activity_log',                          ['as' => 'activity_log',                'uses' => 'HomeController@activity_log']);
+    Route::get('standard_characters',                   ['as' => 'standard_characters',         'uses' => 'HomeController@getStandardCharacters']);
+    Route::get('user-tag/{userId}',                     ['as' => 'get_user_tag',                'uses' => 'HomeController@getUserTags']);
+    Route::post('user-tag/create',                      ['as' => 'create_user_tag',             'uses' => 'HomeController@createUserTag']);
+    Route::post('user-tag/remove',                      ['as' => 'remove_user_tag',             'uses' => 'HomeController@removeUserTag']);
+    Route::post('matrix-store',                         ['as' => 'store_matrix',                'uses' => 'HomeController@storeMatrix']);
+    Route::post('delete-header/{headerId}',             ['as' => 'delete_header',               'uses' => 'HomeController@deleteHeader']);
+    Route::post('change-taxon/{taxon}',                 ['as' => 'change_taxon',                'uses' => 'HomeController@changeTaxon']);
+    Route::post('add-more-column/{columnCount}',        ['as' => 'add_more_column',             'uses' => 'HomeController@addMoreColumn']);
 
-
-    Route::post('meta-log',                     ['as' => 'meta_log',                    'uses' => 'HomeController@saveMetaLog']);
-    Route::get('meta-log/{characterId}',        ['as' => 'activity_log',                'uses' => 'HomeController@getMetaLog']);
-
-    Route::post('user-log',                     ['as' => 'user_log',                    'uses' => 'HomeController@saveUserLog']);
     Route::group([
         'prefix' => '/character',
         'as' => 'character.'
     ], function () {
-        Route::get('all',                       ['as' => 'all',                         'uses' => 'HomeController@all']);
-        Route::get('name',                      ['as' => 'name',                        'uses' => 'HomeController@getName']);
-        Route::get('history/{characterId}',     ['as' => 'history',                     'uses' => 'HomeController@history']);
-        Route::get('usage/{characterId}',       ['as' => 'usage',                       'uses' => 'HomeController@usage']);
-        Route::get('/{id}',                     ['as' => 'get-character',               'uses' => 'HomeController@getCharacter']);
-        Route::post('create',                   ['as' => 'create',                      'uses' => 'HomeController@store']);
-        Route::post('add-header',               ['as' => 'add-header',                  'uses' => 'HomeController@addHeader']);
-        Route::post('update',                   ['as' => 'update',                      'uses' => 'HomeController@update']);
-        Route::post('delete',                   ['as' => 'delete',                      'uses' => 'HomeController@delete']);
-        Route::post('delete-header/{headerId}', ['as' => 'delete-header',               'uses' => 'HomeController@deleteHeader']);
-        Route::post('undelete',                 ['as' => 'undelete',                    'uses' => 'HomeController@undelete']);
-        Route::post('set-charashow',            ['as' => 'set_charashow',               'uses' => 'HomeController@setCharashow']);
+        Route::post('create',                           ['as' => 'create_character',            'uses' => 'HomeController@storeCharacter']);
+        Route::post('add-character',                    ['as' => 'add_character',               'uses' => 'HomeController@addCharacter']);
+        Route::get('{userId}',                          ['as' => 'get_character',               'uses' => 'HomeController@getCharacter']);
+        Route::post('update',                           ['as' => 'update_character',            'uses' => 'HomeController@updateCharacter']);
+        Route::post('delete/{userId}/{characterId}',    ['as' => 'delete_character',            'uses' => 'HomeController@deleteCharacter']);
+
+
+        Route::get('usage/{characterId}',               ['as' => 'usage',                       'uses' => 'HomeController@usage']);
+        Route::post('delete-header/{headerId}',         ['as' => 'delete-header',               'uses' => 'HomeController@deleteHeader']);
     });
 });

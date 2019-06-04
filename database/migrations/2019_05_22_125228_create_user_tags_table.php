@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateMetaLogsTable extends Migration
+class CreateUserTagsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreateMetaLogsTable extends Migration
      */
     public function up()
     {
-        Schema::create('meta_logs', function (Blueprint $table) {
+        Schema::create('user_tags', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('character_id');
-            $table->string('username');
-            $table->string('description');
+            $table->integer('user_id');
+            $table->string('tag_name');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreateMetaLogsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('meta_logs');
+        Schema::dropIfExists('user_tags');
     }
 }

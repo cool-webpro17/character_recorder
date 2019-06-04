@@ -173,29 +173,29 @@
                     </div>
                 </div>
                 <div class="col-md-12" style="margin-top: 10px;">
-                    <label class="col-md-3 text-right">At:</label>
-                    <input :disabled="viewFlag || edit_created_other" v-on:blur="userLog('At')" class="col-md-8" v-model="methodAt" @keyup="saveMeasureItems" name="methodAt"/>
-                    <p v-if="atId != null || greenTick.at == true" style="color: green;">&#10004;</p>
-                    <a v-if="atNeedMore == true" class="red col-md-12" v-bind:class="{ green: needMoreGreen.at }"
-                       v-on:mouseover="needMore('at')">Need info on new terms:</a>
-                    <div class="col-md-12" v-if="formViewFlag.at == true">
-                        <div class="col-md-12" v-if="atSynonyms.length > 0">
-                            {{ methodAt }}: is a synonym of
+                    <label class="col-md-3 text-right">Where:</label>
+                    <input :disabled="viewFlag || edit_created_other" v-on:blur="userLog('Where')" class="col-md-8" v-model="methodWhere" @keyup="saveMeasureItems" name="methodWhere"/>
+                    <p v-if="whereId != null || greenTick.where == true" style="color: green;">&#10004;</p>
+                    <a v-if="whereNeedMore == true" class="red col-md-12" v-bind:class="{ green: needMoreGreen.where }"
+                       v-on:mouseover="needMore('where')">Need info on new terms:</a>
+                    <div class="col-md-12" v-if="formViewFlag.where == true">
+                        <div class="col-md-12" v-if="whereSynonyms.length > 0">
+                            {{ methodWhere }}: is a synonym of
                         </div>
-                        <div class="col-md-12" v-if="atSynonyms.length > 0">
-                            <a class="btn btn-basic" v-on:click="addSynonym('at', each)" v-tooltip="each.tooltip"
-                               v-for="each in atSynonyms">
+                        <div class="col-md-12" v-if="whereSynonyms.length > 0">
+                            <a class="btn btn-basic" v-on:click="addSynonym('where', each)" v-tooltip="each.tooltip"
+                               v-for="each in whereSynonyms">
                                 {{ each.term }}
                             </a>
-                            <a class="col-md-12 btn btn-basic" v-on:click="noneSynonym('at')">None of above, add the
+                            <a class="col-md-12 btn btn-basic" v-on:click="noneSynonym('where')">None of above, add the
                                 term to Dictionary</a>
                         </div>
-                        <div class="col-md-12" v-if="noneSynonymFlag.at == true">
+                        <div class="col-md-12" v-if="noneSynonymFlag.where == true">
                             <div>
                                 Add the following to the dictionary:
                             </div>
-                            <a class="btn btn-primary col-md-4" v-on:click="addTerm('at', methodAt)"
-                               style="padding: 3px 8px;"> {{ methodAt }} </a>
+                            <a class="btn btn-primary col-md-4" v-on:click="addTerm('where', methodWhere)"
+                               style="padding: 3px 8px;"> {{ methodWhere }} </a>
                             <!-- <div class="col-md-7"
                                  style="border: 1px solid grey; border-radius: 4px; margin-left: 10px;">
                                 <input v-model="definition.at" style="max-width: 120px;"/>
@@ -245,14 +245,14 @@
                 childData: [],
                 character_name: null,
                 viewFlag: false,
-                edit_created_other: false,
+                edit_created_other: true,
                 methodEntry: null,
                 noneMethod: false,
                 methodFrom: null,
                 methodTo: null,
                 methodInclude: null,
                 methodExclude: null,
-                methodAt: null,
+                methodWhere: null,
                 fromId: null,
                 fromTerm: null,
                 toId: null,
@@ -261,52 +261,52 @@
                 includeId: null,
                 excludeTerm: null,
                 excludeId: null,
-                atTerm: null,
-                atId: null,
+                whereTerm: null,
+                whereId: null,
                 fromNeedMore: false,
                 toNeedMore: false,
                 includeNeedMore: false,
                 excludeNeedMore: false,
-                atNeedMore: false,
+                whereNeedMore: false,
                 fromSynonyms: [],
                 toSynonyms: [],
                 includeSynonyms: [],
                 excludeSynonyms: [],
-                atSynonyms: [],
+                whereSynonyms: [],
                 formViewFlag: {
                     from: false,
                     to: false,
                     include: false,
                     exclude: false,
-                    at: false
+                    where: false
                 },
                 greenTick: {
                     from: false,
                     to: false,
                     include: false,
                     exclude: false,
-                    at: false
+                    where: false
                 },
                 definition: {
                     from: null,
                     to: null,
                     include: null,
                     exclude: null,
-                    at: null
+                    where: null
                 },
                 noneSynonymFlag: {
                     from: false,
                     to: false,
                     include: false,
                     exclude: false,
-                    at: false
+                    where: false
                 },
                 needMoreGreen: {
                     from: false,
                     to: false,
                     include: false,
                     exclude: false,
-                    at: false
+                    where: false
                 },
                 methodArray: [],
                 modalFlag: false,
@@ -343,16 +343,6 @@
                 var app = this;
                 app.newTerm = value;
                 app.currentSetting = setting;
-                var jsonRequest = {
-                    'user_id': app.childData[3].id,
-                    'action': 'In Method, added ' + setting,
-                    'action_detail': setting + '=' + app.newTerm +' in "'+app.character_name+'"',
-                    'type': 'Measurement Recorder',
-                };
-                axios.post('/mr/individual/public/api/v1/user-log', jsonRequest)
-                    .then(function (resp) {
-                        console.log('user-log resp', resp);
-                    });
                 app.modalFlag = true;
 
             },
@@ -360,31 +350,11 @@
                 var app = this;
                 app.newTerm = definition;
                 app.currentSetting = setting;
-                var jsonRequest = {
-                    'user_id': app.childData[3].id,
-                    'action': 'In Method, add new ' + setting,
-                    'action_detail': setting + '=' + app.newTerm +' in "'+app.character_name+'"',
-                    'type': 'Measurement Recorder',
-                };
-                axios.post('/mr/individual/public/api/v1/user-log', jsonRequest)
-                    .then(function (resp) {
-                        console.log('user-log resp', resp);
-                    });
                 app.modalFlag = true;
             },
             confirmTerm: function (definition) {
                 var app = this;
 
-                var jsonLog = {
-                    'user_id': app.childData[3].id,
-                    'action': 'In Method, add definition for term',
-                    'action_detail': 'term=' + app.newTerm + ', definition=' + definition +' in "'+app.character_name+'"',
-                    'type': 'Measurement Recorder',
-                };
-                axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                    .then(function (resp) {
-                        console.log('user-log resp', resp);
-                    });
                 var jsonRequest = {
                     user: app.childData[3].name,
                     ontology: 'exp',
@@ -439,8 +409,8 @@
                     case 'exclude':
                         jsonRequest.term = app.methodExclude;
                         break;
-                    case 'at':
-                        jsonRequest.term = app.methodExclude;
+                    case 'where':
+                        jsonRequest.term = app.methodWhere;
                         break;
                     default:
                         break;
@@ -458,16 +428,6 @@
                         jsonRequest.creationDate = new Date();
                         jsonRequest.definitionSrc = app.childData[3].name;
                         jsonRequest.logicDefinition = value.term;
-                        var jsonLog = {
-                            'user_id': app.childData[3].id,
-                            'action': 'In Method, add new term',
-                            'action_detail': 'term=' + jsonRequest.term +' in "'+app.character_name+'"',
-                            'type': 'Measurement Recorder',
-                        };
-                        axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                            .then(function (resp) {
-                                console.log('user-log resp', resp);
-                            });
                         axios.post('http://shark.sbs.arizona.edu:8080/class', jsonRequest)
                             .then(function (resp) {
                                 console.log('class resp', resp);
@@ -485,16 +445,7 @@
                     if (temp.length > 0) {
                         jsonRequest.classIRI = temp[0].value;
                     }
-                    var jsonLog = {
-                        'user_id': app.childData[3].id,
-                        'action': 'In Method, add synonym',
-                        'action_detail': 'term=' + jsonRequest.term + ', synonym=' + value.term +' in "'+app.character_name+'"',
-                        'type': 'Measurement Recorder',
-                    };
-                    axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                        .then(function (resp) {
-                            console.log('user-log resp', resp);
-                        });
+
                     axios.post('http://shark.sbs.arizona.edu:8080/esynonym', jsonRequest)
                         .then(function (resp) {
                             console.log('esynonym resp', resp);
@@ -516,16 +467,6 @@
                     $('.img-method').css('border', 'none');
                     $('#img-method-' + index).css('border', 'solid 1px green');
                     console.log('value', value);
-                    var jsonLog = {
-                        'user_id': app.childData[3].id,
-                        'action': 'In Method, clicked Illustrator',
-                        'action_detail': value +' in "'+app.character_name+'"',
-                        'type': 'Measurement Recorder',
-                    };
-                    axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                        .then(function (resp) {
-                            console.log('user-log resp', resp);
-                        });
                     app.childData[0] = value;
                     app.childData[1] = app.methodEntry.term;
                     app.childData[2] = app.methodEntry.resultAnnotations.filter(function (e) {
@@ -535,7 +476,7 @@
                     app.childData[5] = app.methodTo;
                     app.childData[6] = app.methodInclude;
                     app.childData[7] = app.methodExclude;
-                    app.childData[8] = app.methodAt;
+                    app.childData[8] = app.methodWhere;
 
                     console.log('childData', app.childData);
 
@@ -547,16 +488,6 @@
             noneOfAbove() {
                 var app = this;
                 app.noneMethod = true;
-                var jsonLog = {
-                    'user_id': app.childData[3].id,
-                    'action': 'click on "None of the above" for ' + app.character_name,
-                    'action_detail': '',
-                    'type': 'Measurement Recorder',
-                };
-                axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                    .then(function (resp) {
-                        console.log('user-log resp', resp);
-                    });
             },
             displayImageSection() {
                 var app = this;
@@ -578,25 +509,11 @@
                     case 'Exclude':
                         t_action_detail = app.methodExclude;
                         break;
-                    case 'At':
-                        t_action_detail = app.methodAt;
+                    case 'Where':
+                        t_action_detail = app.methodWhere;
                         break;
                     default:
                         break;
-                }
-
-                if (!!t_action_detail) {
-                    var jsonLog = {
-                        'user_id': app.childData[3].id,
-                        'action': 'In Method, added ' + setting,
-                        'action_detail': '',
-                        'type': 'Measurement Recorder',
-                    };
-                    jsonLog.action_detail = t_action_detail+' in "'+app.character_name+'"';
-                    axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                        .then(function (resp) {
-                            console.log('user-log resp', resp);
-                        });
                 }
             },
             checkDictionary() {
@@ -609,43 +526,41 @@
                     app.childData[5] = app.methodTo;
                     app.childData[6] = app.methodInclude;
                     app.childData[7] = app.methodExclude;
-                    app.childData[8] = app.methodAt;
+                    app.childData[8] = app.methodWhere;
                     app.fromTerm = null;
                     app.fromId = null;
                     app.toTerm = null;
-                    app.toId == null;
+                    app.toId = null;
                     app.includeTerm = null;
                     app.includeId = null;
                     app.excludeTerm = null;
                     app.excludeId = null;
-                    app.atTerm = null;
-                    app.atId = null;
+                    app.whereTerm = null;
+                    app.whereId = null;
                     app.greenTick.from = false;
                     app.greenTick.to = false;
                     app.greenTick.include = false;
                     app.greenTick.exclude = false;
-                    app.greenTick.at = false;
+                    app.greenTick.where = false;
                     app.fromNeedMore = false;
                     app.toNeedMore = false;
                     app.includeNeedMore = false;
                     app.excludeNeedMore = false;
-                    app.atNeedMore = false;
+                    app.whereNeedMore = false;
                     app.needMoreGreen.from = false;
                     app.needMoreGreen.to = false;
                     app.needMoreGreen.include = false;
                     app.needMoreGreen.exclude = false;
-                    app.needMoreGreen.at = false;
+                    app.needMoreGreen.where = false;
+                    console.log('app.methodEntry',app.methodEntry);
+                    app.childData[0] = '';
+                    app.childData[4] = app.methodFrom;
+                    app.childData[5] = app.methodTo;
+                    app.childData[6] = app.methodInclude;
+                    app.childData[7] = app.methodExclude;
+                    app.childData[8] = app.methodWhere;
 
-                    var jsonLog = {
-                        'user_id': app.childData[3].id,
-                        'action': 'In Method, clicked on "Check" button',
-                        'action_detail': app.character_name,
-                        'type': 'Measurement Recorder',
-                    };
-                    axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                        .then(function (resp) {
-                            console.log('user-log resp', resp);
-                        });
+                    console.log('childData', app.childData);
 
                     console.log('interface console', app.childData);
 
@@ -660,9 +575,7 @@
                                     tempFlag = true;
                                 }
                             }
-                            //var axios_result = [];
                             if (app.methodFrom != null && app.methodFrom != '') {
-                                //axios_result['methodFrom'] = '';
                                 axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.methodFrom)
                                     .then(function (resp) {
                                         console.log('search from resp', resp);
@@ -677,17 +590,6 @@
                                             }
                                         }
                                         if (app.fromId == null) {
-                                            //axios_result['methodFrom'] = app.methodFrom;
-                                            var jsonLog = {
-                                                'user_id': app.childData[3].id,
-                                                'action': 'unmatched phrases ',
-                                                'action_detail': '"from" : ' + app.methodFrom,
-                                                'type': 'Measurement Recorder',
-                                            };
-                                            axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                                                .then(function (resp) {
-
-                                                });
                                             app.fromNeedMore = true;
                                             app.fromSynonyms = resp.data.entries;
                                             if (app.fromSynonyms.length == 0) {
@@ -703,13 +605,9 @@
                                                 }
                                             }
                                         }
-                                        // else {
-                                        //     axios_result['methodFrom'] = 'ok';
-                                        // }
                                     });
                             }
                             if (app.methodTo != null && app.methodTo != '') {
-                                //axios_result['methodTo'] = '';
                                 axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.methodTo)
                                     .then(function (resp) {
                                         console.log('search to resp', resp);
@@ -724,17 +622,6 @@
                                             }
                                         }
                                         if (app.toId == null) {
-                                            //axios_result['methodTo'] = app.methodTo;
-                                            var jsonLog = {
-                                                'user_id': app.childData[3].id,
-                                                'action': 'unmatched phrases ',
-                                                'action_detail': '"to" : ' + app.methodTo,
-                                                'type': 'Measurement Recorder',
-                                            };
-                                            axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                                                .then(function (resp) {
-
-                                                });
                                             app.toNeedMore = true;
                                             app.toSynonyms = resp.data.entries;
                                             if (app.toSynonyms.length == 0) {
@@ -750,13 +637,9 @@
                                                 }
                                             }
                                         }
-                                        // else {
-                                        //     axios_result['methodTo'] = 'ok';
-                                        // }
                                     });
                             }
                             if (app.methodInclude != null && app.methodInclude != '') {
-                                //axios_result['methodInclude'] = '';
                                 axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.methodInclude)
                                     .then(function (resp) {
                                         console.log('search include resp', resp);
@@ -771,17 +654,6 @@
                                             }
                                         }
                                         if (app.includeId == null) {
-                                            //axios_result['methodInclude'] = app.methodInclude;
-                                            var jsonLog = {
-                                                'user_id': app.childData[3].id,
-                                                'action': 'unmatched phrases ',
-                                                'action_detail': '"Include" : ' + app.methodInclude,
-                                                'type': 'Measurement Recorder',
-                                            };
-                                            axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                                                .then(function (resp) {
-
-                                                });
                                             app.includeNeedMore = true;
                                             app.includeSynonyms = resp.data.entries;
                                             if (app.includeSynonyms.length == 0) {
@@ -797,13 +669,9 @@
                                                 }
                                             }
                                         }
-                                        // else {
-                                        //     axios_result['methodInclude'] = "ok";
-                                        // }
                                     });
                             }
                             if (app.methodExclude != null && app.methodExclude != '') {
-                                //axios_result['methodExclude'] = '';
                                 axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.methodExclude)
                                     .then(function (resp) {
                                         console.log('search exclude resp', resp);
@@ -818,17 +686,6 @@
                                             }
                                         }
                                         if (app.excludeId == null) {
-                                            //axios_result['methodExclude'] = app.methodExclude;
-                                            var jsonLog = {
-                                                'user_id': app.childData[3].id,
-                                                'action': 'unmatched phrases ',
-                                                'action_detail': '"Exclude" : ' + app.methodExclude,
-                                                'type': 'Measurement Recorder',
-                                            };
-                                            axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                                                .then(function (resp) {
-
-                                                });
                                             app.excludeNeedMore = true;
                                             app.excludeSynonyms = resp.data.entries;
                                             if (app.excludeSynonyms.length == 0) {
@@ -844,96 +701,40 @@
                                                 }
                                             }
                                         }
-                                        // else {
-                                        //     axios_result['methodExclude'] = 'ok';
-                                        // }
                                     });
                             }
-                            if (app.methodAt != null && app.methodAt != '') {
-                                //axios_result['methodAt'] = '';
-                                axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.methodAt)
+                            if (app.methodWhere != null && app.methodWhere != '') {
+                                axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.methodWhere)
                                     .then(function (resp) {
                                         console.log('search at resp', resp);
                                         for (var i = 0; i < resp.data.entries.length; i++) {
                                             if (resp.data.entries[i].score == 1) {
-                                                app.atTerm = resp.data.entries[i].term;
-                                                app.atId = resp.data.entries[i].resultAnnotations.filter(function (e) {
+                                                app.whereTerm = resp.data.entries[i].term;
+                                                app.whereId = resp.data.entries[i].resultAnnotations.filter(function (e) {
                                                     return e.property == 'http://www.geneontology.org/formats/oboInOwl#id';
                                                 })[0].value;
-                                                console.log('atId', app.atId);
+                                                console.log('whereId', app.whereId);
                                                 break;
                                             }
                                         }
-                                        if (app.atId == null) {
-                                            //axios_result['methodAt'] = app.methodAt;
-                                            var jsonLog = {
-                                                'user_id': app.childData[3].id,
-                                                'action': 'unmatched phrases ',
-                                                'action_detail': '"at" : ' + app.methodAt,
-                                                'type': 'Measurement Recorder',
-                                            };
-                                            axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                                                .then(function (resp) {
-
-                                                });
-                                            app.atNeedMore = true;
-                                            app.atSynonyms = resp.data.entries;
-                                            if (app.atSynonyms.length == 0) {
+                                        if (app.whereId == null) {
+                                            app.whereNeedMore = true;
+                                            app.whereSynonyms = resp.data.entries;
+                                            if (app.whereSynonyms.length == 0) {
                                                 app.noneSynonymFlag.at = true;
                                             }
-                                            for (var i = 0; i < app.atSynonyms.length; i++) {
-                                                app.atSynonyms[i].tooltip = '';
-                                                var temp = app.atSynonyms[i].resultAnnotations.filter(function (e) {
+                                            for (var i = 0; i < app.whereSynonyms.length; i++) {
+                                                app.whereSynonyms[i].tooltip = '';
+                                                var temp = app.whereSynonyms[i].resultAnnotations.filter(function (e) {
                                                     return e.property == 'http://purl.oblibrary.org/obo/IAO_0000115';
                                                 });
                                                 if (temp.length > 0) {
-                                                    app.atSynonyms[i].tooltip = temp[0].value;
+                                                    app.whereSynonyms[i].tooltip = temp[0].value;
                                                 }
                                             }
                                         }
-                                        // else {
-                                        //     axios_result['methodAt'] = 'ok';
-                                        // }
                                     });
                             }
-
-                            // Array.prototype.remove = function(val) {
-                            //     var index = this.indexOf(val);
-                            //     if (index > -1) {
-                            //         this.splice(index, 1);
-                            //     }
-                            // };
-
-                            // if (axios_result.length !== 0) {
-                            //     var getAllRespTimer = window.setInterval(getAllResp, 200);
-                            // }
-                            //
-                            // function getAllResp() {
-                            //     var axios_result_length = axios_result.length;
-                            //     var axios_result_all_ready = true;
-                            //     for (var i = 0;i < axios_result_length; i++) {
-                            //         if (axios_result[i] !== '') {
-                            //             if (axios_result[i] === 'ok') {
-                            //                 axios_result.remove(i);
-                            //             }
-                            //         } else {
-                            //             axios_result_all_ready = false;
-                            //         }
-                            //     }
-                            //     if (axios_result_all_ready === true) {
-                            //         window.clearInterval(getAllRespTimer);
-                            //         var jsonLog = {
-                            //             'user_id': app.childData[3].id,
-                            //             'action': 'unmatched phrases :',
-                            //             'action_detail': 'term=' + jsonClass.term +' in "'+app.character_name+'"',
-                            //             'type': 'Measurement Recorder',
-                            //         };
-                            //         axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                            //             .then(function (resp) {
-                            //                 console.log('user-log resp', resp);
-                            //             });
-                            //     }
-                            // }
 
                             if (tempFlag == false) {
 
@@ -961,8 +762,8 @@
                                 if (app.methodExclude != null) {
                                     jsonClass.definition = jsonClass.definition + ' exclude [' + app.methodExclude + ']';
                                 }
-                                if (app.methodAt != null) {
-                                    jsonClass.definition = jsonClass.definition + ' at [' + app.methodAt + ']';
+                                if (app.methodWhere != null) {
+                                    jsonClass.definition = jsonClass.definition + ' where [' + app.methodWhere + ']';
                                 }
                                 if (app.character_name.split(' ')[0] == 'distance') {
                                     jsonClass.superclassIRI = "http://biosemantics.arizona.edu/ontologies/carex#distance"
@@ -972,17 +773,6 @@
                                 } else if (app.character_name.split(' ')[0] == 'width') {
                                     jsonClass.superclassIRI = "http://biosemantics.arizona.edu/ontologies/carex#width"
                                 }
-                                var jsonLog = {
-                                    'user_id': app.childData[3].id,
-                                    'action': 'In Method, add new term to ontology',
-                                    'action_detail': 'term=' + jsonClass.term +' in "'+app.character_name+'"',
-                                    'type': 'Measurement Recorder',
-                                };
-
-                                axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                                    .then(function (resp) {
-                                        console.log('user-log resp', resp);
-                                    });
                                 axios.post('http://shark.sbs.arizona.edu:8080/class', jsonClass)
                                     .then(function (resp) {
                                         console.log('class resp', resp);
@@ -1023,8 +813,8 @@
                                 if (app.methodExclude != null) {
                                     jsonClass.definition = jsonClass.definition + ' exclude [' + app.methodExclude + ']';
                                 }
-                                if (app.methodAt != null) {
-                                    jsonClass.definition = jsonClass.definition + ' at [' + app.methodAt + ']';
+                                if (app.methodWhere != null) {
+                                    jsonClass.definition = jsonClass.definition + ' where [' + app.methodWhere + ']';
                                 }
                                 if (app.character_name.split(' ')[0] == 'distance') {
                                     jsonClass.superclassIRI = "http://biosemantics.arizona.edu/ontologies/carex#distance"
@@ -1035,16 +825,6 @@
                                     jsonClass.superclassIRI = "http://biosemantics.arizona.edu/ontologies/carex#width"
                                 }
 
-                                var jsonLog = {
-                                    'user_id': app.childData[3].id,
-                                    'action': 'In Method, add new term to ontology',
-                                    'action_detail': 'term=' + jsonClass.term +' in "'+app.character_name+'"',
-                                    'type': 'Measurement Recorder',
-                                };
-                                axios.post('/mr/individual/public/api/v1/user-log', jsonLog)
-                                    .then(function (resp) {
-                                        console.log('user-log resp', resp);
-                                    });
                                 axios.post('http://shark.sbs.arizona.edu:8080/class', jsonClass)
                                     .then(function (resp) {
                                         console.log('class resp', resp);
@@ -1084,7 +864,7 @@
             app.methodTo = app.childData[5];
             app.methodInclude = app.childData[6];
             app.methodExclude = app.childData[7];
-            app.methodAt = app.childData[8];
+            app.methodWhere = app.childData[8];
 
             axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.character_name)
                 .then(function (resp) {
@@ -1173,17 +953,17 @@
                                 }
                             });
                     }
-                    if (app.methodAt != null) {
-                        axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.methodAt)
+                    if (app.methodWhere != null) {
+                        axios.get('http://shark.sbs.arizona.edu:8080/exp/search?user=' + app.childData[3].name + '&term=' + app.methodWhere)
                             .then(function (resp) {
                                 console.log('search to resp', resp);
                                 for (var i = 0; i < resp.data.entries.length; i++) {
                                     if (resp.data.entries[i].score == 1) {
-                                        app.atTerm = resp.data.entries[i].term;
-                                        app.atId = resp.data.entries[i].resultAnnotations.filter(function (e) {
+                                        app.whereTerm = resp.data.entries[i].term;
+                                        app.whereId = resp.data.entries[i].resultAnnotations.filter(function (e) {
                                             return e.property == 'http://www.geneontology.org/formats/oboInOwl#id';
                                         })[0].value;
-                                        console.log('atId', app.atId);
+                                        console.log('whereId', app.whereId);
                                         break;
                                     }
                                 }

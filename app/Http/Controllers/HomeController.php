@@ -20,16 +20,4 @@ class HomeController extends Controller
     {
         return view('home');
     }
-
-    public function specimenTwo()
-    {
-        return view('home');
-    }
-
-    public function specimenThree()
-    {
-        return view('home');
-    }
-
-
 }

@@ -538,7 +538,7 @@
             },
             removeUserCharacter(characterId) {
                 var app = this;
-                axios.post("/api/v1/character/delete/" + app.user.id + "/" + characterId)
+                axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
                     .then(function(resp) {
                         var oldUserTag = app.userCharacters.find(ch => ch.id == characterId).standard_tag;
                         app.userCharacters = resp.data;
@@ -548,7 +548,7 @@
                                 user_tag: oldUserTag
                             };
                             console.log('remove jsonUserTag', jsonUserTag);
-                            axios.post("/api/v1/user-tag/remove", jsonUserTag)
+                            axios.post("/chrecorder/public/api/v1/user-tag/remove", jsonUserTag)
                                 .then(function(resp) {
                                     console.log("remove UserTag", resp.data);
                                 });
@@ -665,7 +665,7 @@
                 var app = this;
                 var userId = sessionStorage.getItem("userId");
                 app.confirmUnit = false;
-                axios.get("/api/v1/character/" + userId)
+                axios.get("/chrecorder/public/api/v1/character/" + userId)
                     .then(function(resp) {
                         console.log('getCharacter', resp);
                         var currentCharacters = resp.data.characters;
@@ -681,7 +681,7 @@
                                                 user_tag: app.character.standard_tag
                                             };
                                             console.log('jsonUserTag', jsonUserTag);
-                                            axios.post("/api/v1/user-tag/create", jsonUserTag)
+                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
                                                 .then(function(resp) {
                                                     console.log("create UserTag", resp.data);
                                                 });
@@ -713,7 +713,7 @@
                                         app.detailsFlag = false;
                                     });
                             } else {
-                                axios.post("/api/v1/character/create", app.character)
+                                axios.post("/chrecorder/public/api/v1/character/create", app.character)
                                     .then(function(resp) {
                                         if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
                                             var jsonUserTag = {
@@ -721,7 +721,7 @@
                                                 user_tag: app.character.standard_tag
                                             };
                                             console.log('jsonUserTag', jsonUserTag);
-                                            axios.post("/api/v1/user-tag/create", jsonUserTag)
+                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
                                                 .then(function(resp) {
                                                     console.log("create UserTag", resp.data);
                                                 });
@@ -760,7 +760,7 @@
                         'column_count': app.columnCount,
                         'taxon': app.taxonName
                     };
-                    axios.post('/api/v1/matrix-store', jsonMatrix)
+                    axios.post('/chrecorder/public/api/v1/matrix-store', jsonMatrix)
                         .then(function(resp) {
                             console.log('resp storeMatrix', resp.data);
                             app.matrixShowFlag = true;
@@ -796,7 +796,7 @@
             },
             deleteHeader(headerId) {
                 var app = this;
-                axios.post('/api/v1/delete-header/' + headerId)
+                axios.post('/chrecorder/public/api/v1/delete-header/' + headerId)
                     .then(function(resp) {
                         console.log('delete header', resp.data);
                         app.headers = resp.data.headers;
@@ -825,7 +825,7 @@
             },
             changeTaxonName() {
                 var app = this;
-                axios.post('/api/v1/change-taxon/' + app.taxonName)
+                axios.post('/chrecorder/public/api/v1/change-taxon/' + app.taxonName)
                     .then(function(resp) {
                         app.taxonName = resp.data.taxon;
                     });
@@ -836,7 +836,7 @@
                     app.columnCount = app.headers.length - 1;
                     alert("Specimen Count should be bigger than older Count!!");
                 } else {
-                    axios.post('/api/v1/add-more-column/' + app.columnCount)
+                    axios.post('/chrecorder/public/api/v1/add-more-column/' + app.columnCount)
                         .then(function(resp) {
                             console.log('addMoreColumn resp', resp.data);
                             app.userCharacters = resp.data.characters;
@@ -870,7 +870,7 @@
                     alert("Value should be only positive value.");
                     value.value = '';
                 } else {
-                    axios.post('/api/v1/character/update', value)
+                    axios.post('/chrecorder/public/api/v1/character/update', value)
                         .then(function(resp) {
                             console.log('saveItem', resp.data);
                             if (resp.data.error_input == 1) {
@@ -912,7 +912,7 @@
         },
         created() {
             var app = this;
-            axios.get('/api/v1/standard_characters')
+            axios.get('/chrecorder/public/api/v1/standard_characters')
                 .then(function (resp) {
                     console.log('standardCharacters', resp);
                     app.defaultCharacters = resp.data;
@@ -943,7 +943,7 @@
                         app.standardCharacters.push(temp);
                     }
                 });
-            axios.get("/api/v1/character/" + app.user.id)
+            axios.get("/chrecorder/public/api/v1/character/" + app.user.id)
                 .then(function(resp) {
                     console.log('resp character', resp.data);
                     app.userCharacters = resp.data.characters;

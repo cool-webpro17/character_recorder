@@ -10,7 +10,7 @@ const routes = [
     //     name: 'home'
     // },
     {
-        path: '/',
+        path: '/chrecorder/public/',
         component: Home,
         name: 'home'
     },

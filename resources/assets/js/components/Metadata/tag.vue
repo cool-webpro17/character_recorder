@@ -50,7 +50,7 @@
         beforeMount () {
             var app = this;
             var userId = sessionStorage.getItem('userId');
-            axios.get("/api/v1/user-tag/" + userId)
+            axios.get("/chrecorder/public/api/v1/user-tag/" + userId)
                 .then(function(resp) {
                     console.log('userTags', app.userTags);
                     app.userTags = resp.data;

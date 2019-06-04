@@ -46,10 +46,10 @@
 
                         <div class="form-group">
                             <div class="col-md-8 col-md-offset-4">
-                                <button type="submit" onclick="javascript: form.action='/login';" class="btn btn-primary">
+                                <button type="submit" onclick="javascript: form.action='/chrecorder/public/login';" class="btn btn-primary">
                                     Login
                                 </button>
-                                <button type="submit" onclick="javascript: form.action='/register';" class="btn btn-primary">
+                                <button type="submit" onclick="javascript: form.action='/chrecorder/public/register';" class="btn btn-primary">
                                     Register
                                 </button>
                             </div>

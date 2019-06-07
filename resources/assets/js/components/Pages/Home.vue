@@ -844,6 +844,7 @@
                 app.isLoading = true;
                 if (app.columnCount < app.headers.length - 1) {
                     app.columnCount = app.headers.length - 1;
+                    app.isLoading = false;
                     alert("To reduce the size of the matrix, use the remove button (x) in the matrix.");
                 } else {
                     axios.post('/chrecorder/public/api/v1/add-more-column/' + app.columnCount)

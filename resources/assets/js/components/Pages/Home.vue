@@ -812,6 +812,7 @@
                             app.userTags = resp.data;
                         });
                 } else {
+                    app.isLoading = false;
                     alert("You need to fill the taxon name and specimen count in the input box!")
                 }
 

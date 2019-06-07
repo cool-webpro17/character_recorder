@@ -4,11 +4,11 @@
 import Home from './components/Pages/Home.vue';
 
 const routes = [
-    // {
-    //     path: '/home',
-    //     component: Home,
-    //     name: 'home'
-    // },
+    {
+        path: '/chrecorder/public/home',
+        component: Home,
+        name: 'home'
+    },
     {
         path: '/chrecorder/public/',
         component: Home,

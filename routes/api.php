@@ -17,6 +17,7 @@ Route::group([
     Route::post('delete-header/{headerId}',             ['as' => 'delete_header',               'uses' => 'HomeController@deleteHeader']);
     Route::post('change-taxon/{taxon}',                 ['as' => 'change_taxon',                'uses' => 'HomeController@changeTaxon']);
     Route::post('add-more-column/{columnCount}',        ['as' => 'add_more_column',             'uses' => 'HomeController@addMoreColumn']);
+    Route::post('show-tab-character/{tabName}',         ['as' => 'show_tab_character',          'uses' => 'HomeController@showTabCharacter']);
 
     Route::group([
         'prefix' => '/character',
@@ -27,6 +28,8 @@ Route::group([
         Route::get('{userId}',                          ['as' => 'get_character',               'uses' => 'HomeController@getCharacter']);
         Route::post('update',                           ['as' => 'update_character',            'uses' => 'HomeController@updateCharacter']);
         Route::post('delete/{userId}/{characterId}',    ['as' => 'delete_character',            'uses' => 'HomeController@deleteCharacter']);
+        Route::post('add-standard',                     ['as' => 'add_standard_character',      'uses' => 'HomeController@addStandardCharacter']);
+        Route::post('remove-all-standard',              ['as' => 'remove_all_standard',         'uses' => 'HomeController@removeAllStandard']);
 
 
         Route::get('usage/{characterId}',               ['as' => 'usage',                       'uses' => 'HomeController@usage']);

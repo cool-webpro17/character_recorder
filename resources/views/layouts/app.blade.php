@@ -92,8 +92,8 @@
                     </button>
 
                     <!-- Branding Image -->
-                    <a class="navbar-brand" href="{{ url('/') }}">
-                        {{ config('app.name', 'Character Recorder') }}
+                    <a class="navbar-brand font-30" href="{{ url('/') }}">
+                        <b>{{ config('app.name', 'Character Recorder') }}</b>
                     </a>
                 </div>
 

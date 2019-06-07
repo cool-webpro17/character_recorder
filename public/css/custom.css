@@ -309,6 +309,7 @@ button[aria-disabled="true"] {
 }
 .th-input {
     /*width: 100%;*/
+    max-width: 155px;
     border: none;
     text-align: center;
     height: 43px;
@@ -545,6 +546,10 @@ p a {
     cursor: pointer;
 }
 
+a {
+    cursor: pointer;
+}
+
 .back-yellow {
     background: #f7e401;
     color: #111111;
@@ -735,6 +740,17 @@ p a {
     margin-top: 10px;
 }
 
+.font-30 {
+    font-size: 30px;
+}
+
+.font-20 {
+    font-size: 20px;
+}
+
+body {
+    font-size: 16px;
+}
 /*.container .table-responsive {*/
     /*min-height: 500px;*/
 /*}*/

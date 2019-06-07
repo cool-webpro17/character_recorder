@@ -35,13 +35,14 @@ class HomeController extends Controller
             'addMoreColumn',
             'addCharacter',
             'updateCharacter',
+            'addStandardCharacter',
         ]);
     }
 
     public function getHeaders() {
         return Header::where('user_id', Auth::id())
             ->orWhere('user_id', NULL)
-            ->orderBy('id', 'asc')->get();
+            ->orderBy('created_at', 'desc')->get();
     }
 
     public function getValuesByCharacter()
@@ -55,11 +56,12 @@ class HomeController extends Controller
         foreach ($allCharacters as $eachCharacter) {
             $value_array = [];
             foreach ($headers as $header) {
-                $value = Value::where(['character_id'=>$eachCharacter->id, 'header_id'=>$header->id])->first();
+                if ($value = Value::where(['character_id'=>$eachCharacter->id, 'header_id'=>$header->id])->first()) {
+                    $value->username = $eachCharacter->username;
+                    $value->unit = $eachCharacter->unit;
+                    array_push($value_array, $value);
+                }
 
-                $value->username = $eachCharacter->username;
-                $value->unit = $eachCharacter->unit;
-                array_push($value_array, $value);
             }
             array_push($characters, $value_array);
         }
@@ -150,6 +152,7 @@ class HomeController extends Controller
             'method_exclude' => $request->input('method_exclude'),
             'method_where' => $request->input('method_where'),
             'unit' => $request->input('unit'),
+            'standard' => $request->input('standard'),
             'creator' => $request->input('creator'),
             'username' => $request->input('username'),
             'usage_count' => $request->input('usage_count'),
@@ -186,6 +189,9 @@ class HomeController extends Controller
 
     public function deleteCharacter(Request $request, $userId, $characterId) {
         $character = Character::where('id', '=', $characterId)->delete();
+        if (Value::where('character_id', '=', $characterId)->first()) {
+            Value::where('character_id', '=', $characterId)->delete();
+        }
 
         $user = User::where('id', '=', $userId)->first();
         $username = explode('@', $user['email'])[0];
@@ -261,7 +267,7 @@ class HomeController extends Controller
         $characters = Character::where('username', '=', $username)->get();
         for ($i = 0; $i < ($columnCount - $oldHeaderCount); $i++) {
             for ($j = 0; $j < $columnCount; $j++) {
-                if (!Header::where('header', '=', ('Specimen' . ($j + 1)))->first()) {
+                if (!Header::where('header', '=', ('Specimen' . ($j + 1)))->where('user_id', '=', Auth::id())->first()) {
                     $header = Header::create([
                         'user_id' => Auth::id(),
                         'header' => 'Specimen' . ($j + 1)
@@ -304,6 +310,7 @@ class HomeController extends Controller
             'method_exclude' => $request->input('method_exclude'),
             'method_where' => $request->input('method_where'),
             'unit' => $request->input('unit'),
+            'standard' => $request->input('standard'),
             'creator' => $request->input('creator'),
             'username' => $request->input('username'),
             'usage_count' => $request->input('usage_count'),
@@ -368,6 +375,89 @@ class HomeController extends Controller
         $returnCharacters = $this->getArrayCharacters();
         $data = [
             'error_input' => 0,
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+        ];
+
+        return $data;
+    }
+
+    public function addStandardCharacter(Request $request) {
+        $standardCharacters = $request->all();
+//        dd($standardCharacters);
+
+        foreach ($standardCharacters as $eachCharacter) {
+            $character = new Character([
+                'name' => $eachCharacter['name'],
+                'method_from' => $eachCharacter['method_from'],
+                'method_to' => $eachCharacter['method_to'],
+                'method_include' => $eachCharacter['method_include'],
+                'method_exclude' => $eachCharacter['method_exclude'],
+                'method_where' => $eachCharacter['method_where'],
+                'unit' => $eachCharacter['unit'],
+                'standard' => $eachCharacter['standard'],
+                'creator' => $eachCharacter['creator'],
+                'username' => $eachCharacter['username'],
+                'usage_count' => $eachCharacter['usage_count'],
+                'show_flag' => $eachCharacter['show_flag'],
+                'standard_tag' => $eachCharacter['standard_tag'],
+            ]);
+
+            $character->save();
+
+            if (!UserTag::where('user_id', '=', Auth::id())->where('tag_name', '=', $eachCharacter['standard_tag'])->first()) {
+                UserTag::create([
+                    'user_id' => Auth::id(),
+                    'tag_name' => $eachCharacter['standard_tag']
+                ]);
+            }
+        }
+
+        $returnCharacters = $this->getArrayCharacters();
+
+        return $returnCharacters;
+    }
+
+    public function removeAllStandard(Request $request) {
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+
+        $characters = Character::where('username', '=', $username)->where('standard', '=', 1)->get();
+        foreach($characters as $eachCharacter) {
+            if (Value::where('character_id', '=', $eachCharacter->id)->first()) {
+                Value::where('character_id', '=', $eachCharacter->id)->delete();
+            }
+            if (Character::where('standard_tag', '=', $eachCharacter->standard_tag)->where('username', '=', $username)->count() < 2) {
+                UserTag::where('user_id', '=', Auth::id())->where('tag_name', '=', $eachCharacter->standard_tag)->delete();
+            }
+            $eachCharacter->delete();
+        }
+        $returnCharacters = $this->getArrayCharacters();
+
+        return $returnCharacters;
+    }
+
+    public function showTabCharacter(Request $request, $tabName) {
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+
+        $allCharacters = Character::where('username', '=', $username)->get();
+        $characters = Character::where('standard_tag', '=', $tabName)->where('username', '=', $username)->get();
+
+        foreach ($allCharacters as $eachCharacter) {
+            $eachCharacter->show_flag = false;
+            $eachCharacter->save();
+        }
+        foreach ($characters as $character) {
+            $character->show_flag = true;
+            $character->save();
+        }
+
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $data = [
             'headers' => $returnHeaders,
             'characters' => $returnCharacters,
             'values' => $returnValues,

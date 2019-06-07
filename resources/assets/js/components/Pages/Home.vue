@@ -1,312 +1,356 @@
 <template>
-    <div slot="section" class="">
+    <div slot="section" class="vld-parent">
+        <loading :active.sync="isLoading"
+                 :is-full-page="true"
+                 :width="255"
+                 :height="255"></loading>
         <div class="tab-pane" id="">
-            <form class="row" autocomplete="off">
-                <div class="col-md-12">
-                    <h4><b>Set up your matrix</b></h4>
-                </div>
-                <div class="col-md-12" v-if="collapsedFlag == false">
-                    <div style="max-width: 1000px; margin-left: auto; margin-right: auto; margin-top:50px;">
-                        <div>
-                            I 'm measuring <input class="" v-model="taxonName" style="width: 330px;"
-                                                  placeholder="Enter a default taxon name, such as Carex capitata"/>.
-                        </div>
-                        <div class="margin-top-10">
-                            I have <input v-model="columnCount" style="width: 180px;" placeholder="Enter a default count, like 3"> specimens.
-                        </div>
-                        <div class="margin-top-10 row">
-                            <div class="col-md-5" style="line-height: 38px;">
-                                I 'm measuring <a class="btn btn-primary" v-on:click="showStandardCharacters()">The
-                                Standard Set of Characters</a> <a style="cursor: pointer;" v-tooltip="standardCharactersTooltip"> ? </a> or
-                            </div>
-                            <div class="col-md-7">
-                                <model-select :options="standardCharacters"
-                                              v-model="item"
-                                              placeholder="Search character here"
-                                              @searchchange="printSearchText"
-                                              @select="onSelect"
-                                />
-
+            <form autocomplete="off">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div v-if="matrixShowFlag == false" style="max-width: 1000px; margin-left: auto; margin-right: auto;">
+                                <h3><b>Set up your matrix</b></h3>
                             </div>
                         </div>
-                        <div class="margin-top-10" v-if="userCharacters.length > 0">
-                            <h5><b>Characters selected</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <a v-on:click="removeAllCharacters()">X</a>
-                            </h5>
-                            <div v-for="eachCharacter in userCharacters" v-tooltip="eachCharacter.tooltip"
-                                 style="display: table; cursor: pointer;">
-                                {{ eachCharacter.name }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <a
-                                        v-on:click="removeUserCharacter(eachCharacter.id)" style="cursor: pointer;">
-                                    X </a>
-                            </div>
-                        </div>
-                        <div class="margin-top-10" v-if="standardShowFlag == true">
-                            <h5><b>Standard Characters</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <a v-on:click="standardShowFlag = false;">X</a></h5>
-                            <div v-for="eachCharacter in standardShowCharacters" v-tooltip="eachCharacter.tooltip"
-                                 style="display: table; cursor: pointer;">
-                                {{ eachCharacter.name }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                                <a
-                                    v-on:click="removeStandardCharacter(eachCharacter.value)" style="cursor: pointer;">
-                                X </a>
-                            </div>
-                        </div>
-                        <div class="margin-top-10 text-right">
-                            <a class="btn btn-primary" v-on:click="generateMatrix()" style="width: 200px;">Generate Matrix</a>
-                            <a class="btn btn-primary" v-on:click="importMatrix()" style="width: 200px;">Import (CR) Matrix</a>
-                            <a class="btn btn-primary" v-on:click="collapsedFlag = true;" style="width: 40px;"><span class="glyphicon glyphicon-chevron-up"></span></a>
-                        </div>
-                    </div>
-                </div>
-                <div v-if="collapsedFlag == true">
-                    <div class="col-md-2">
-                        <input v-model="taxonName" v-on:blur="changeTaxonName()" style="line-height: 38px;">
-                    </div>
-                    <div class="col-md-4">
-                        <input v-model="columnCount" v-on:blur="changeColumnCount()" style="margin-left: 30px; line-height: 38px;"> Specimens
-                    </div>
-                    <div class="col-md-5">
-                        <model-select :options="standardCharacters"
-                                      v-model="item"
-                                      placeholder="Search character here"
-                                      @searchchange="printSearchText"
-                                      @select="onSelect"
-                        />
-                    </div>
-                    <a class="btn btn-primary" v-on:click="collapsedFlag = false;" style="width: 40px;"><span class="glyphicon glyphicon-chevron-down"></span></a>
-                </div>
-                <div class="margin-top-10 col-md-12" v-if="matrixShowFlag == true">
-                    <div style="overflow-x: auto; max-height: 850px;">
-                        <table class="table table-bordered table-responsive cr-table">
-                            <thead>
-                            <tr>
-                                <th style="min-width: 200px; height: 43px; line-height: 43px; text-align: center;">
-                                    Character
-                                </th>
-                                <th v-if="header.id != 1" v-for="header in headers" style="min-width: 200px;">
-                                    <input class="th-input" v-bind:value="header.header"/>
-                                    <a class="btn btn-add display-block"
-                                       v-on:click="deleteHeader(header.id)"><span
-                                            class="glyphicon glyphicon-remove"></span></a>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr v-for="row in values">
-                                <td v-if="value.header_id == 1"
-                                    v-for="value in row"
-                                    v-tooltip="userCharacters.find(ch => ch.id == value.character_id).tooltip"
-                                    style="cursor: pointer; line-height: 44px;">
-                                    {{ value.value }}
-                                </td>
-                                <td v-if="value.header_id != 1" v-for="value in row">
-                                    <input class="td-input" v-model="value.value"
-                                           v-on:blur="saveItem($event, value)"/>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-                <div v-if="newCharacterFlag" @close="newCharacterFlag = false">
-                    <transition name="modal">
-                        <div class="modal-mask character-modal">
-                            <div class="modal-wrapper">
-                                <div class="modal-container">
-                                    <div class="modal-header">
-                                        Input the character name in the input box and click OK.
+                        <div class="col-md-12" v-if="collapsedFlag == false">
+                            <div style="max-width: 1000px; margin-left: auto; margin-right: auto; margin-top:50px;">
+                                <div>
+                                    <b>I 'm measuring <input class="" v-model="taxonName" style="width: 330px;"
+                                                             placeholder="Carex capitata"/>.</b>
+                                </div>
+                                <div class="margin-top-10">
+                                    <b>I have <input v-model="columnCount" style="width: 180px;" placeholder="Enter a default count, like 3"> specimens.</b>
+                                </div>
+                                <div class="margin-top-10 row">
+                                    <div class="col-md-12" style="line-height: 38px;">
+                                        <b>I 'm measuring <a class="btn btn-primary" v-on:click="showStandardCharacters()" v-tooltip="standardCharactersTooltip">
+                                            the standard set of characters
+                                        </a> <a style="cursor: pointer;" v-tooltip="standardCharactersTooltip"> ? </a> or</b>
                                     </div>
-                                    <div class="modal-body">
-                                        <b>Form character name:</b>
-                                        <br>
-                                        <br>
-                                        <div>
-                                            <select v-model="firstCharacter" style="height: 26px;">
-                                                <option>length</option>
-                                                <option>width</option>
-                                                <option>depth</option>
-                                                <option>diameter</option>
-                                                <option>distance</option>
-                                            </select>
-                                            <select v-model="middleCharacter" style="height: 26px;">
-                                                <option>of</option>
-                                                <option>between</option>
-                                            </select>
-                                            <input v-model="lastCharacter">
+                                    <div class="col-md-12 margin-top-10">
+                                        <model-select :options="standardCharacters"
+                                                      v-model="item"
+                                                      placeholder="Search character here"
+                                                      @searchchange="printSearchText"
+                                                      @select="onSelect"
+                                        />
 
-                                            <!--<input autofocus v-model="character.name" v-on:input="checkMsg"/>-->
-                                        </div>
                                     </div>
-                                    <div class="modal-footer">
-                                        <a class="btn btn-primary ok-btn"
-                                           v-bind:class="{ disabled: !firstCharacter || !middleCharacter || !lastCharacter }"
-                                           v-on:click="storeCharacter()">
-                                            &nbsp; &nbsp; OK &nbsp; &nbsp; </a>
-                                        <a v-on:click="cancelNewCharacter()" class="btn btn-danger">Cancel</a>
+                                </div>
+                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 0)">
+                                    <h4><b>Characters selected</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <a class="btn btn-add display-block" v-on:click="removeAllCharacters()"><span
+                                                class="glyphicon glyphicon-remove"></span></a>
+                                    </h4>
+                                    <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 0" v-tooltip="eachCharacter.tooltip"
+                                         style="display: table; font-weight: bold; cursor: pointer;">
+                                        {{ eachCharacter.name }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <a class="btn btn-add display-block"
+                                           v-on:click="removeUserCharacter(eachCharacter.id)"><span
+                                                class="glyphicon glyphicon-remove"></span></a>
+                                        <!--<a-->
+                                                <!--v-on:click="removeUserCharacter(eachCharacter.id)" style="cursor: pointer;">-->
+                                            <!--X </a>-->
                                     </div>
+                                </div>
+                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 1)">
+                                    <h4><b>Standard Characters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                                        <a class="btn btn-add display-block"
+                                               v-on:click="removeAllStandardCharacters()"><span
+                                            class="glyphicon glyphicon-remove"></span></a></h4>
+
+                                    <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 1" v-tooltip="eachCharacter.tooltip"
+                                         style="display: table; cursor: pointer;">
+                                        <b>{{ eachCharacter.name }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <a class="btn btn-add display-block"
+                                               v-on:click="removeStandardCharacter(eachCharacter.id)"><span
+                                                    class="glyphicon glyphicon-remove"></span></a></b>
+                                            <!--<a-->
+                                                    <!--v-on:click="removeStandardCharacter(eachCharacter.id)" style="cursor: pointer;">-->
+                                                <!--X </a>-->
+                                    </div>
+                                </div>
+                                <div class="margin-top-10 text-right">
+                                    <a class="btn btn-primary" v-on:click="generateMatrix()" style="width: 200px;">Generate Matrix</a>
+                                    <a class="btn btn-primary" v-on:click="importMatrix()" style="width: 200px; background-color: grey; border-color: grey;">Import (CR) Matrix</a>
+                                    <a class="btn btn-primary" v-on:click="collapsedFlag = true;" style="width: 40px;"><span class="glyphicon glyphicon-chevron-up"></span></a>
                                 </div>
                             </div>
                         </div>
-                    </transition>
+                        <div v-if="collapsedFlag == true">
+                            <div style="max-width: 1000px; margin-right: auto; margin-left: auto;">
+                                <div class="col-md-1">
+                                    <a class="btn btn-primary" v-on:click="collapsedFlag = false;" style="width: 40px;"><span class="glyphicon glyphicon-chevron-down"></span></a>
+                                </div>
+                                <div class="col-md-2">
+                                    <input v-model="taxonName" v-on:blur="changeTaxonName()" style="line-height: 38px; border: none;">
+                                </div>
+                                <div class="col-md-3">
+                                    <input v-model="columnCount" v-on:keyup.enter="changeColumnCount()" v-on:blur="changeColumnCount()" style="width: 40px; margin-left: 30px; line-height: 38px; border:none;"> Specimens
+                                </div>
+                                <div class="col-md-5">
+                                    <model-select :options="standardCharacters"
+                                                  v-model="item"
+                                                  placeholder="Search character here"
+                                                  @searchchange="printSearchText"
+                                                  @select="onSelect"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div v-if="detailsFlag" @close="detailsFlag = false">
-                    <transition name="modal">
-                        <div class="modal-mask">
-                            <div class="modal-wrapper">
-                                <div class="modal-container">
+                <hr v-if="matrixShowFlag == true" style="margin-top: 40px; margin-bottom: 40px; border-top: 2px solid;">
 
-                                    <div class="modal-header">
-                                        <h3>Information about "{{ character.name }}" by {{ character.username
-                                            }}</h3>
-                                    </div>
+                <div class="container">
+                    <div class="row">
+                        <div class="margin-top-10 col-md-12" v-if="matrixShowFlag == true">
+                            <ul class="nav nav-tabs">
+                                <li v-for="eachTag in userTags"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
+                            </ul>
+                            <div style="overflow-x: auto; max-height: 700px; margin-right: auto; margin-left: auto;">
+                                <table class="table table-bordered table-responsive cr-table">
+                                    <thead>
+                                    <tr>
+                                        <th style="min-width: 270px; height: 43px; line-height: 43px; text-align: center;">
+                                            Character
+                                        </th>
+                                        <th v-if="header.id != 1" v-for="header in headers" style="min-width: 200px;">
+                                            <input class="th-input" v-bind:value="header.header"/>
+                                            <a class="btn btn-add display-block"
+                                               v-on:click="deleteHeader(header.id)"><span
+                                                    class="glyphicon glyphicon-remove"></span></a>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="row in values"
+                                        v-if="userCharacters.find(ch => ch.id == row[0].character_id).show_flag == true">
+                                        <td v-if="value.header_id == 1"
+                                            v-for="value in row"
+                                            v-tooltip="userCharacters.find(ch => ch.id == value.character_id).tooltip"
+                                            style="cursor: pointer; line-height: 44px;">
+                                            {{ value.value }}
+                                        </td>
+                                        <td v-if="value.header_id != 1" v-for="value in row">
+                                            <input class="td-input" v-model="value.value"
+                                                   v-on:blur="saveItem($event, value)"/>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                                    <div class="modal-body">
-                                        <div class="row">
-                                            <div class="col-md-6 radial-menu">
-                                                <ul style="margin-left: auto; margin-right: auto;">
-                                                    <li><a v-on:click="showDetails('', metadataFlag)"></a></li>
-                                                    <li class="method"><a
-                                                            v-on:click="showDetails('method', metadataFlag)">1.
-                                                        Method<br><span class="glyphicon glyphicon-edit"></span></a>
-                                                    </li>
-                                                    <li class="unit"><a
-                                                            v-on:click="showDetails('unit', metadataFlag)">2.
-                                                        Unit<br><span class="glyphicon glyphicon-edit"></span></a>
-                                                    </li>
-                                                    <li class="tag"><a
-                                                            v-on:click="showDetails('tag', metadataFlag)">
-                                                        Tag</a>
-                                                    </li>
-                                                    <li class="summary"><a
-                                                            v-on:click="showDetails('summary', metadataFlag)">
-                                                        Summary<br>Function</a>
-                                                    </li>
-                                                    <li class="creator"><a
-                                                            v-on:click="showDetails('creator', metadataFlag)">Creator</a>
-                                                    </li>
-                                                    <li><a v-on:click="showDetails('usage', metadataFlag)">Usage</a>
-                                                    </li>
-                                                    <li>
-                                                        <a v-on:click="showDetails('history', metadataFlag)">History</a>
-                                                    </li>
-                                                    <li><a v-on:click="showDetails('', metadataFlag)"></a></li>
-                                                </ul>
-                                                <div class="center">
-                                                    <a>{{ character.name }}</a>
+                        </div>
+                        <div v-if="newCharacterFlag" @close="newCharacterFlag = false">
+                            <transition name="modal">
+                                <div class="modal-mask character-modal">
+                                    <div class="modal-wrapper">
+                                        <div class="modal-container">
+                                            <div class="modal-header">
+                                                Input the character name in the input box and click OK.
+                                            </div>
+                                            <div class="modal-body">
+                                                <b>Form character name:</b>
+                                                <br>
+                                                <br>
+                                                <div class="row">
+                                                    <div class="col-md-3">
+                                                        <select v-model="firstCharacter" style="height: 26px;">
+                                                            <option>length</option>
+                                                            <option>width</option>
+                                                            <option>depth</option>
+                                                            <option>diameter</option>
+                                                            <option>distance</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <select v-model="middleCharacter" style="height: 26px;">
+                                                            <option>of</option>
+                                                            <option>between</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <input v-model="lastCharacter">
+                                                    </div>
+
+                                                    <!--<input autofocus v-model="character.name" v-on:input="checkMsg"/>-->
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div id="metadataPlace">
-                                                    <div :is="currentMetadata" :parentData="parentData"
-                                                         @interface="handleFcAfterDateBack">
+                                            <div class="modal-footer">
+                                                <a class="btn btn-primary ok-btn"
+                                                   v-bind:class="{ disabled: !firstCharacter || !middleCharacter || !lastCharacter }"
+                                                   v-on:click="storeCharacter()">
+                                                    &nbsp; &nbsp; OK &nbsp; &nbsp; </a>
+                                                <a v-on:click="cancelNewCharacter()" class="btn btn-danger">Cancel</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </transition>
+                        </div>
+                        <div v-if="detailsFlag" @close="detailsFlag = false">
+                            <transition name="modal">
+                                <div class="modal-mask">
+                                    <div class="modal-wrapper">
+                                        <div class="modal-container">
 
+                                            <div class="modal-header">
+                                                <h3>Information about "{{ character.name }}" by {{ character.username
+                                                    }}</h3>
+                                            </div>
+
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6 radial-menu">
+                                                        <ul style="margin-left: auto; margin-right: auto;">
+                                                            <li><a v-on:click="showDetails('', metadataFlag)"></a></li>
+                                                            <li class="method"><a
+                                                                    v-on:click="showDetails('method', metadataFlag)">1.
+                                                                Method<br><span class="glyphicon glyphicon-edit"></span></a>
+                                                            </li>
+                                                            <li class="unit"><a
+                                                                    v-on:click="showDetails('unit', metadataFlag)">2.
+                                                                Unit<br><span class="glyphicon glyphicon-edit"></span></a>
+                                                            </li>
+                                                            <li class="tag"><a
+                                                                    v-on:click="showDetails('tag', metadataFlag)">
+                                                                Tag</a>
+                                                            </li>
+                                                            <li class="summary"><a
+                                                                    v-on:click="showDetails('summary', metadataFlag)">
+                                                                Summary<br>Function</a>
+                                                            </li>
+                                                            <li class="creator"><a
+                                                                    v-on:click="showDetails('creator', metadataFlag)">Creator</a>
+                                                            </li>
+                                                            <li><a v-on:click="showDetails('usage', metadataFlag)">Usage</a>
+                                                            </li>
+                                                            <li>
+                                                                <a v-on:click="showDetails('history', metadataFlag)">History</a>
+                                                            </li>
+                                                            <li><a v-on:click="showDetails('', metadataFlag)"></a></li>
+                                                        </ul>
+                                                        <div class="center">
+                                                            <a>{{ character.name }}</a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div id="metadataPlace">
+                                                            <div :is="currentMetadata" :parentData="parentData"
+                                                                 @interface="handleFcAfterDateBack">
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-12 text-right" style="margin-top: 15px;">
+                                                        <a v-if="viewFlag == false"
+                                                           v-on:click="saveCharacter(metadataFlag)" class="btn btn-primary">Save</a>
+                                                        <a v-if="viewFlag == true" v-on:click="use(item)"
+                                                           class="btn btn-primary">Use this</a>
+                                                        <a v-if="viewFlag == true" v-on:click="enhance(item)"
+                                                           class="btn btn-primary">Clone and enhance</a>
+                                                        <a v-on:click="cancelCharacter()" class="btn btn-danger">Cancel</a>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12 text-right" style="margin-top: 15px;">
-                                                <a v-if="viewFlag == false"
-                                                   v-on:click="saveCharacter(metadataFlag)" class="btn btn-primary">Save</a>
-                                                <a v-if="viewFlag == true" v-on:click="use(item)"
-                                                   class="btn btn-primary">Use this</a>
-                                                <a v-if="viewFlag == true" v-on:click="enhance(item)"
-                                                   class="btn btn-primary">Clone and enhance</a>
-                                                <a v-on:click="cancelCharacter()" class="btn btn-danger">Cancel</a>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="modal-footer">
+                                            <div class="modal-footer">
 
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </transition>
-                </div>
-                <div v-if="confirmMethod" @close="confirmMethod = false">
-                    <transition name="modal">
-                        <div class="modal-mask character-modal">
-                            <div class="modal-wrapper">
-                                <div class="modal-container">
-                                    <div class="modal-header">
-                                        Confirm Method
-                                    </div>
-                                    <div class="modal-body">
-                                        <div v-if="!character.method_as">
-                                            <div>
-                                                <b>Please review the method definition carefully. Is this what you would
-                                                    like
-                                                    to save for <i>{{ character.name }}</i>?</b>
                                             </div>
-                                            <br>
-                                            <div v-if="character.method_from">
-                                                From: {{ character.method_from }}
-                                            </div>
-                                            <div v-if="character.method_to">
-                                                To: {{ character.method_to }}
-                                            </div>
-                                            <div v-if="character.method_include">
-                                                Include: {{ character.method_include }}
-                                            </div>
-                                            <div v-if="character.method_exclude">
-                                                Exclude: {{ character.method_exclude }}
-                                            </div>
-                                            <div v-if="character.method_where">
-                                                At: {{ character.method_where }}
-                                            </div>
-                                        </div>
-                                        <div v-if="character.method_as">
-                                            <div>
-                                                <b>Please review the method definition carefully. Is this what you
-                                                    would like
-                                                    to save for <i>{{ character.name }}</i>?</b>
-                                            </div>
-                                            <div>
-                                                <img class="img-method"
-                                                     style="width: 100%;"
-                                                     v-bind:src="'https://drive.google.com/uc?id=' + character.method_as.split('id=')[1].substring(0, character.method_as.split('id=')[1].length)"/>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <a class="btn btn-primary ok-btn"
-                                               v-on:click="methodConfirm()">
-                                                &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
-                                            <a v-on:click="cancelConfirmMethod()" class="btn btn-danger">Cancel</a>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </transition>
                         </div>
-                    </transition>
-                </div>
-                <div v-if="confirmUnit" @close="confirmUnit = false">
-                    <transition name="modal">
-                        <div class="modal-mask character-modal">
-                            <div class="modal-wrapper">
-                                <div class="modal-container">
-                                    <div class="modal-header">
-                                        Confirm Unit
-                                    </div>
-                                    <div class="modal-body">
-                                        <div>
-                                            You've select <b>{{ character.unit }}</b> as the Unit for <i>{{ character.name }}</i>.
-                                        </div>
-                                        <div class="modal-footer">
-                                            <a class="btn btn-primary ok-btn"
-                                               v-on:click="confirmSave(metadataFlag)">
-                                                &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
-                                            <a v-on:click="cancelConfirmUnit()" class="btn btn-danger">Cancel</a>
+                        <div v-if="confirmMethod" @close="confirmMethod = false">
+                            <transition name="modal">
+                                <div class="modal-mask character-modal">
+                                    <div class="modal-wrapper">
+                                        <div class="modal-container">
+                                            <div class="modal-header">
+                                                Confirm Method
+                                            </div>
+                                            <div class="modal-body">
+                                                <div v-if="!character.method_as">
+                                                    <div>
+                                                        <b>Please review the method definition carefully. Is this what you would
+                                                            like
+                                                            to save for <i>{{ character.name }}</i>?</b>
+                                                    </div>
+                                                    <br>
+                                                    <div v-if="character.method_from">
+                                                        From: {{ character.method_from }}
+                                                    </div>
+                                                    <div v-if="character.method_to">
+                                                        To: {{ character.method_to }}
+                                                    </div>
+                                                    <div v-if="character.method_include">
+                                                        Include: {{ character.method_include }}
+                                                    </div>
+                                                    <div v-if="character.method_exclude">
+                                                        Exclude: {{ character.method_exclude }}
+                                                    </div>
+                                                    <div v-if="character.method_where">
+                                                        Where: {{ character.method_where }}
+                                                    </div>
+                                                </div>
+                                                <div v-if="character.method_as">
+                                                    <div>
+                                                        <b>Please review the method definition carefully. Is this what you
+                                                            would like
+                                                            to save for <i>{{ character.name }}</i>?</b>
+                                                    </div>
+                                                    <div>
+                                                        <img class="img-method"
+                                                             style="width: 100%;"
+                                                             v-bind:src="'https://drive.google.com/uc?id=' + character.method_as.split('id=')[1].substring(0, character.method_as.split('id=')[1].length)"/>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a class="btn btn-primary ok-btn"
+                                                       v-on:click="methodConfirm()">
+                                                        &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
+                                                    <a v-on:click="cancelConfirmMethod()" class="btn btn-danger">Cancel</a>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </transition>
                         </div>
-                    </transition>
+                        <div v-if="confirmUnit" @close="confirmUnit = false">
+                            <transition name="modal">
+                                <div class="modal-mask character-modal">
+                                    <div class="modal-wrapper">
+                                        <div class="modal-container">
+                                            <div class="modal-header">
+                                                Confirm Unit
+                                            </div>
+                                            <div class="modal-body">
+                                                <div>
+                                                    You've select <b>{{ character.unit }}</b> as the Unit for <i>{{ character.name }}</i>.
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a class="btn btn-primary ok-btn"
+                                                       v-on:click="confirmSave(metadataFlag)">
+                                                        &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
+                                                    <a v-on:click="cancelConfirmUnit()" class="btn btn-danger">Cancel</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </transition>
+                        </div>
+                    </div>
+
                 </div>
+
+
             </form>
         </div>
     </div>
@@ -326,6 +370,9 @@
     
     import {ModelSelect} from '../../libs/vue-search-select-lib'
     Vue.use({ModelSelect});
+
+    import Loading from 'vue-loading-overlay';
+    import 'vue-loading-overlay/dist/vue-loading.css';
 
     export default {
         props: [
@@ -354,7 +401,8 @@
                 confirmMethod: false,
                 confirmUnit: false,
                 columnCount: 0,
-                taxonName: '',
+//                taxonName: '',
+                taxonName: 'Carex capitata',
                 matrixShowFlag: false,
                 headers : [],
                 values : [],
@@ -362,10 +410,13 @@
                 value: {
                     value: ''
                 },
+                isLoading: false,
+                userTags: [],
             }
         },
         components: {
-            ModelSelect
+            ModelSelect,
+            Loading
         },
 
         methods: {
@@ -524,17 +575,36 @@
             },
             showStandardCharacters() {
                 var app = this;
+                app.isLoading = true;
                 app.standardShowFlag = !app.standardShowFlag;
+                var postCharacters = [];
+                for (var i = 0; i < app.defaultCharacters.length; i++) {
+                    var character = app.defaultCharacters[i];
+                    if (!app.userCharacters.find(ch => ch.name == character.name)) {
+                        character.username = app.user.name;
+                        character.show_flag = false;
+                        postCharacters.push(character);
+                    }
+                }
+
+                axios.post('/chrecorder/public/api/v1/character/add-standard', postCharacters)
+                    .then(function(resp) {
+                        console.log('addStandard resp', resp.data);
+                        app.userCharacters = resp.data;
+                        app.isLoading = false;
+                        app.refreshUserCharacters();
+                    });
             },
             removeStandardCharacter(characterId) {
                 var app = this;
 
-                for (var i = 0; i < app.standardShowCharacters.length; i++) {
-                    if (app.standardShowCharacters[i].value == characterId) {
-                        app.standardShowCharacters.splice(i, 1);
+                axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
+                    .then(function(resp) {
+                        app.userCharacters = resp.data;
+                        app.refreshUserCharacters();
 
-                    }
-                }
+                    });
+
             },
             removeUserCharacter(characterId) {
                 var app = this;
@@ -553,25 +623,8 @@
                                     console.log("remove UserTag", resp.data);
                                 });
                         }
-                        for (var i = 0; i < resp.data.length; i++) {
-                            app.userCharacters[i].tooltip = '';
-                            if (resp.data[i].method_from != null && resp.data[i].method_from != '') {
-                                app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + resp.data[i].method_from + ', ';
-                            }
-                            if (resp.data[i].method_to != null && resp.data[i].method_to != '') {
-                                app.userCharacters[i].tooltip += 'To: ' + resp.data[i].method_to + ', ';
-                            }
-                            if (resp.data[i].method_include != null && resp.data[i].method_include != '') {
-                                app.userCharacters[i].tooltip += 'Include: ' + resp.data[i].method_include + ', ';
-                            }
-                            if (resp.data[i].method_exclude != null && resp.data[i].method_exclude != '') {
-                                app.userCharacters[i].tooltip += 'Exclude: ' + resp.data[i].method_exclude + ', ';
-                            }
-                            if (resp.data[i].method_where != null && resp.data[i].method_where != '') {
-                                app.userCharacters[i].tooltip += 'Where: ' + resp.data[i].method_where;
-                            }
+                        app.refreshUserCharacters();
 
-                        }
                     });
             },
             removeAllCharacters() {
@@ -591,7 +644,7 @@
                     (this.character['method_to'] == null || this.character['method_to'] == '') &&
                     (this.character['method_include'] == null || this.character['method_include'] == '') &&
                     (this.character['method_exclude'] == null || this.character['method_exclude'] == '') &&
-                    (this.character['method_at'] == null || this.character['method_at'] == '')) {
+                    (this.character['method_where'] == null || this.character['method_where'] == '')) {
                     checkFields = false;
                 }
 
@@ -616,7 +669,7 @@
                     (this.character['method_to'] == null || this.character['method_to'] == '') &&
                     (this.character['method_include'] == null || this.character['method_include'] == '') &&
                     (this.character['method_exclude'] == null || this.character['method_exclude'] == '') &&
-                    (this.character['method_at'] == null || this.character['method_at'] == '')) {
+                    (this.character['method_where'] == null || this.character['method_where'] == '')) {
                     checkFields = false;
                 }
 
@@ -672,6 +725,8 @@
                         if (currentCharacters.find(ch => ch.name == app.character.name)) {
                             alert("The character already exists for this user!!");
                         } else {
+                            app.character.standard = 0;
+                            app.character.show_flag = false;
                             if (app.matrixShowFlag) {
                                 axios.post('api/v1/character/add-character', app.character)
                                     .then(function(resp) {
@@ -683,7 +738,16 @@
                                             console.log('jsonUserTag', jsonUserTag);
                                             axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
                                                 .then(function(resp) {
+                                                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                                        .then(function(resp) {
+                                                            app.userTags = resp.data;
+                                                        });
                                                     console.log("create UserTag", resp.data);
+                                                });
+                                        } else {
+                                            axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                                .then(function(resp) {
+                                                    app.userTags = resp.data;
                                                 });
                                         }
 
@@ -692,24 +756,8 @@
                                         app.values = resp.data.values;
                                         app.taxonName = resp.data.taxon;
 
-                                        for (var i = 0; i < resp.data.characters.length; i++) {
-                                            app.userCharacters[i].tooltip = '';
-                                            if (resp.data.characters[i].method_from != null && resp.data.characters[i].method_from != '') {
-                                                app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + resp.data.characters[i].method_from + ', ';
-                                            }
-                                            if (resp.data.characters[i].method_to != null && resp.data.characters[i].method_to != '') {
-                                                app.userCharacters[i].tooltip += 'To: ' + resp.data.characters[i].method_to + ', ';
-                                            }
-                                            if (resp.data.characters[i].method_include != null && resp.data.characters[i].method_include != '') {
-                                                app.userCharacters[i].tooltip += 'Include: ' + resp.data.characters[i].method_include + ', ';
-                                            }
-                                            if (resp.data.characters[i].method_exclude != null && resp.data.characters[i].method_exclude != '') {
-                                                app.userCharacters[i].tooltip += 'Exclude: ' + resp.data.characters[i].method_exclude + ', ';
-                                            }
-                                            if (resp.data.characters[i].method_where != null && resp.data.characters[i].method_where != '') {
-                                                app.userCharacters[i].tooltip += 'Where: ' + resp.data.characters[i].method_where;
-                                            }
-                                        }
+                                        app.refreshUserCharacters();
+
                                         app.detailsFlag = false;
                                     });
                             } else {
@@ -727,24 +775,8 @@
                                                 });
                                         }
                                         app.userCharacters = resp.data;
-                                        for (var i = 0; i < resp.data.length; i++) {
-                                            app.userCharacters[i].tooltip = '';
-                                            if (resp.data[i].method_from != null && resp.data[i].method_from != '') {
-                                                app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + resp.data[i].method_from + ', ';
-                                            }
-                                            if (resp.data[i].method_to != null && resp.data[i].method_to != '') {
-                                                app.userCharacters[i].tooltip += 'To: ' + resp.data[i].method_to + ', ';
-                                            }
-                                            if (resp.data[i].method_include != null && resp.data[i].method_include != '') {
-                                                app.userCharacters[i].tooltip += 'Include: ' + resp.data[i].method_include + ', ';
-                                            }
-                                            if (resp.data[i].method_exclude != null && resp.data[i].method_exclude != '') {
-                                                app.userCharacters[i].tooltip += 'Exclude: ' + resp.data[i].method_exclude + ', ';
-                                            }
-                                            if (resp.data[i].method_where != null && resp.data[i].method_where != '') {
-                                                app.userCharacters[i].tooltip += 'Where: ' + resp.data[i].method_where;
-                                            }
-                                        }
+                                        app.refreshUserCharacters();
+
                                         app.detailsFlag = false;
                                     });
                             }
@@ -754,6 +786,7 @@
             },
             generateMatrix() {
                 var app = this;
+                app.isLoading = true;
                 if ((isNaN(app.columnCount) == false) && app.columnCount > 0 && app.taxonName != "") {
                     var jsonMatrix = {
                         'user_id': app.user.id,
@@ -762,6 +795,7 @@
                     };
                     axios.post('/chrecorder/public/api/v1/matrix-store', jsonMatrix)
                         .then(function(resp) {
+                            app.isLoading = false;
                             console.log('resp storeMatrix', resp.data);
                             app.matrixShowFlag = true;
                             app.collapsedFlag = true;
@@ -769,25 +803,13 @@
                             app.headers = resp.data.headers;
                             app.values = resp.data.values;
 
-                            for (var i = 0; i < resp.data.characters.length; i++) {
-                                app.userCharacters[i].tooltip = '';
-                                if (resp.data.characters[i].method_from != null && resp.data.characters[i].method_from != '') {
-                                    app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + resp.data.characters[i].method_from + ', ';
-                                }
-                                if (resp.data.characters[i].method_to != null && resp.data.characters[i].method_to != '') {
-                                    app.userCharacters[i].tooltip += 'To: ' + resp.data.characters[i].method_to + ', ';
-                                }
-                                if (resp.data.characters[i].method_include != null && resp.data[i].characters.method_include != '') {
-                                    app.userCharacters[i].tooltip += 'Include: ' + resp.data.characters[i].method_include + ', ';
-                                }
-                                if (resp.data.characters[i].method_exclude != null && resp.data.characters[i].method_exclude != '') {
-                                    app.userCharacters[i].tooltip += 'Exclude: ' + resp.data.characters[i].method_exclude + ', ';
-                                }
-                                if (resp.data.characters[i].method_where != null && resp.data.characters[i].method_where != '') {
-                                    app.userCharacters[i].tooltip += 'Where: ' + resp.data.characters[i].method_where;
-                                }
-                            }
+                            app.refreshUserCharacters();
+
                             console.log('userCharacters', app.userCharacters);
+                        });
+                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                        .then(function(resp) {
+                            app.userTags = resp.data;
                         });
                 } else {
                     alert("You need to fill the taxon name and specimen count in the input box!")
@@ -796,6 +818,7 @@
             },
             deleteHeader(headerId) {
                 var app = this;
+                app.isLoading = true;
                 axios.post('/chrecorder/public/api/v1/delete-header/' + headerId)
                     .then(function(resp) {
                         console.log('delete header', resp.data);
@@ -803,24 +826,9 @@
                         app.values = resp.data.values;
                         app.userCharacters = resp.data.characters;
                         app.columnCount = resp.data.headers.length - 1;
-                        for (var i = 0; i < resp.data.characters.length; i++) {
-                            app.userCharacters[i].tooltip = '';
-                            if (resp.data.characters[i].method_from != null && resp.data.characters[i].method_from != '') {
-                                app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + resp.data.characters[i].method_from + ', ';
-                            }
-                            if (resp.data.characters[i].method_to != null && resp.data.characters[i].method_to != '') {
-                                app.userCharacters[i].tooltip += 'To: ' + resp.data.characters[i].method_to + ', ';
-                            }
-                            if (resp.data.characters[i].method_include != null && resp.data.characters[i].method_include != '') {
-                                app.userCharacters[i].tooltip += 'Include: ' + resp.data.characters[i].method_include + ', ';
-                            }
-                            if (resp.data.characters[i].method_exclude != null && resp.data.characters[i].method_exclude != '') {
-                                app.userCharacters[i].tooltip += 'Exclude: ' + resp.data.characters[i].method_exclude + ', ';
-                            }
-                            if (resp.data.characters[i].method_where != null && resp.data.characters[i].method_where != '') {
-                                app.userCharacters[i].tooltip += 'Where: ' + resp.data.characters[i].method_where;
-                            }
-                        }
+                        app.isLoading = false;
+                        app.refreshUserCharacters();
+
                     });
             },
             changeTaxonName() {
@@ -832,9 +840,10 @@
             },
             changeColumnCount() {
                 var app = this;
+                app.isLoading = true;
                 if (app.columnCount < app.headers.length - 1) {
                     app.columnCount = app.headers.length - 1;
-                    alert("Specimen Count should be bigger than older Count!!");
+                    alert("To reduce the size of the matrix, use the remove button (x) in the matrix.");
                 } else {
                     axios.post('/chrecorder/public/api/v1/add-more-column/' + app.columnCount)
                         .then(function(resp) {
@@ -843,24 +852,9 @@
                             app.headers = resp.data.headers;
                             app.values = resp.data.values;
                             app.taxonName = resp.data.taxon;
-                            for (var i = 0; i < resp.data.characters.length; i++) {
-                                app.userCharacters[i].tooltip = '';
-                                if (resp.data.characters[i].method_from != null && resp.characters.data[i].method_from != '') {
-                                    app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + resp.data.characters[i].method_from + ', ';
-                                }
-                                if (resp.data.characters[i].method_to != null && resp.data.characters[i].method_to != '') {
-                                    app.userCharacters[i].tooltip += 'To: ' + resp.data.characters[i].method_to + ', ';
-                                }
-                                if (resp.data.characters[i].method_include != null && resp.data.characters[i].method_include != '') {
-                                    app.userCharacters[i].tooltip += 'Include: ' + resp.data.characters[i].method_include + ', ';
-                                }
-                                if (resp.data.characters[i].method_exclude != null && resp.data.characters[i].method_exclude != '') {
-                                    app.userCharacters[i].tooltip += 'Exclude: ' + resp.data.characters[i].method_exclude + ', ';
-                                }
-                                if (resp.data.characters[i].method_where != null && resp.data.characters[i].method_where != '') {
-                                    app.userCharacters[i].tooltip += 'Where: ' + resp.data.characters[i].method_where;
-                                }
-                            }
+                            app.isLoading = false;
+                            app.refreshUserCharacters();
+
                         });
                 }
             },
@@ -880,31 +874,65 @@
                                 app.userCharacters = resp.data.characters;
                                 app.headers = resp.data.headers;
                                 app.values = resp.data.values;
-                                for (var i = 0; i < resp.data.characters.length; i++) {
-                                    app.userCharacters[i].tooltip = '';
-                                    if (resp.data.characters[i].method_from != null && resp.data.characters[i].method_from != '') {
-                                        app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + resp.data.characters[i].method_from + ', ';
-                                    }
-                                    if (resp.data.characters[i].method_to != null && resp.data.characters[i].method_to != '') {
-                                        app.userCharacters[i].tooltip += 'To: ' + resp.data.characters[i].method_to + ', ';
-                                    }
-                                    if (resp.data.characters[i].method_include != null && resp.data.characters[i].method_include != '') {
-                                        app.userCharacters[i].tooltip += 'Include: ' + resp.data.characters[i].method_include + ', ';
-                                    }
-                                    if (resp.data.characters[i].method_exclude != null && resp.data.characters[i].method_exclude != '') {
-                                        app.userCharacters[i].tooltip += 'Exclude: ' + resp.data.characters[i].method_exclude + ', ';
-                                    }
-                                    if (resp.data.characters[i].method_where != null && resp.data.characters[i].method_where != '') {
-                                        app.userCharacters[i].tooltip += 'Where: ' + resp.data.characters[i].method_where;
-                                    }
-                                }
+                                app.refreshUserCharacters();
                             }
                         });
                 }
             },
-            testFunction(value) {
+            removeAllStandardCharacters() {
                 var app = this;
-                console.log(app.userCharacters.find(ch => ch.id == value.character_id));
+                app.isLoading = true;
+                axios.post('/chrecorder/public/api/v1/character/remove-all-standard')
+                    .then(function(resp) {
+                        app.isLoading = false;
+                        app.userCharacters = resp.data;
+                        app.refreshUserCharacters();
+                    });
+            },
+            refreshUserCharacters () {
+                var app = this;
+                for (var i = 0; i < app.userCharacters.length; i++) {
+                    app.userCharacters[i].tooltip = '';
+                    if (app.userCharacters[i].method_from != null && app.userCharacters[i].method_from != '') {
+                        app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + app.userCharacters[i].method_from + ', ';
+                    }
+                    if (app.userCharacters[i].method_to != null && app.userCharacters[i].method_to != '') {
+                        app.userCharacters[i].tooltip += 'To: ' + app.userCharacters[i].method_to + ', ';
+                    }
+                    if (app.userCharacters[i].method_include != null && app.userCharacters[i].method_include != '') {
+                        app.userCharacters[i].tooltip += 'Include: ' + app.userCharacters[i].method_include + ', ';
+                    }
+                    if (app.userCharacters[i].method_exclude != null && app.userCharacters[i].method_exclude != '') {
+                        app.userCharacters[i].tooltip += 'Exclude: ' + app.userCharacters[i].method_exclude + ', ';
+                    }
+                    if (app.userCharacters[i].method_where != null && app.userCharacters[i].method_where != '') {
+                        app.userCharacters[i].tooltip += 'Where: ' + app.userCharacters[i].method_where;
+                    }
+                }
+            },
+            showTableForTab(tagName) {
+                var app = this;
+                app.isLoading = true;
+                axios.post('/chrecorder/public/api/v1/show-tab-character/' + tagName)
+                    .then(function(resp) {
+                        app.isLoading = false;
+                        app.userCharacters = resp.data.characters;
+                        app.headers = resp.data.headers;
+                        app.values = resp.data.values;
+                        app.refreshUserCharacters();
+                    });
+//                app.hideAllCharacter();
+//                var showCharacters = app.userCharacters.filter(ch => ch.standard_tag == tagName);
+//                console.log('showCharacters', showCharacters);
+//                for (var i = 0; i < showCharacters.length; i++) {
+//                    app.userCharacters.find(ch => ch.id == showCharacters[i].id).show_flag = true;
+//                }
+            },
+            hideAllCharacter() {
+                var app = this;
+                for (var i = 0; i < app.userCharacters.length; i++) {
+                    app.userCharacters[i].show_flag = false;
+                }
             },
             importMatrix() {
 
@@ -951,6 +979,9 @@
                     app.values = resp.data.values;
                     app.taxonName = resp.data.taxon;
                     app.columnCount = resp.data.headers.length - 1;
+                    if (app.columnCount == 0) {
+                        app.columnCount = 3;
+                    }
                     for (var i = 0; i < app.userCharacters.length; i++) {
                         app.userCharacters[i].tooltip = '';
                         if (app.userCharacters[i].method_from != null && app.userCharacters[i].method_from != '') {
@@ -970,6 +1001,11 @@
                         }
 
                     }
+                });
+            axios.get("/chrecorder/public/api/v1/user-tag/" + app.user.id)
+                .then(function(resp) {
+                    app.userTags = resp.data;
+                    console.log('userTags', app.userTags);
                 });
         },
         mounted() {

@@ -36,6 +36,8 @@ class HomeController extends Controller
             'addCharacter',
             'updateCharacter',
             'addStandardCharacter',
+            'removeAll',
+            'removeAllStandard',
         ]);
     }
 
@@ -464,5 +466,24 @@ class HomeController extends Controller
         ];
 
         return $data;
+    }
+
+    public function removeAll(Request $request) {
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+
+        $characters = Character::where('username', '=', $username)->where('standard', '=', 0)->get();
+        foreach($characters as $eachCharacter) {
+            if (Value::where('character_id', '=', $eachCharacter->id)->first()) {
+                Value::where('character_id', '=', $eachCharacter->id)->delete();
+            }
+            if (Character::where('standard_tag', '=', $eachCharacter->standard_tag)->where('username', '=', $username)->count() < 2) {
+                UserTag::where('user_id', '=', Auth::id())->where('tag_name', '=', $eachCharacter->standard_tag)->delete();
+            }
+            $eachCharacter->delete();
+        }
+        $returnCharacters = $this->getArrayCharacters();
+
+        return $returnCharacters;
     }
 }

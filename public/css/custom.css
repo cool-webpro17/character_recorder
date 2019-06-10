@@ -751,6 +751,10 @@ a {
 body {
     font-size: 16px;
 }
+
+.tooltip-inner {
+    max-width: 500px;
+}
 /*.container .table-responsive {*/
     /*min-height: 500px;*/
 /*}*/

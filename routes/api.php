@@ -30,6 +30,7 @@ Route::group([
         Route::post('delete/{userId}/{characterId}',    ['as' => 'delete_character',            'uses' => 'HomeController@deleteCharacter']);
         Route::post('add-standard',                     ['as' => 'add_standard_character',      'uses' => 'HomeController@addStandardCharacter']);
         Route::post('remove-all-standard',              ['as' => 'remove_all_standard',         'uses' => 'HomeController@removeAllStandard']);
+        Route::post('remove-all',                       ['as' => 'remove_all',                  'uses' => 'HomeController@removeAll']);
 
 
         Route::get('usage/{characterId}',               ['as' => 'usage',                       'uses' => 'HomeController@usage']);

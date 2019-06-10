@@ -24,9 +24,10 @@
                                 </div>
                                 <div class="margin-top-10 row">
                                     <div class="col-md-12" style="line-height: 38px;">
-                                        <b>I 'm measuring <a class="btn btn-primary" v-on:click="showStandardCharacters()" v-tooltip="standardCharactersTooltip">
+                                        <b class="some-container">I 'm measuring <a class="btn btn-primary" v-on:click="showStandardCharacters()"
+                                                             v-tooltip="{ content:standardCharactersTooltip, classes: 'standard-tooltip'}">
                                             the standard set of characters
-                                        </a> <a style="cursor: pointer;" v-tooltip="standardCharactersTooltip"> ? </a> or</b>
+                                        </a> <br/> or</b>
                                     </div>
                                     <div class="col-md-12 margin-top-10">
                                         <model-select :options="standardCharacters"
@@ -38,8 +39,9 @@
 
                                     </div>
                                 </div>
+                                <hr style="border-top: 2px solid; margin-top: 20px;">
                                 <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 0)">
-                                    <h4><b>Characters selected</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <h4><b><u>Characters selected</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <a class="btn btn-add display-block" v-on:click="removeAllCharacters()"><span
                                                 class="glyphicon glyphicon-remove"></span></a>
                                     </h4>
@@ -55,7 +57,7 @@
                                     </div>
                                 </div>
                                 <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 1)">
-                                    <h4><b>Standard Characters&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                                    <h4><b><u>Selected Standard Characters</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
                                         <a class="btn btn-add display-block"
                                                v-on:click="removeAllStandardCharacters()"><span
                                             class="glyphicon glyphicon-remove"></span></a></h4>
@@ -131,6 +133,19 @@
                                             v-for="value in row"
                                             v-tooltip="userCharacters.find(ch => ch.id == value.character_id).tooltip"
                                             style="cursor: pointer; line-height: 44px;">
+                                            <!--<div >-->
+                                                <!--<div style="display: inline-block; width: 30px;">-->
+                                                    <!--<div style="">-->
+                                                        <!--a-->
+                                                    <!--</div>-->
+                                                    <!--<div>-->
+                                                        <!--b-->
+                                                    <!--</div>-->
+                                                <!--</div>-->
+                                                <!--<div>-->
+                                                    <!--{{ value.value }}-->
+                                                <!--</div>-->
+                                            <!--</div>-->
                                             {{ value.value }}
                                         </td>
                                         <td v-if="value.header_id != 1" v-for="value in row">
@@ -401,7 +416,6 @@
                 confirmMethod: false,
                 confirmUnit: false,
                 columnCount: 0,
-//                taxonName: '',
                 taxonName: 'Carex capitata',
                 matrixShowFlag: false,
                 headers : [],
@@ -412,6 +426,7 @@
                 },
                 isLoading: false,
                 userTags: [],
+                currentTab : '',
             }
         },
         components: {
@@ -470,6 +485,13 @@
             onSelect(selectedItem) {
                 var app = this;
                 var selectedCharacter = app.defaultCharacters.find(ch => ch.id == selectedItem);
+                console.log('selectedItem', selectedItem);
+                console.log('selectedCharacter', selectedCharacter);
+                if (!selectedCharacter) {
+                    selectedCharacter = app.userCharacters.find(ch => ch.id == selectedItem);
+                }
+                console.log('selectedItem', selectedItem);
+                console.log('selectedCharacter', selectedCharacter);
                 if (!selectedCharacter) {
                     app.firstCharacter = '';
                     app.middleCharacter = '';
@@ -608,9 +630,9 @@
             },
             removeUserCharacter(characterId) {
                 var app = this;
+                var oldUserTag = app.userCharacters.find(ch => ch.id == characterId).standard_tag;
                 axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
                     .then(function(resp) {
-                        var oldUserTag = app.userCharacters.find(ch => ch.id == characterId).standard_tag;
                         app.userCharacters = resp.data;
                         if (!app.userCharacters.find(ch => ch.standard_tag == oldUserTag)) {
                             var jsonUserTag = {
@@ -628,7 +650,14 @@
                     });
             },
             removeAllCharacters() {
-
+                var app = this;
+                app.isLoading = true;
+                axios.post('/chrecorder/public/api/v1/character/remove-all')
+                    .then(function(resp) {
+                        app.isLoading = false;
+                        app.userCharacters = resp.data;
+                        app.refreshUserCharacters();
+                    });
             },
             saveCharacter(metadataFlag) {
                 var app = this;
@@ -689,6 +718,9 @@
             enhance(characterId) {
                 var app = this;
                 var selectedCharacter = app.defaultCharacters.find(ch => ch.id == characterId);
+                if (!selectedCharacter) {
+                    selectedCharacter = app.userCharacters.find(ch => ch.id == characterId);
+                }
                 selectedCharacter.username = app.user.name;
                 selectedCharacter.creator = app.user.name + ' via CR';
                 app.detailsFlag = false;
@@ -726,7 +758,11 @@
                             alert("The character already exists for this user!!");
                         } else {
                             app.character.standard = 0;
-                            app.character.show_flag = false;
+                            if (app.character.standard_tag == app.currentTab) {
+                                app.character.show_flag = true;
+                            } else {
+                                app.character.show_flag = false;
+                            }
                             if (app.matrixShowFlag) {
                                 axios.post('api/v1/character/add-character', app.character)
                                     .then(function(resp) {
@@ -915,6 +951,7 @@
             showTableForTab(tagName) {
                 var app = this;
                 app.isLoading = true;
+                app.currentTab = tagName;
                 axios.post('/chrecorder/public/api/v1/show-tab-character/' + tagName)
                     .then(function(resp) {
                         app.isLoading = false;
@@ -949,7 +986,7 @@
                     for (var i = 0; i < resp.data.length; i++) {
                         var temp = {};
                         temp.name = resp.data[i].name;
-                        app.standardCharactersTooltip = app.standardCharactersTooltip + resp.data[i].name + '<br/>';
+                        app.standardCharactersTooltip = app.standardCharactersTooltip + resp.data[i].name + '; ';
                         temp.text = resp.data[i].name + ' by ' + resp.data[i].username + ' (' + resp.data[i].usage_count + ')';
                         temp.value = resp.data[i].id;
                         temp.tooltip = '';
@@ -972,38 +1009,65 @@
                         app.standardShowCharacters.push(temp);
                         app.standardCharacters.push(temp);
                     }
-                });
-            axios.get("/chrecorder/public/api/v1/character/" + app.user.id)
-                .then(function(resp) {
-                    console.log('resp character', resp.data);
-                    app.userCharacters = resp.data.characters;
-                    app.headers = resp.data.headers;
-                    app.values = resp.data.values;
-                    app.taxonName = resp.data.taxon;
-                    app.columnCount = resp.data.headers.length - 1;
-                    if (app.columnCount == 0) {
-                        app.columnCount = 3;
-                    }
-                    for (var i = 0; i < app.userCharacters.length; i++) {
-                        app.userCharacters[i].tooltip = '';
-                        if (app.userCharacters[i].method_from != null && app.userCharacters[i].method_from != '') {
-                            app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + app.userCharacters[i].method_from + ', ';
-                        }
-                        if (app.userCharacters[i].method_to != null && app.userCharacters[i].method_to != '') {
-                            app.userCharacters[i].tooltip += 'To: ' + app.userCharacters[i].method_to + ', ';
-                        }
-                        if (app.userCharacters[i].method_include != null && app.userCharacters[i].method_include != '') {
-                            app.userCharacters[i].tooltip += 'Include: ' + app.userCharacters[i].method_include + ', ';
-                        }
-                        if (app.userCharacters[i].method_exclude != null && app.userCharacters[i].method_exclude != '') {
-                            app.userCharacters[i].tooltip += 'Exclude: ' + app.userCharacters[i].method_exclude + ', ';
-                        }
-                        if (app.userCharacters[i].method_where != null && app.userCharacters[i].method_where != '') {
-                            app.userCharacters[i].tooltip += 'Where: ' + app.userCharacters[i].method_where;
-                        }
+                    axios.get("/chrecorder/public/api/v1/character/" + app.user.id)
+                        .then(function(resp) {
+                            console.log('resp character', resp.data);
+                            app.userCharacters = resp.data.characters;
+                            app.headers = resp.data.headers;
+                            app.values = resp.data.values;
+                            app.taxonName = resp.data.taxon;
+                            app.columnCount = resp.data.headers.length - 1;
+                            if (app.columnCount == 0) {
+                                app.columnCount = 3;
+                            }
+                            for (var i = 0; i < app.userCharacters.length; i++) {
+                                var temp = {};
+                                temp.name = app.userCharacters[i].name;
+                                temp.text = app.userCharacters[i].name + ' by ' + app.userCharacters[i].username + ' (' + app.userCharacters[i].usage_count + ')';
+                                temp.value = app.userCharacters[i].id;
+                                temp.tooltip = '';
 
-                    }
+                                if (app.userCharacters[i].method_from != null && app.userCharacters[i].method_from != '') {
+                                    temp.tooltip = temp.tooltip + 'From: ' + app.userCharacters[i].method_from + ', ';
+                                }
+                                if (app.userCharacters[i].method_to != null && app.userCharacters[i].method_to != '') {
+                                    temp.tooltip = temp.tooltip + 'To: ' + app.userCharacters[i].method_to + ', ';
+                                }
+                                if (app.userCharacters[i].method_include != null && app.userCharacters[i].method_include != '') {
+                                    temp.tooltip = temp.tooltip + 'Include: ' + app.userCharacters[i].method_include + ', ';
+                                }
+                                if (app.userCharacters[i].method_exclude != null && app.userCharacters[i].method_exclude != '') {
+                                    temp.tooltip = temp.tooltip + 'Exclude: ' + app.userCharacters[i].method_exclude + ', ';
+                                }
+                                if (app.userCharacters[i].method_where != null && app.userCharacters[i].method_where != '') {
+                                    temp.tooltip = temp.tooltip + 'Where: ' + app.userCharacters[i].method_where;
+                                }
+                                app.standardCharacters.push(temp);
+                            }
+
+                            app.refreshUserCharacters();
+//                    for (var i = 0; i < app.userCharacters.length; i++) {
+//                        app.userCharacters[i].tooltip = '';
+//                        if (app.userCharacters[i].method_from != null && app.userCharacters[i].method_from != '') {
+//                            app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + app.userCharacters[i].method_from + ', ';
+//                        }
+//                        if (app.userCharacters[i].method_to != null && app.userCharacters[i].method_to != '') {
+//                            app.userCharacters[i].tooltip += 'To: ' + app.userCharacters[i].method_to + ', ';
+//                        }
+//                        if (app.userCharacters[i].method_include != null && app.userCharacters[i].method_include != '') {
+//                            app.userCharacters[i].tooltip += 'Include: ' + app.userCharacters[i].method_include + ', ';
+//                        }
+//                        if (app.userCharacters[i].method_exclude != null && app.userCharacters[i].method_exclude != '') {
+//                            app.userCharacters[i].tooltip += 'Exclude: ' + app.userCharacters[i].method_exclude + ', ';
+//                        }
+//                        if (app.userCharacters[i].method_where != null && app.userCharacters[i].method_where != '') {
+//                            app.userCharacters[i].tooltip += 'Where: ' + app.userCharacters[i].method_where;
+//                        }
+//
+//                    }
+                        });
                 });
+
             axios.get("/chrecorder/public/api/v1/user-tag/" + app.user.id)
                 .then(function(resp) {
                     app.userTags = resp.data;

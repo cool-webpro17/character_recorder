@@ -51,9 +51,6 @@
                                         <a class="btn btn-add display-block"
                                            v-on:click="removeUserCharacter(eachCharacter.id)"><span
                                                 class="glyphicon glyphicon-remove"></span></a>
-                                        <!--<a-->
-                                                <!--v-on:click="removeUserCharacter(eachCharacter.id)" style="cursor: pointer;">-->
-                                            <!--X </a>-->
                                     </div>
                                 </div>
                                 <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 1)">
@@ -105,59 +102,70 @@
                 </div>
                 <hr v-if="matrixShowFlag == true" style="margin-top: 40px; margin-bottom: 40px; border-top: 2px solid;">
 
-                <div class="container">
-                    <div class="row">
-                        <div class="margin-top-10 col-md-12" v-if="matrixShowFlag == true">
-                            <ul class="nav nav-tabs">
-                                <li v-for="eachTag in userTags"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
-                            </ul>
-                            <div style="overflow-x: auto; max-height: 700px; margin-right: auto; margin-left: auto;">
-                                <table class="table table-bordered table-responsive cr-table">
-                                    <thead>
-                                    <tr>
-                                        <th style="min-width: 270px; height: 43px; line-height: 43px; text-align: center;">
-                                            Character
-                                        </th>
-                                        <th v-if="header.id != 1" v-for="header in headers" style="min-width: 200px;">
-                                            <input class="th-input" v-bind:value="header.header"/>
-                                            <a class="btn btn-add display-block"
-                                               v-on:click="deleteHeader(header.id)"><span
-                                                    class="glyphicon glyphicon-remove"></span></a>
-                                        </th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr v-for="row in values"
-                                        v-if="userCharacters.find(ch => ch.id == row[0].character_id).show_flag == true">
-                                        <td v-if="value.header_id == 1"
-                                            v-for="value in row"
-                                            v-tooltip="userCharacters.find(ch => ch.id == value.character_id).tooltip"
-                                            style="cursor: pointer; line-height: 44px;">
-                                            <!--<div >-->
-                                                <!--<div style="display: inline-block; width: 30px;">-->
-                                                    <!--<div style="">-->
-                                                        <!--a-->
-                                                    <!--</div>-->
-                                                    <!--<div>-->
-                                                        <!--b-->
-                                                    <!--</div>-->
-                                                <!--</div>-->
-                                                <!--<div>-->
-                                                    <!--{{ value.value }}-->
-                                                <!--</div>-->
-                                            <!--</div>-->
-                                            {{ value.value }}
-                                        </td>
-                                        <td v-if="value.header_id != 1" v-for="value in row">
-                                            <input class="td-input" v-model="value.value"
-                                                   v-on:blur="saveItem($event, value)"/>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                <div style="margin-left: 15px; margin-right: 15px;" v-if="matrixShowFlag == true">
+                    <ul class="nav nav-tabs">
+                        <li v-for="eachTag in userTags"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
+                    </ul>
+                    <div class="table-responsive" style="overflow-x: inherit;" >
+                        <table class="table table-bordered cr-table">
+                            <thead>
+                            <tr>
+                                <th style="min-width: 270px; height: 43px; line-height: 43px; text-align: center;">
+                                    Character
+                                </th>
+                                <th v-if="header.id != 1" v-for="header in headers" style="min-width: 200px;">
+                                    <input class="th-input" v-bind:value="header.header"/>
+                                    <a class="btn btn-add display-block"
+                                       v-on:click="deleteHeader(header.id)"><span
+                                            class="glyphicon glyphicon-remove"></span></a>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="row in values"
+                                v-if="userCharacters.find(ch => ch.id == row[0].character_id).show_flag == true">
+                                <td v-if="value.header_id == 1"
+                                    v-for="value in row"
+                                    v-tooltip="userCharacters.find(ch => ch.id == value.character_id).tooltip"
+                                    style="cursor: pointer; display: flex; ">
+                                    <div style="width: 30px;">
+                                        <div style="height: 22px; line-height: 22px;">
+                                            <span v-on:click="upUserValue(value.character_id)" class="glyphicon glyphicon-chevron-up"></span>
+                                        </div>
+                                        <div style="height: 22px; line-height: 22px;">
+                                            <span v-on:click="downUserValue(value.character_id)" class="glyphicon glyphicon-chevron-down"></span>
+                                        </div>
+                                    </div>
+                                    <div style="line-height: 44px;">
+                                        {{ value.value }}
+                                    </div>
+                                    <div class="btn-group" style="margin-left: 10px;">
+                                        <a class="btn btn-add dropdown-toggle" style="line-height: 30px;" data-toggle="dropdown">
+                                            <span><b>{{ value.unit }}</b></span>
+                                            <span class="sr-only">Toggle Dropdown</span>
+                                        </a>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a v-on:click="changeUnit(value.character_id, 'm')">m</a></li>
+                                            <li><a v-on:click="changeUnit(value.character_id, 'dm')">dm</a></li>
+                                            <li><a v-on:click="changeUnit(value.character_id, 'cm')">cm</a></li>
+                                            <li><a v-on:click="changeUnit(value.character_id, 'mm')">mm</a></li>
+                                        </ul>
+                                    </div>
+                                    <div style="margin-left: 5px; line-height: 44px;">
+                                        <a v-on:click="removeRowTable(value.character_id)" class="btn btn-add"><span
+                                                class="glyphicon glyphicon-remove"></span></a>
+                                    </div>
+                                </td>
+                                <td v-if="value.header_id != 1" v-for="value in row">
+                                    <input class="td-input" v-model="value.value"
+                                           v-on:blur="saveItem($event, value)"/>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-                        </div>
+                    <div class="container">
                         <div v-if="newCharacterFlag" @close="newCharacterFlag = false">
                             <transition name="modal">
                                 <div class="modal-mask character-modal">
@@ -605,6 +613,7 @@
                     if (!app.userCharacters.find(ch => ch.name == character.name)) {
                         character.username = app.user.name;
                         character.show_flag = false;
+                        character.unit = 'cm';
                         postCharacters.push(character);
                     }
                 }
@@ -622,7 +631,9 @@
 
                 axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
                     .then(function(resp) {
-                        app.userCharacters = resp.data;
+                        app.userCharacters = resp.data.characters;
+                        app.headers = resp.data.headers;
+                        app.values = resp.data.values;
                         app.refreshUserCharacters();
 
                     });
@@ -633,7 +644,9 @@
                 var oldUserTag = app.userCharacters.find(ch => ch.id == characterId).standard_tag;
                 axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
                     .then(function(resp) {
-                        app.userCharacters = resp.data;
+                        app.userCharacters = resp.data.characters;
+                        app.headers = resp.data.headers;
+                        app.values = resp.data.values;
                         if (!app.userCharacters.find(ch => ch.standard_tag == oldUserTag)) {
                             var jsonUserTag = {
                                 user_id: app.user.id,
@@ -655,7 +668,9 @@
                 axios.post('/chrecorder/public/api/v1/character/remove-all')
                     .then(function(resp) {
                         app.isLoading = false;
-                        app.userCharacters = resp.data;
+                        app.userCharacters = resp.data.characters;
+                        app.headers = resp.data.headers;
+                        app.values = resp.data.values;
                         app.refreshUserCharacters();
                     });
             },
@@ -923,7 +938,9 @@
                 axios.post('/chrecorder/public/api/v1/character/remove-all-standard')
                     .then(function(resp) {
                         app.isLoading = false;
-                        app.userCharacters = resp.data;
+                        app.userCharacters = resp.data.characters;
+                        app.headers = resp.data.headers;
+                        app.values = resp.data.values;
                         app.refreshUserCharacters();
                     });
             },
@@ -960,18 +977,66 @@
                         app.values = resp.data.values;
                         app.refreshUserCharacters();
                     });
-//                app.hideAllCharacter();
-//                var showCharacters = app.userCharacters.filter(ch => ch.standard_tag == tagName);
-//                console.log('showCharacters', showCharacters);
-//                for (var i = 0; i < showCharacters.length; i++) {
-//                    app.userCharacters.find(ch => ch.id == showCharacters[i].id).show_flag = true;
-//                }
             },
             hideAllCharacter() {
                 var app = this;
                 for (var i = 0; i < app.userCharacters.length; i++) {
                     app.userCharacters[i].show_flag = false;
                 }
+            },
+            removeRowTable(characterId) {
+                var app = this;
+                axios.post('/chrecorder/public/api/v1/character/delete/' + app.user.id + '/' + characterId)
+                    .then(function(resp) {
+                        app.userCharacters = resp.data.characters;
+                        app.headers = resp.data.headers;
+                        app.values = resp.data.values;
+                        app.userTags = resp.data.userTags;
+                        app.refreshUserCharacters();
+                    });
+            },
+            changeUnit(characterId, unit) {
+                var app = this;
+
+                var jsonPost = {
+                    character_id: characterId,
+                    unit: unit
+                };
+                axios.post('/chrecorder/public/api/v1/character/update-unit', jsonPost)
+                    .then(function(resp) {
+                        app.userCharacters = resp.data.characters;
+                        app.headers = resp.data.headers;
+                        app.values = resp.data.values;
+                        app.refreshUserCharacters();
+                    });
+            },
+            upUserValue(valueId) {
+                var app = this;
+                var showedCharacters = app.userCharacters.filter(ch => ch.show_flag == true);
+                var index = showedCharacters.indexOf(showedCharacters.find(ch => ch.id == valueId));
+                app.swap(showedCharacters[index].id, false);
+            },
+            downUserValue(valueId) {
+                var app = this;
+                var showedCharacters = app.userCharacters.filter(ch => ch.show_flag == true);
+                var index = showedCharacters.indexOf(showedCharacters.find(ch => ch.id == valueId));
+                app.swap(showedCharacters[index].id, true);
+
+            },
+            swap(valueId, directionFlag = true) {
+                var app = this;
+                var valueIndex = app.values.indexOf(app.values.find(value => value[0].character_id == valueId));
+
+                if ((directionFlag == true) && (valueIndex < app.values.length)) {
+                    var tmp = app.values[valueIndex];
+                    app.values.splice(valueIndex, 1);
+                    app.values.splice(valueIndex + 1, 0, tmp);
+                } else if ((directionFlag == false) && (valueIndex > 0)) {
+                    var tmp = app.values[valueIndex];
+                    app.values.splice(valueIndex, 1);
+                    app.values.splice(valueIndex - 1, 0, tmp);
+                }
+
             },
             importMatrix() {
 
@@ -1046,25 +1111,6 @@
                             }
 
                             app.refreshUserCharacters();
-//                    for (var i = 0; i < app.userCharacters.length; i++) {
-//                        app.userCharacters[i].tooltip = '';
-//                        if (app.userCharacters[i].method_from != null && app.userCharacters[i].method_from != '') {
-//                            app.userCharacters[i].tooltip = app.userCharacters[i].tooltip + 'From: ' + app.userCharacters[i].method_from + ', ';
-//                        }
-//                        if (app.userCharacters[i].method_to != null && app.userCharacters[i].method_to != '') {
-//                            app.userCharacters[i].tooltip += 'To: ' + app.userCharacters[i].method_to + ', ';
-//                        }
-//                        if (app.userCharacters[i].method_include != null && app.userCharacters[i].method_include != '') {
-//                            app.userCharacters[i].tooltip += 'Include: ' + app.userCharacters[i].method_include + ', ';
-//                        }
-//                        if (app.userCharacters[i].method_exclude != null && app.userCharacters[i].method_exclude != '') {
-//                            app.userCharacters[i].tooltip += 'Exclude: ' + app.userCharacters[i].method_exclude + ', ';
-//                        }
-//                        if (app.userCharacters[i].method_where != null && app.userCharacters[i].method_where != '') {
-//                            app.userCharacters[i].tooltip += 'Where: ' + app.userCharacters[i].method_where;
-//                        }
-//
-//                    }
                         });
                 });
 

@@ -74,7 +74,11 @@ class HomeController extends Controller
     public function getArrayCharacters() {
         $user = User::where('id', '=', Auth::id())->first();
         $username = explode('@', $user['email'])[0];
-        $arrayCharacters = Character::where('username', '=', $username)->orderBy('standard_tag', 'ASC')->get();
+
+        $arrayCharacters = [];
+        if (Character::where('username', '=', $username)->first()) {
+            $arrayCharacters = Character::where('username', '=', $username)->orderBy('standard_tag', 'ASC')->get();
+        }
         foreach ($arrayCharacters as $c) {
 
             $usageCount = Value::where('character_id', '=', $c->id)
@@ -173,7 +177,6 @@ class HomeController extends Controller
     public function getCharacter(Request $request, $userId) {
         $user = User::where('id', '=', $userId)->first();
         $username = explode('@', $user['email'])[0];
-        $characters = Character::where('username', '=', $username)->orderBy('standard_tag', 'ASC')->get();
 
         $returnHeaders = $this->getHeaders();
         $returnValues = $this->getValuesByCharacter();
@@ -190,6 +193,12 @@ class HomeController extends Controller
     }
 
     public function deleteCharacter(Request $request, $userId, $characterId) {
+
+        if (Character::where('standard_tag', '=', Character::where('id', '=', $characterId)->first()->standard_tag)->count() < 2) {
+            UserTag::where('tag_name', '=', Character::where('id', '=', $characterId)->first()->standard_tag)
+                ->where('user_id', '=', Auth::id())
+                ->delete();
+        }
         $character = Character::where('id', '=', $characterId)->delete();
         if (Value::where('character_id', '=', $characterId)->first()) {
             Value::where('character_id', '=', $characterId)->delete();
@@ -199,8 +208,24 @@ class HomeController extends Controller
         $username = explode('@', $user['email'])[0];
         $characters = Character::where('username', '=', $username)->orderBy('standard_tag', 'ASC')->get();
 
+        if (!Character::where('username', '=', $username)->first()) {
+            Header::where('user_id', '=', Auth::id())->delete();
+        }
 
-        return $characters;
+
+
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $returnUserTags = UserTag::where('user_id', '=', Auth::id())->get();
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+            'userTags' => $returnUserTags
+        ];
+
+        return $data;
     }
 
     public function storeMatrix(Request $request) {
@@ -435,9 +460,23 @@ class HomeController extends Controller
             }
             $eachCharacter->delete();
         }
-        $returnCharacters = $this->getArrayCharacters();
+        if (!Character::where('username', '=', $username)->first()) {
+            if (Header::where('user_id', '=', Auth::id())->first()) {
+                Header::where('user_id', '=', Auth::id())->delete();
+            }
+        }
 
-        return $returnCharacters;
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+        ];
+
+        return $data;
+
     }
 
     public function showTabCharacter(Request $request, $tabName) {
@@ -482,8 +521,38 @@ class HomeController extends Controller
             }
             $eachCharacter->delete();
         }
-        $returnCharacters = $this->getArrayCharacters();
 
-        return $returnCharacters;
+        if (!Character::where('username', '=', $username)->first()) {
+            Header::where('user_id', '=', Auth::id())->delete();
+        }
+
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+        ];
+
+        return $data;
+    }
+
+    public function updateUnit(Request $request) {
+        $character = Character::where('id', '=', $request->input('character_id'))->first();
+        if ($character->unit != $request->input('unit')) {
+            $character->unit = $request->input('unit');
+            $character->save();
+        }
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+        ];
+
+        return $data;
     }
 }

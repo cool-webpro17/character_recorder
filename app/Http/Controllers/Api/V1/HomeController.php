@@ -412,7 +412,6 @@ class HomeController extends Controller
 
     public function addStandardCharacter(Request $request) {
         $standardCharacters = $request->all();
-//        dd($standardCharacters);
 
         foreach ($standardCharacters as $eachCharacter) {
             $character = new Character([
@@ -540,10 +539,96 @@ class HomeController extends Controller
 
     public function updateUnit(Request $request) {
         $character = Character::where('id', '=', $request->input('character_id'))->first();
+        $oldUnit = $character->unit;
         if ($character->unit != $request->input('unit')) {
             $character->unit = $request->input('unit');
             $character->save();
+            $values = Value::where('character_id', '=', $character->id)->where('header_id', '<>', 1)->get();
+            foreach ($values as $value) {
+                if ($value->value) {
+                    switch ($oldUnit) {
+                        case "mm":
+                            switch ($request->input('unit')) {
+                                case "cm":
+                                    $value->value = (float)$value->value / 10;
+                                    $value->save();
+                                    break;
+                                case "dm":
+                                    $value->value = (float)$value->value / 100;
+                                    $value->save();
+                                    break;
+                                case "m":
+                                    $value->value = (float)$value->value / 1000;
+                                    $value->save();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case "cm":
+                            switch ($request->input('unit')) {
+                                case "mm":
+                                    $value->value = (float)$value->value * 10;
+                                    $value->save();
+                                    break;
+                                case "dm":
+                                    $value->value = (float)$value->value / 10;
+                                    $value->save();
+                                    break;
+                                case "m":
+                                    $value->value = (float)$value->value / 100;
+                                    $value->save();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case "dm":
+                            switch ($request->input('unit')) {
+                                case "mm":
+                                    $value->value = (float)$value->value * 100;
+                                    $value->save();
+                                    break;
+                                case "cm":
+                                    $value->value = (float)$value->value * 10;
+                                    $value->save();
+                                    break;
+                                case "m":
+                                    $value->value = (float)$value->value / 10;
+                                    $value->save();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        case "m":
+                            switch ($request->input('unit')) {
+                                case "mm":
+                                    $value->value = (float)$value->value * 1000;
+                                    $value->save();
+                                    break;
+                                case "cm":
+                                    $value->value = (float)$value->value * 100;
+                                    $value->save();
+                                    break;
+                                case "dm":
+                                    $value->value = (float)$value->value * 10;
+                                    $value->save();
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+            }
+
         }
+
+
         $returnHeaders = $this->getHeaders();
         $returnValues = $this->getValuesByCharacter();
         $returnCharacters = $this->getArrayCharacters();

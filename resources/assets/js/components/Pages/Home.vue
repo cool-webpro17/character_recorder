@@ -182,11 +182,11 @@
                                                 <div class="row">
                                                     <div class="col-md-3">
                                                         <select v-model="firstCharacter" style="height: 26px;">
-                                                            <option>length</option>
-                                                            <option>width</option>
-                                                            <option>depth</option>
-                                                            <option>diameter</option>
-                                                            <option>distance</option>
+                                                            <option>Length</option>
+                                                            <option>Width</option>
+                                                            <option>Depth</option>
+                                                            <option>Diameter</option>
+                                                            <option>Distance</option>
                                                         </select>
                                                     </div>
                                                     <div class="col-md-3">
@@ -614,7 +614,14 @@
                     if (!app.userCharacters.find(ch => ch.name == character.name)) {
                         character.username = app.user.name;
                         character.show_flag = false;
-                        character.unit = 'cm';
+                        if (character.name.startsWith('Length of')
+                            || character.name.startsWith('Width of')
+                            || character.name.startsWith('Number of')
+                            || character.name.startsWith('Depth of')
+                            || character.name.startsWith('Diameter of')
+                            || character.name.startsWith('Distance between')) {
+                            character.unit = 'cm';
+                        }
                         postCharacters.push(character);
                     }
                 }
@@ -914,24 +921,36 @@
             },
             saveItem(event, value) {
                 var app = this;
-                if (value.value < 0) {
-                    alert("Value should be only positive value.");
-                    value.value = '';
+                var currentCharacter = app.userCharacters.find(ch => ch.id == value.character_id);
+                if (currentCharacter.name.startsWith('Length of')
+                    || currentCharacter.name.startsWith('Width of')
+                    || currentCharacter.name.startsWith('Number of')
+                    || currentCharacter.name.startsWith('Depth of')
+                    || currentCharacter.name.startsWith('Diameter of')
+                    || currentCharacter.name.startsWith('Distance between')) {
+                    if (isNaN(value.value) || value.value < 0) {
+                        alert('Value should be only positive number.');
+                        value.value = '';
+                    } else {
+                        axios.post('/chrecorder/public/api/v1/character/update', value)
+                            .then(function(resp) {
+                                console.log('saveItem', resp.data);
+                                if (resp.data.error_input == 1) {
+                                    event.target.style.color = 'red';
+                                } else {
+                                    event.target.style.color = 'black';
+                                    app.userCharacters = resp.data.characters;
+                                    app.headers = resp.data.headers;
+                                    app.values = resp.data.values;
+                                    app.refreshUserCharacters();
+                                }
+                            });
+                    }
+
                 } else {
-                    axios.post('/chrecorder/public/api/v1/character/update', value)
-                        .then(function(resp) {
-                            console.log('saveItem', resp.data);
-                            if (resp.data.error_input == 1) {
-                                event.target.style.color = 'red';
-                            } else {
-                                event.target.style.color = 'black';
-                                app.userCharacters = resp.data.characters;
-                                app.headers = resp.data.headers;
-                                app.values = resp.data.values;
-                                app.refreshUserCharacters();
-                            }
-                        });
+
                 }
+
             },
             removeAllStandardCharacters() {
                 var app = this;
@@ -1081,7 +1100,9 @@
                             app.userCharacters = resp.data.characters;
                             app.headers = resp.data.headers;
                             app.values = resp.data.values;
-                            app.taxonName = resp.data.taxon;
+                            if (resp.data.taxon != null) {
+                                app.taxonName = resp.data.taxon;
+                            }
                             app.columnCount = resp.data.headers.length - 1;
                             if (app.columnCount == 0) {
                                 app.columnCount = 3;

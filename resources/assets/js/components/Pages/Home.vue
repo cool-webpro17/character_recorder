@@ -164,7 +164,8 @@
                             </tbody>
                         </table>
                     </div>
-
+                </div>
+                <div>
                     <div class="container">
                         <div v-if="newCharacterFlag" @close="newCharacterFlag = false">
                             <transition name="modal">

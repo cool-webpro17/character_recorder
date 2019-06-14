@@ -493,6 +493,7 @@
             onSelect(selectedItem) {
                 var app = this;
                 var selectedCharacter = app.defaultCharacters.find(ch => ch.id == selectedItem);
+                console.log("app.defaultCharacters", app.defaultCharacters);
                 console.log('selectedItem', selectedItem);
                 console.log('selectedCharacter', selectedCharacter);
                 if (!selectedCharacter) {
@@ -651,6 +652,8 @@
                 var oldUserTag = app.userCharacters.find(ch => ch.id == characterId).standard_tag;
                 axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
                     .then(function(resp) {
+                        app.defaultCharacters = resp.data.defaultCharacters;
+                        app.refreshDefaultCharacters();
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
@@ -712,6 +715,7 @@
             use(characterId) {
                 var app = this;
                 app.character = app.defaultCharacters.find(ch => ch.id == characterId);
+                app.character.username = app.character.username + ', ' + app.user.name;
                 console.log('use', characterId);
 
                 var checkFields = true;
@@ -743,7 +747,7 @@
                 if (!selectedCharacter) {
                     selectedCharacter = app.userCharacters.find(ch => ch.id == characterId);
                 }
-                selectedCharacter.username = app.user.name;
+                selectedCharacter.username = selectedCharacter.username + ', ' + app.user.name;
                 selectedCharacter.creator = app.user.name + ' via CR';
                 app.detailsFlag = false;
                 sessionStorage.setItem('viewFlag', false);
@@ -808,46 +812,13 @@
                                                     app.userTags = resp.data;
                                                 });
                                         }
-
-                                        axios.get('/chrecorder/public/api/v1/standard_characters')
-                                            .then(function (resp) {
-                                                console.log('standardCharacters', resp);
-                                                app.defaultCharacters = resp.data;
-                                                app.standardCharactersTooltip = "";
-                                                app.standardCharacters = [];
-                                                for (var i = 0; i < resp.data.length; i++) {
-                                                    var temp = {};
-                                                    temp.name = resp.data[i].name;
-                                                    if (resp.data[i].standard == 1) {
-                                                        app.standardCharactersTooltip = app.standardCharactersTooltip + resp.data[i].name + '; ';
-                                                    }
-                                                    temp.text = resp.data[i].name + ' by ' + resp.data[i].username + ' (' + resp.data[i].usage_count + ')';
-                                                    temp.value = resp.data[i].id;
-                                                    temp.tooltip = '';
-
-                                                    if (resp.data[i].method_from != null && resp.data[i].method_from != '') {
-                                                        temp.tooltip = temp.tooltip + 'From: ' + resp.data[i].method_from + ', ';
-                                                    }
-                                                    if (resp.data[i].method_to != null && resp.data[i].method_to != '') {
-                                                        temp.tooltip = temp.tooltip + 'To: ' + resp.data[i].method_to + ', ';
-                                                    }
-                                                    if (resp.data[i].method_include != null && resp.data[i].method_include != '') {
-                                                        temp.tooltip = temp.tooltip + 'Include: ' + resp.data[i].method_include + ', ';
-                                                    }
-                                                    if (resp.data[i].method_exclude != null && resp.data[i].method_exclude != '') {
-                                                        temp.tooltip = temp.tooltip + 'Exclude: ' + resp.data[i].method_exclude + ', ';
-                                                    }
-                                                    if (resp.data[i].method_where != null && resp.data[i].method_where != '') {
-                                                        temp.tooltip = temp.tooltip + 'Where: ' + resp.data[i].method_where;
-                                                    }
-                                                    app.standardCharacters.push(temp);
-                                                }
-                                            });
-
                                         app.userCharacters = resp.data.characters;
                                         app.headers = resp.data.headers;
                                         app.values = resp.data.values;
                                         app.taxonName = resp.data.taxon;
+                                        app.defaultCharacters = resp.data.defaultCharacters;
+                                        app.refreshDefaultCharacters();
+
 
                                         app.refreshUserCharacters();
 
@@ -867,42 +838,11 @@
                                                     console.log("create UserTag", resp.data);
                                                 });
                                         }
-                                        axios.get('/chrecorder/public/api/v1/standard_characters')
-                                            .then(function (resp) {
-                                                console.log('standardCharacters', resp);
-                                                app.defaultCharacters = resp.data;
-                                                app.standardCharactersTooltip = "";
-                                                app.standardCharacters = [];
-                                                for (var i = 0; i < resp.data.length; i++) {
-                                                    var temp = {};
-                                                    temp.name = resp.data[i].name;
-                                                    if (resp.data[i].standard == 1) {
-                                                        app.standardCharactersTooltip = app.standardCharactersTooltip + resp.data[i].name + '; ';
-                                                    }
-                                                    temp.text = resp.data[i].name + ' by ' + resp.data[i].username + ' (' + resp.data[i].usage_count + ')';
-                                                    temp.value = resp.data[i].id;
-                                                    temp.tooltip = '';
-
-                                                    if (resp.data[i].method_from != null && resp.data[i].method_from != '') {
-                                                        temp.tooltip = temp.tooltip + 'From: ' + resp.data[i].method_from + ', ';
-                                                    }
-                                                    if (resp.data[i].method_to != null && resp.data[i].method_to != '') {
-                                                        temp.tooltip = temp.tooltip + 'To: ' + resp.data[i].method_to + ', ';
-                                                    }
-                                                    if (resp.data[i].method_include != null && resp.data[i].method_include != '') {
-                                                        temp.tooltip = temp.tooltip + 'Include: ' + resp.data[i].method_include + ', ';
-                                                    }
-                                                    if (resp.data[i].method_exclude != null && resp.data[i].method_exclude != '') {
-                                                        temp.tooltip = temp.tooltip + 'Exclude: ' + resp.data[i].method_exclude + ', ';
-                                                    }
-                                                    if (resp.data[i].method_where != null && resp.data[i].method_where != '') {
-                                                        temp.tooltip = temp.tooltip + 'Where: ' + resp.data[i].method_where;
-                                                    }
-                                                    app.standardCharacters.push(temp);
-                                                }
-                                            });
-                                        app.userCharacters = resp.data;
+                                        app.userCharacters = resp.data.characters;
                                         app.refreshUserCharacters();
+                                        app.defaultCharacters = resp.data.defaultCharacters;
+                                        app.refreshDefaultCharacters();
+
 
                                         app.detailsFlag = false;
                                     });
@@ -1127,6 +1067,34 @@
                     app.values.splice(valueIndex - 1, 0, tmp);
                 }
 
+            },
+            refreshDefaultCharacters() {
+                var app = this;
+                app.standardCharacters = [];
+                for (var i = 0; i < app.defaultCharacters.length; i++) {
+                    var temp = {};
+                    temp.name = app.defaultCharacters[i].name;
+                    temp.text = app.defaultCharacters[i].name + ' by ' + app.defaultCharacters[i].username + ' (' + app.defaultCharacters[i].usage_count + ')';
+                    temp.value = app.defaultCharacters[i].id;
+                    temp.tooltip = '';
+
+                    if (app.defaultCharacters[i].method_from != null && app.defaultCharacters[i].method_from != '') {
+                        temp.tooltip = temp.tooltip + 'From: ' + app.defaultCharacters[i].method_from + ', ';
+                    }
+                    if (app.defaultCharacters[i].method_to != null && app.defaultCharacters[i].method_to != '') {
+                        temp.tooltip = temp.tooltip + 'To: ' + app.defaultCharacters[i].method_to + ', ';
+                    }
+                    if (app.defaultCharacters[i].method_include != null && app.defaultCharacters[i].method_include != '') {
+                        temp.tooltip = temp.tooltip + 'Include: ' + app.defaultCharacters[i].method_include + ', ';
+                    }
+                    if (app.defaultCharacters[i].method_exclude != null && app.defaultCharacters[i].method_exclude != '') {
+                        temp.tooltip = temp.tooltip + 'Exclude: ' + app.defaultCharacters[i].method_exclude + ', ';
+                    }
+                    if (app.defaultCharacters[i].method_where != null && app.defaultCharacters[i].method_where != '') {
+                        temp.tooltip = temp.tooltip + 'Where: ' + app.defaultCharacters[i].method_where;
+                    }
+                    app.standardCharacters.push(temp);
+                }
             },
             importMatrix() {
 

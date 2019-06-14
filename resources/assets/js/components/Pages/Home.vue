@@ -1193,9 +1193,6 @@
             var app = this;
             app.user.name = app.user.email.split('@')[0];
             sessionStorage.setItem('userId', app.user.id);
-            $(".td-input").on("focus", function() {
-                $(this).css("min-width", "300");
-            });
         },
     }
 

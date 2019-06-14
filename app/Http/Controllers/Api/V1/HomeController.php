@@ -91,9 +91,11 @@ class HomeController extends Controller
     }
 
     public function getStandardCharacters() {
-        $standardCharacters = StandardCharacter::all();
+        $standardCharacters = StandardCharacter::all()->toArray();
+        $userCharacters = Character::where('standard', '=', 0)->get()->toArray();
+        $result = array_merge($standardCharacters, $userCharacters);
 
-        return $standardCharacters;
+        return $result;
     }
 
     public function getUserTags(Request $request, $userId) {

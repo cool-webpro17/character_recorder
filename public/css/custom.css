@@ -334,6 +334,10 @@ input.display-block {
     height: 43px;
 }
 
+.td-input:focus {
+    min-width: 300px;
+}
+
 .cr-table > tbody > tr > td {
     padding: 0;
     /*line-height: 44px;*/

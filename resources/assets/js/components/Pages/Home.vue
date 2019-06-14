@@ -104,13 +104,13 @@
 
                 <div style="margin-left: 15px; margin-right: 15px;" v-if="matrixShowFlag == true">
                     <ul class="nav nav-tabs">
-                        <li v-for="eachTag in userTags"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
+                        <li v-for="eachTag in userTags" v-bind:class="{ active: currentTab == eachTag.tag_name }"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
                     </ul>
                     <div class="table-responsive" style="overflow-x: inherit;" >
                         <table class="table table-bordered cr-table">
                             <thead>
                             <tr>
-                                <th style="min-width: 270px; height: 43px; line-height: 43px; text-align: center;">
+                                <th style="min-width: 300px; height: 43px; line-height: 43px; text-align: center;">
                                     Character
                                 </th>
                                 <th v-if="header.id != 1" v-for="header in headers" style="min-width: 200px;">
@@ -157,7 +157,7 @@
                                     </div>
                                 </td>
                                 <td v-if="value.header_id != 1" v-for="value in row">
-                                    <input class="td-input" v-model="value.value"
+                                    <input class="td-input" v-model="value.value" v-on:focus=""
                                            v-on:blur="saveItem($event, value)"/>
                                 </td>
                             </tr>
@@ -408,7 +408,6 @@
                 userCharacters: [],
                 defaultCharacters: [],
                 standardCharacters: [],
-                standardShowCharacters: [],
                 item: null,
                 searchText: null,
                 standardShowFlag: false,
@@ -810,6 +809,41 @@
                                                 });
                                         }
 
+                                        axios.get('/chrecorder/public/api/v1/standard_characters')
+                                            .then(function (resp) {
+                                                console.log('standardCharacters', resp);
+                                                app.defaultCharacters = resp.data;
+                                                app.standardCharactersTooltip = "";
+                                                app.standardCharacters = [];
+                                                for (var i = 0; i < resp.data.length; i++) {
+                                                    var temp = {};
+                                                    temp.name = resp.data[i].name;
+                                                    if (resp.data[i].standard == 1) {
+                                                        app.standardCharactersTooltip = app.standardCharactersTooltip + resp.data[i].name + '; ';
+                                                    }
+                                                    temp.text = resp.data[i].name + ' by ' + resp.data[i].username + ' (' + resp.data[i].usage_count + ')';
+                                                    temp.value = resp.data[i].id;
+                                                    temp.tooltip = '';
+
+                                                    if (resp.data[i].method_from != null && resp.data[i].method_from != '') {
+                                                        temp.tooltip = temp.tooltip + 'From: ' + resp.data[i].method_from + ', ';
+                                                    }
+                                                    if (resp.data[i].method_to != null && resp.data[i].method_to != '') {
+                                                        temp.tooltip = temp.tooltip + 'To: ' + resp.data[i].method_to + ', ';
+                                                    }
+                                                    if (resp.data[i].method_include != null && resp.data[i].method_include != '') {
+                                                        temp.tooltip = temp.tooltip + 'Include: ' + resp.data[i].method_include + ', ';
+                                                    }
+                                                    if (resp.data[i].method_exclude != null && resp.data[i].method_exclude != '') {
+                                                        temp.tooltip = temp.tooltip + 'Exclude: ' + resp.data[i].method_exclude + ', ';
+                                                    }
+                                                    if (resp.data[i].method_where != null && resp.data[i].method_where != '') {
+                                                        temp.tooltip = temp.tooltip + 'Where: ' + resp.data[i].method_where;
+                                                    }
+                                                    app.standardCharacters.push(temp);
+                                                }
+                                            });
+
                                         app.userCharacters = resp.data.characters;
                                         app.headers = resp.data.headers;
                                         app.values = resp.data.values;
@@ -833,6 +867,40 @@
                                                     console.log("create UserTag", resp.data);
                                                 });
                                         }
+                                        axios.get('/chrecorder/public/api/v1/standard_characters')
+                                            .then(function (resp) {
+                                                console.log('standardCharacters', resp);
+                                                app.defaultCharacters = resp.data;
+                                                app.standardCharactersTooltip = "";
+                                                app.standardCharacters = [];
+                                                for (var i = 0; i < resp.data.length; i++) {
+                                                    var temp = {};
+                                                    temp.name = resp.data[i].name;
+                                                    if (resp.data[i].standard == 1) {
+                                                        app.standardCharactersTooltip = app.standardCharactersTooltip + resp.data[i].name + '; ';
+                                                    }
+                                                    temp.text = resp.data[i].name + ' by ' + resp.data[i].username + ' (' + resp.data[i].usage_count + ')';
+                                                    temp.value = resp.data[i].id;
+                                                    temp.tooltip = '';
+
+                                                    if (resp.data[i].method_from != null && resp.data[i].method_from != '') {
+                                                        temp.tooltip = temp.tooltip + 'From: ' + resp.data[i].method_from + ', ';
+                                                    }
+                                                    if (resp.data[i].method_to != null && resp.data[i].method_to != '') {
+                                                        temp.tooltip = temp.tooltip + 'To: ' + resp.data[i].method_to + ', ';
+                                                    }
+                                                    if (resp.data[i].method_include != null && resp.data[i].method_include != '') {
+                                                        temp.tooltip = temp.tooltip + 'Include: ' + resp.data[i].method_include + ', ';
+                                                    }
+                                                    if (resp.data[i].method_exclude != null && resp.data[i].method_exclude != '') {
+                                                        temp.tooltip = temp.tooltip + 'Exclude: ' + resp.data[i].method_exclude + ', ';
+                                                    }
+                                                    if (resp.data[i].method_where != null && resp.data[i].method_where != '') {
+                                                        temp.tooltip = temp.tooltip + 'Where: ' + resp.data[i].method_where;
+                                                    }
+                                                    app.standardCharacters.push(temp);
+                                                }
+                                            });
                                         app.userCharacters = resp.data;
                                         app.refreshUserCharacters();
 
@@ -861,8 +929,10 @@
                             app.userCharacters = resp.data.characters;
                             app.headers = resp.data.headers;
                             app.values = resp.data.values;
+                            console.log('app.userTags', app.userTags);
+                            app.showTableForTab(app.userTags[0].tag_name);
 
-                            app.refreshUserCharacters();
+                            app.refreshUserCharacters(true);
 
                             console.log('userCharacters', app.userCharacters);
                         });
@@ -964,7 +1034,7 @@
                         app.refreshUserCharacters();
                     });
             },
-            refreshUserCharacters () {
+            refreshUserCharacters (showTabFlag = false) {
                 var app = this;
                 for (var i = 0; i < app.userCharacters.length; i++) {
                     app.userCharacters[i].tooltip = '';
@@ -1071,7 +1141,9 @@
                     for (var i = 0; i < resp.data.length; i++) {
                         var temp = {};
                         temp.name = resp.data[i].name;
-                        app.standardCharactersTooltip = app.standardCharactersTooltip + resp.data[i].name + '; ';
+                        if (resp.data[i].standard == 1) {
+                            app.standardCharactersTooltip = app.standardCharactersTooltip + resp.data[i].name + '; ';
+                        }
                         temp.text = resp.data[i].name + ' by ' + resp.data[i].username + ' (' + resp.data[i].usage_count + ')';
                         temp.value = resp.data[i].id;
                         temp.tooltip = '';
@@ -1091,7 +1163,6 @@
                         if (resp.data[i].method_where != null && resp.data[i].method_where != '') {
                             temp.tooltip = temp.tooltip + 'Where: ' + resp.data[i].method_where;
                         }
-                        app.standardShowCharacters.push(temp);
                         app.standardCharacters.push(temp);
                     }
                     axios.get("/chrecorder/public/api/v1/character/" + app.user.id)
@@ -1106,30 +1177,6 @@
                             app.columnCount = resp.data.headers.length - 1;
                             if (app.columnCount == 0) {
                                 app.columnCount = 3;
-                            }
-                            for (var i = 0; i < app.userCharacters.length; i++) {
-                                var temp = {};
-                                temp.name = app.userCharacters[i].name;
-                                temp.text = app.userCharacters[i].name + ' by ' + app.userCharacters[i].username + ' (' + app.userCharacters[i].usage_count + ')';
-                                temp.value = app.userCharacters[i].id;
-                                temp.tooltip = '';
-
-                                if (app.userCharacters[i].method_from != null && app.userCharacters[i].method_from != '') {
-                                    temp.tooltip = temp.tooltip + 'From: ' + app.userCharacters[i].method_from + ', ';
-                                }
-                                if (app.userCharacters[i].method_to != null && app.userCharacters[i].method_to != '') {
-                                    temp.tooltip = temp.tooltip + 'To: ' + app.userCharacters[i].method_to + ', ';
-                                }
-                                if (app.userCharacters[i].method_include != null && app.userCharacters[i].method_include != '') {
-                                    temp.tooltip = temp.tooltip + 'Include: ' + app.userCharacters[i].method_include + ', ';
-                                }
-                                if (app.userCharacters[i].method_exclude != null && app.userCharacters[i].method_exclude != '') {
-                                    temp.tooltip = temp.tooltip + 'Exclude: ' + app.userCharacters[i].method_exclude + ', ';
-                                }
-                                if (app.userCharacters[i].method_where != null && app.userCharacters[i].method_where != '') {
-                                    temp.tooltip = temp.tooltip + 'Where: ' + app.userCharacters[i].method_where;
-                                }
-                                app.standardCharacters.push(temp);
                             }
 
                             app.refreshUserCharacters();
@@ -1146,7 +1193,12 @@
             var app = this;
             app.user.name = app.user.email.split('@')[0];
             sessionStorage.setItem('userId', app.user.id);
+            $(".td-input").on("focus", function() {
+                $(this).css("min-width", "300");
+            });
         },
     }
+
+
 
 </script>

@@ -715,7 +715,8 @@
             use(characterId) {
                 var app = this;
                 app.character = app.defaultCharacters.find(ch => ch.id == characterId);
-                app.character.username = app.character.username + ', ' + app.user.name;
+                app.character.show_flag = false;
+                app.character.username = 'onlyUsed by ' + app.user.name;
                 console.log('use', characterId);
 
                 var checkFields = true;
@@ -1145,6 +1146,13 @@
                             app.columnCount = resp.data.headers.length - 1;
                             if (app.columnCount == 0) {
                                 app.columnCount = 3;
+                            }
+                            if (app.values.find(value => value.header_id != 1)) {
+                                if (app.values.find(value => value.header_id != 1).length != 0) {
+                                    app.matrixShowFlag = true;
+                                    app.collapsedFlag = true;
+                                    app.showTableForTab(app.userTags[0].tag_name);
+                                }
                             }
 
                             app.refreshUserCharacters();

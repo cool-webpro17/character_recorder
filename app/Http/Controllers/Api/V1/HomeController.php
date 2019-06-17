@@ -92,15 +92,23 @@ class HomeController extends Controller
 
     public function getDefaultCharacters() {
         $standardCharacters = StandardCharacter::all()->toArray();
-        $userCharacters = Character::where('standard', '=', 0)->get()->toArray();
+        $userCharacters = Character::where('standard', '=', 0)->where('username', 'not like', 'onlyUsed by%')->get()->toArray();
         $defaultCharacters = array_merge($standardCharacters, $userCharacters);
 
         return $defaultCharacters;
     }
 
+    public function removeString($string, $compareStr) {
+        $string = str_replace($compareStr, '', $string); // Replaces all spaces with hyphens.
+        $string = preg_replace('/[^A-Za-z0-9, \-]/', '', $string); // Removes special chars.
+
+        return preg_replace('/-+/', '-', $string); // Replaces multiple hyphens with single one.
+    }
+
+
     public function getStandardCharacters() {
         $standardCharacters = StandardCharacter::all()->toArray();
-        $userCharacters = Character::where('standard', '=', 0)->get()->toArray();
+        $userCharacters = Character::where('standard', '=', 0)->where('username', 'not like', 'onlyUsed by%')->get()->toArray();
         $result = array_merge($standardCharacters, $userCharacters);
 
         return $result;
@@ -213,20 +221,30 @@ class HomeController extends Controller
     }
 
     public function deleteCharacter(Request $request, $userId, $characterId) {
-
-        if (Character::where('standard_tag', '=', Character::where('id', '=', $characterId)->first()->standard_tag)->count() < 2) {
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+        if (Character::where('standard_tag', '=', Character::where('id', '=', $characterId)->first()->standard_tag)
+                ->where('username', 'like', '%' . $username
+                )->count() < 2) {
             UserTag::where('tag_name', '=', Character::where('id', '=', $characterId)->first()->standard_tag)
                 ->where('user_id', '=', Auth::id())
                 ->delete();
         }
+
+
         $character = Character::where('id', '=', $characterId)->delete();
         if (Value::where('character_id', '=', $characterId)->first()) {
             Value::where('character_id', '=', $characterId)->delete();
         }
 
-        $user = User::where('id', '=', $userId)->first();
-        $username = explode('@', $user['email'])[0];
+
         $characters = Character::where('username', 'like', '%' . $username)->orderBy('standard_tag', 'ASC')->get();
+
+        $usedCharacters = Character::where('username', 'like', '%' . $username . ',%')->get();
+        foreach ($usedCharacters as $usedCharacter) {
+            $usedCharacter->username = $this->removeString($usedCharacter->username, $username . ',');
+            $usedCharacter->save();
+        }
 
         if (!Character::where('username', 'like', '%' . $username)->first()) {
             Header::where('user_id', '=', Auth::id())->delete();
@@ -577,15 +595,15 @@ class HomeController extends Controller
                         case "mm":
                             switch ($request->input('unit')) {
                                 case "cm":
-                                    $value->value = (float)$value->value / 10;
+                                    $value->value = round((float)$value->value / 10, 2);
                                     $value->save();
                                     break;
                                 case "dm":
-                                    $value->value = (float)$value->value / 100;
+                                    $value->value = round((float)$value->value / 100, 2);
                                     $value->save();
                                     break;
                                 case "m":
-                                    $value->value = (float)$value->value / 1000;
+                                    $value->value = round((float)$value->value / 1000, 2);
                                     $value->save();
                                     break;
                                 default:
@@ -595,15 +613,15 @@ class HomeController extends Controller
                         case "cm":
                             switch ($request->input('unit')) {
                                 case "mm":
-                                    $value->value = (float)$value->value * 10;
+                                    $value->value = round((float)$value->value * 10, 2);
                                     $value->save();
                                     break;
                                 case "dm":
-                                    $value->value = (float)$value->value / 10;
+                                    $value->value = round((float)$value->value / 10, 2);
                                     $value->save();
                                     break;
                                 case "m":
-                                    $value->value = (float)$value->value / 100;
+                                    $value->value = round((float)$value->value / 100, 2);
                                     $value->save();
                                     break;
                                 default:
@@ -613,15 +631,15 @@ class HomeController extends Controller
                         case "dm":
                             switch ($request->input('unit')) {
                                 case "mm":
-                                    $value->value = (float)$value->value * 100;
+                                    $value->value = round((float)$value->value * 100, 2);
                                     $value->save();
                                     break;
                                 case "cm":
-                                    $value->value = (float)$value->value * 10;
+                                    $value->value = round((float)$value->value * 10, 2);
                                     $value->save();
                                     break;
                                 case "m":
-                                    $value->value = (float)$value->value / 10;
+                                    $value->value = round((float)$value->value / 10, 2);
                                     $value->save();
                                     break;
                                 default:
@@ -631,15 +649,15 @@ class HomeController extends Controller
                         case "m":
                             switch ($request->input('unit')) {
                                 case "mm":
-                                    $value->value = (float)$value->value * 1000;
+                                    $value->value = round((float)$value->value * 1000, 2);
                                     $value->save();
                                     break;
                                 case "cm":
-                                    $value->value = (float)$value->value * 100;
+                                    $value->value = round((float)$value->value * 100, 2);
                                     $value->save();
                                     break;
                                 case "dm":
-                                    $value->value = (float)$value->value * 10;
+                                    $value->value = round((float)$value->value * 10, 2);
                                     $value->save();
                                     break;
                                 default:

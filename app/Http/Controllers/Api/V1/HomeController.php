@@ -699,7 +699,7 @@ class HomeController extends Controller
 
         return array(
             'is_scucess'    =>  1,
-            'doc_url'       =>  '/export.docx'
+            'doc_url'       =>  '/chrecorder/public/export.docx'
         );
 
 

@@ -760,6 +760,9 @@ body {
     max-width: 500px;
 }
 
+.width-95per {
+    width: 95%;
+}
 /*.container .table-responsive {*/
     /*min-height: 500px;*/
 /*}*/

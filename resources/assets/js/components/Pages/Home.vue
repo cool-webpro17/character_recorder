@@ -102,68 +102,94 @@
                 </div>
                 <hr v-if="matrixShowFlag == true" style="margin-top: 40px; margin-bottom: 40px; border-top: 2px solid;">
 
-                <div style="margin-left: 15px; margin-right: 15px;" v-if="matrixShowFlag == true">
-                    <ul class="nav nav-tabs">
-                        <li v-for="eachTag in userTags" v-bind:class="{ active: currentTab == eachTag.tag_name }"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
-                    </ul>
-                    <div class="table-responsive" style="overflow-x: inherit;" >
-                        <table class="table table-bordered cr-table">
-                            <thead>
-                            <tr>
-                                <th style="min-width: 300px; height: 43px; line-height: 43px; text-align: center;">
-                                    Character
-                                </th>
-                                <th v-if="header.id != 1" v-for="header in headers" style="min-width: 200px;">
-                                    <input class="th-input" v-bind:value="header.header"/>
-                                    <a class="btn btn-add display-block"
-                                       v-on:click="deleteHeader(header.id)"><span
-                                            class="glyphicon glyphicon-remove"></span></a>
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr v-for="row in values"
-                                v-if="userCharacters.find(ch => ch.id == row[0].character_id).show_flag == true">
-                                <td v-if="value.header_id == 1"
-                                    v-for="value in row"
-                                    v-tooltip="userCharacters.find(ch => ch.id == value.character_id).tooltip"
-                                    style="cursor: pointer; display: flex; ">
-                                    <div style="width: 30px;">
-                                        <div style="height: 22px; line-height: 22px;">
-                                            <span v-on:click="upUserValue(value.character_id)" class="glyphicon glyphicon-chevron-up"></span>
-                                        </div>
-                                        <div style="height: 22px; line-height: 22px;">
-                                            <span v-on:click="downUserValue(value.character_id)" class="glyphicon glyphicon-chevron-down"></span>
-                                        </div>
-                                    </div>
-                                    <div style="line-height: 44px;">
-                                        {{ value.value }}
-                                    </div>
-                                    <div class="btn-group" style="margin-left: 10px;">
-                                        <a class="btn btn-add dropdown-toggle" style="line-height: 30px;" data-toggle="dropdown">
-                                            <span><b>{{ value.unit }}</b></span>
-                                            <span class="sr-only">Toggle Dropdown</span>
-                                        </a>
-                                        <ul class="dropdown-menu" role="menu">
-                                            <li><a v-on:click="changeUnit(value.character_id, 'm')">m</a></li>
-                                            <li><a v-on:click="changeUnit(value.character_id, 'dm')">dm</a></li>
-                                            <li><a v-on:click="changeUnit(value.character_id, 'cm')">cm</a></li>
-                                            <li><a v-on:click="changeUnit(value.character_id, 'mm')">mm</a></li>
-                                        </ul>
-                                    </div>
-                                    <div style="margin-left: 5px; line-height: 44px;">
-                                        <a v-on:click="removeRowTable(value.character_id)" class="btn btn-add"><span
+                <div style="padding-left: 15px; padding-right: 15px; display: inline-flex; width: 100%;" v-if="matrixShowFlag == true">
+                    <div v-if="descriptionFlag <= 0" v-bind:class="{'width-95per': descriptionFlag == -1}" style="min-width: 70%;">
+                        <ul class="nav nav-tabs">
+                            <li v-for="eachTag in userTags" v-bind:class="{ active: currentTab == eachTag.tag_name }"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
+                        </ul>
+                        <div class="table-responsive">
+                            <table class="table table-bordered cr-table">
+                                <thead>
+                                <tr>
+                                    <th style="min-width: 300px; height: 43px; line-height: 43px; text-align: center;">
+                                        Character
+                                    </th>
+                                    <th v-if="header.id != 1" v-for="header in headers" style="min-width: 200px;">
+                                        <input class="th-input" v-bind:value="header.header"/>
+                                        <a class="btn btn-add display-block"
+                                           v-on:click="deleteHeader(header.id)"><span
                                                 class="glyphicon glyphicon-remove"></span></a>
-                                    </div>
-                                </td>
-                                <td v-if="value.header_id != 1" v-for="value in row">
-                                    <input class="td-input" v-model="value.value" v-on:focus=""
-                                           v-on:blur="saveItem($event, value)"/>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="row in values"
+                                    v-if="userCharacters.find(ch => ch.id == row[0].character_id).show_flag == true">
+                                    <td v-if="value.header_id == 1"
+                                        v-for="value in row"
+                                        v-tooltip="userCharacters.find(ch => ch.id == value.character_id).tooltip"
+                                        style="cursor: pointer; display: flex; ">
+                                        <div style="width: 30px;">
+                                            <div style="height: 22px; line-height: 22px;">
+                                                <span v-on:click="upUserValue(value.character_id)" class="glyphicon glyphicon-chevron-up"></span>
+                                            </div>
+                                            <div style="height: 22px; line-height: 22px;">
+                                                <span v-on:click="downUserValue(value.character_id)" class="glyphicon glyphicon-chevron-down"></span>
+                                            </div>
+                                        </div>
+                                        <div style="line-height: 44px;">
+                                            {{ value.value }}
+                                        </div>
+                                        <div class="btn-group" style="margin-left: 10px;">
+                                            <a v-if="checkHaveUnit(value.value)"
+                                               class="btn btn-add dropdown-toggle" style="line-height: 30px;" data-toggle="dropdown">
+                                                <span><b>{{ value.unit }}</b></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </a>
+                                            <ul class="dropdown-menu" role="menu">
+                                                <li><a v-on:click="changeUnit(value.character_id, 'm')">m</a></li>
+                                                <li><a v-on:click="changeUnit(value.character_id, 'dm')">dm</a></li>
+                                                <li><a v-on:click="changeUnit(value.character_id, 'cm')">cm</a></li>
+                                                <li><a v-on:click="changeUnit(value.character_id, 'mm')">mm</a></li>
+                                            </ul>
+                                        </div>
+                                        <div style="margin-left: 5px; line-height: 44px;">
+                                            <a v-on:click="removeRowTable(value.character_id)" class="btn btn-add"><span
+                                                    class="glyphicon glyphicon-remove"></span></a>
+                                        </div>
+                                    </td>
+                                    <td v-if="value.header_id != 1" v-for="value in row">
+                                        <input class="td-input" v-model="value.value" v-on:focus=""
+                                               v-on:blur="saveItem($event, value)"/>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                    <div>
+                        <div style="margin-top: auto; margin-bottom: auto; margin-left: 5px; margin-right: 5px;">
+                            <div>
+                                <a class="btn btn-primary" v-on:click="expandTable()"><span class="glyphicon glyphicon-chevron-right"></span></a>
+                            </div>
+                            <div style="margin-top: 5px;">
+                                <a class="btn btn-primary" v-on:click="expandDescription()"><span class="glyphicon glyphicon-chevron-left"></span></a>
+                            </div>
+                            <div style="margin-top: 5px;">
+                                <a class="btn btn-primary" v-on:click="expandDescription()"><span class="glyphicon glyphicon-option-vertical"></span></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="descriptionFlag >= 0" v-bind:class="{'width-95per':descriptionFlag == 1}" style="position:relative; min-width: 25%; word-wrap: break-word;" class="panel">
+                        <div class="panel-heading">Description</div>
+                        <div class="panel-body" style="min-height: 100px;" v-html="descriptionText">
+                        </div>
+                        <div class="text-right">
+                            <a class="btn btn-primary" v-on:click="updateDescription()">Update</a>
+                            <a class="btn btn-primary" v-on:click="exportDescription()">Export</a>
+                        </div>
+                    </div>
+
                 </div>
                 <div>
                     <div class="container">
@@ -435,6 +461,8 @@
                 isLoading: false,
                 userTags: [],
                 currentTab : '',
+                descriptionText: '',
+                descriptionFlag : 0,
             }
         },
         components: {
@@ -619,6 +647,7 @@
                             || character.name.startsWith('Number of')
                             || character.name.startsWith('Depth of')
                             || character.name.startsWith('Diameter of')
+                            || character.name.startsWith('Count of')
                             || character.name.startsWith('Distance between')) {
                             character.unit = 'cm';
                         }
@@ -938,6 +967,7 @@
                     || currentCharacter.name.startsWith('Number of')
                     || currentCharacter.name.startsWith('Depth of')
                     || currentCharacter.name.startsWith('Diameter of')
+                    || currentCharacter.name.startsWith('Count of')
                     || currentCharacter.name.startsWith('Distance between')) {
                     if (isNaN(value.value) || value.value < 0) {
                         alert('Value should be only positive number.');
@@ -959,7 +989,19 @@
                     }
 
                 } else {
-
+                    axios.post('/chrecorder/public/api/v1/character/update', value)
+                        .then(function(resp) {
+                            console.log('saveItem', resp.data);
+                            if (resp.data.error_input == 1) {
+                                event.target.style.color = 'red';
+                            } else {
+                                event.target.style.color = 'black';
+                                app.userCharacters = resp.data.characters;
+                                app.headers = resp.data.headers;
+                                app.values = resp.data.values;
+                                app.refreshUserCharacters();
+                            }
+                        });
                 }
 
             },
@@ -1096,6 +1138,144 @@
                     }
                     app.standardCharacters.push(temp);
                 }
+            },
+            expandTable() {
+                var app = this;
+                if (app.descriptionFlag != -1) {
+                    app.descriptionFlag--;
+                }
+            },
+            expandDescription() {
+                var app = this;
+                if (app.descriptionFlag != 1) {
+                    app.descriptionFlag++;
+                }
+            },
+            checkHaveUnit(string) {
+                var app = this;
+
+                if (string.startsWith('Length of')
+                    || string.startsWith('Width of')
+                    || string.startsWith('Number of')
+                    || string.startsWith('Depth of')
+                    || string.startsWith('Diameter of')
+                    || string.startsWith('Distance between')
+                    || string.startsWith('Count of')) {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+            updateDescription() {
+                var app = this;
+
+                app.descriptionText = '';
+
+                console.log('characters', app.userCharacters);
+                console.log('tabs', app.userTags);
+                console.log('values', app.values);
+                for (var i = 0; i < app.userTags.length; i++) {
+                    app.descriptionText += '<b>' + app.userTags[i].tag_name + ': ' + '</b>';
+                    var filteredCharacters = app.userCharacters.filter(function(eachCharacter){
+                        return eachCharacter.standard_tag == app.userTags[i].tag_name;
+                    });
+                    for (var j = 0; j < filteredCharacters.length; j++) {
+                        var filteredValues = app.values.filter(function(eachValue) {
+                            return eachValue[0].character_id == filteredCharacters[j].id;
+                        })[0];
+                        var tempValueArray = [];
+                        for (var k = 0; k < filteredValues.length; k++) {
+                            if (filteredValues[k].header_id != 1) {
+                                tempValueArray.push(filteredValues[k].value);
+                            }
+                        }
+                        if (app.checkHaveUnit(filteredCharacters[j].name)) {
+                            switch (filteredCharacters[j].summary) {
+                                case "range-percentile":
+                                    if (filteredCharacters[j].name.startsWith('Distance')) {
+                                        app.descriptionText += filteredCharacters[j].name + ' ';
+                                    }
+                                    tempValueArray.sort((a, b) => a - b);
+                                    var minValue = tempValueArray[0];
+                                    var maxValue = tempValueArray[tempValueArray.length - 1];
+                                    var minPercentileValue = 0;
+                                    var maxPercentileValue = 0;
+                                    if (tempValueArray.length % 2 == 0) {
+                                        minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1];
+                                        maxPercentileValue = tempValueArray[tempValueArray.length / 2];
+                                    } else {
+                                        minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1.5];
+                                        maxPercentileValue = tempValueArray[tempValueArray.length / 2 + 0.5];
+                                    }
+                                    app.descriptionText += '(' + minValue + '-)' + minPercentileValue + '-' + maxPercentileValue + '(-' + maxValue + ') ' + filteredCharacters[j].unit;
+
+
+                                    break;
+                                case "mean":
+                                    tempValueArray.sort((a, b) => a - b);
+                                    if (tempValueArray.length % 2 == 0) {
+                                        app.descriptionText += (tempValueArray[tempValueArray.length / 2 - 1] + tempValueArray[tempValueArray.length / 2]) + filteredCharacters[j].unit;
+                                    } else {
+                                        app.descriptionText += tempValueArray[tempValueArray.length / 2 - 0.5] + filteredCharacters[j].unit;
+                                    }
+                                    break;
+                                case "median":
+                                    var sum = 0;
+                                    for( var l = 0; l < tempValueArray.length; l++ ){
+                                        sum += parseInt( tempValueArray[l], 10 ); //don't forget to add the base
+                                    }
+
+                                    var avg = sum/tempValueArray.length;
+                                    app.descriptionText += avg + filteredCharacters[j].unit;
+
+                                    break;
+                                default:
+                                    break;
+                            }
+                            if (filteredCharacters[j].name.startsWith('Length')) {
+                                app.descriptionText += ' long; ';
+                            } else if (filteredCharacters[j].name.startsWith('Width')) {
+                                app.descriptionText += ' wide; ';
+
+                            } else if (filteredCharacters[j].name.startsWith('Height')) {
+                                app.descriptionText += ' tall; ';
+
+                            } else if (filteredCharacters[j].name.startsWith('Diameter')) {
+                                app.descriptionText += ' diameter; ';
+                            } else {
+                                app.descriptionText += ' ; ' ;
+                            }
+                        } else {
+                            if (tempValueArray.find(v => v == 'green')) {
+                                if (tempValueArray.find(v => v == 'grey')) {
+                                    app.descriptionText += 'frequently grey, occasionally green; '
+                                } else {
+                                    app.descriptionText += 'usually light grey, occasionally dark grey or green; '
+                                }
+                            } else {
+                                app.descriptionText += 'sometimes hairy at base or middle part, sometimes ciliate, or occasionally smooth throughout; '
+                            }
+                        }
+                    }
+                    app.descriptionText = app.descriptionText.substring(0, app.descriptionText.length - 2);
+                    app.descriptionText += '.';
+                    app.descriptionText += '<br/>';
+
+                }
+
+            },
+            exportDescription() {
+                var app = this;
+                axios.post('/chrecorder/public/api/v1/export-description', {template: app.descriptionText})
+                    .then(function(resp) {
+                        console.log('resp', resp.data);
+                        if (resp.data.is_scucess == 1){
+                            window.location.href = resp.data.doc_url;
+                        } else {
+                            alert('Error occurred while exporting data!');
+                        }
+
+                    });
             },
             importMatrix() {
 

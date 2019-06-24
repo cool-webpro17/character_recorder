@@ -425,20 +425,20 @@ class HomeController extends Controller
         $value = Value::where('id', '=', $request->input('id'))->first();
 
         $v = $request->input('value');
-
-        if (is_numeric($v)) {
-            $value->value = $v;
-        } else {
-            $varr = preg_split('/(?<=[0-9])(?=[a-z]+)/i',$v);
-            if (count($varr)==2 && is_numeric($varr[0])) {
-                $c = Character::find($value->character_id);
-                if ($c->unit == $varr[1]) {
-                    $value->value = $varr[0];
-                } else {
-                    return ['error_input' => 1];
-                }
-            }
-        }
+        $value->value = $v;
+//        if (is_numeric($v)) {
+//            $value->value = $v;
+//        } else {
+//            $varr = preg_split('/(?<=[0-9])(?=[a-z]+)/i',$v);
+//            if (count($varr)==2 && is_numeric($varr[0])) {
+//                $c = Character::find($value->character_id);
+//                if ($c->unit == $varr[1]) {
+//                    $value->value = $varr[0];
+//                } else {
+//                    return ['error_input' => 1];
+//                }
+//            }
+//        }
 
         $value->save();
 
@@ -684,5 +684,24 @@ class HomeController extends Controller
         ];
 
         return $data;
+    }
+
+    public function exportDescription(Request $request) {
+        $phpWord = new \PhpOffice\PhpWord\PhpWord();
+        $section = $phpWord->addSection();
+        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $request->input('template'));
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment;filename="export.docx"');
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save('export.docx');
+
+        $filepath = public_path('export.docx');
+
+        return array(
+            'is_scucess'    =>  1,
+            'doc_url'       =>  '/export.docx'
+        );
+
+
     }
 }

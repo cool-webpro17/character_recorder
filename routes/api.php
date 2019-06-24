@@ -18,6 +18,7 @@ Route::group([
     Route::post('change-taxon/{taxon}',                 ['as' => 'change_taxon',                'uses' => 'HomeController@changeTaxon']);
     Route::post('add-more-column/{columnCount}',        ['as' => 'add_more_column',             'uses' => 'HomeController@addMoreColumn']);
     Route::post('show-tab-character/{tabName}',         ['as' => 'show_tab_character',          'uses' => 'HomeController@showTabCharacter']);
+    Route::post('export-description',                   ['as' => 'export_description',          'uses' => 'HomeController@exportDescription']);
 
     Route::group([
         'prefix' => '/character',

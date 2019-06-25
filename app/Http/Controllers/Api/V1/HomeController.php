@@ -61,6 +61,7 @@ class HomeController extends Controller
                 if ($value = Value::where(['character_id'=>$eachCharacter->id, 'header_id'=>$header->id])->first()) {
                     $value->username = $eachCharacter->username;
                     $value->unit = $eachCharacter->unit;
+                    $value->summary = $eachCharacter->summary;
                     array_push($value_array, $value);
                 }
 
@@ -687,21 +688,44 @@ class HomeController extends Controller
     }
 
     public function exportDescription(Request $request) {
+        $fileName = $request->input('taxon');
         $phpWord = new \PhpOffice\PhpWord\PhpWord();
         $section = $phpWord->addSection();
-        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $request->input('template'));
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment;filename="export.docx"');
-        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-        $objWriter->save('export.docx');
 
-        $filepath = public_path('export.docx');
+        $textLines = explode('<br/>', $request->input('template'));
+        foreach ($textLines as $eachText) {
+            $eachText = str_replace('<b>', '', $eachText);
+            $eachText = str_replace('</b>', '', $eachText);
+            $separatedTexts = explode(':', $eachText);
+            if (count($separatedTexts) > 1) {
+                $textrun = $section->addTextRun();
+                $textrun->addText($separatedTexts[0] . ': ', ['bold' => true]);
+                $textrun->addText($separatedTexts[1]);
+            }
+        }
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save($fileName . '.docx');
 
         return array(
             'is_scucess'    =>  1,
-            'doc_url'       =>  '/chrecorder/public/export.docx'
+            'doc_url'       =>  '/chrecorder/public/' . $fileName . '.docx',
         );
+    }
 
+    public function updateSummary(Request $request) {
+        $character = Character::where('id', '=', $request->input('character_id'))->first();
+        $character->summary = $request->input('summary');
+        $character->save();
 
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+        ];
+
+        return $data;
     }
 }

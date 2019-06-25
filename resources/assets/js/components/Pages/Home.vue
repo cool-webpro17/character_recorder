@@ -100,10 +100,11 @@
                         </div>
                     </div>
                 </div>
-                <hr v-if="matrixShowFlag == true" style="margin-top: 40px; margin-bottom: 40px; border-top: 2px solid;">
+                <!--<hr v-if="matrixShowFlag == true" style="margin-top: 40px; margin-bottom: 40px; border-top: 2px solid;">-->
+                <div v-if="matrixShowFlag == true" style="border-bottom: 2px solid; width: 100%; margin-top: 40px;"></div>
 
                 <div style="padding-left: 15px; padding-right: 15px; display: inline-flex; width: 100%;" v-if="matrixShowFlag == true">
-                    <div v-if="descriptionFlag <= 0" v-bind:class="{'width-95per': descriptionFlag == -1}" style="min-width: 70%;">
+                    <div v-bind:class="{'width-95per': descriptionFlag == false}" style="min-width: 70%;">
                         <ul class="nav nav-tabs">
                             <li v-for="eachTag in userTags" v-bind:class="{ active: currentTab == eachTag.tag_name }"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
                         </ul>
@@ -153,6 +154,17 @@
                                                 <li><a v-on:click="changeUnit(value.character_id, 'mm')">mm</a></li>
                                             </ul>
                                         </div>
+                                        <div v-if="checkHaveUnit(value.value)" class="btn-group">
+                                            <a class="btn btn-add dropdown-toggle" style="line-height: 30px;" data-toggle="dropdown">
+                                                <span><b>{{ value.summary }}</b></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </a>
+                                            <ul class="dropdown-menu" role="menu">
+                                                <li><a v-on:click="changeSummary(value.character_id, 'rp')">rp</a></li>
+                                                <li><a v-on:click="changeSummary(value.character_id, 'mn')">mn</a></li>
+                                                <li><a v-on:click="changeSummary(value.character_id, 'md')">md</a></li>
+                                            </ul>
+                                        </div>
                                         <div style="margin-left: 5px; line-height: 44px;">
                                             <a v-on:click="removeRowTable(value.character_id)" class="btn btn-add"><span
                                                     class="glyphicon glyphicon-remove"></span></a>
@@ -167,24 +179,22 @@
                             </table>
                         </div>
                     </div>
-                    <div>
-                        <div style="margin-top: auto; margin-bottom: auto; margin-left: 5px; margin-right: 5px;">
-                            <div>
-                                <a class="btn btn-primary" v-on:click="expandTable()"><span class="glyphicon glyphicon-chevron-right"></span></a>
-                            </div>
-                            <div style="margin-top: 5px;">
-                                <a class="btn btn-primary" v-on:click="expandDescription()"><span class="glyphicon glyphicon-chevron-left"></span></a>
-                            </div>
-                            <div style="margin-top: 5px;">
-                                <a class="btn btn-primary" v-on:click="expandDescription()"><span class="glyphicon glyphicon-option-vertical"></span></a>
-                            </div>
+                    <div style="border-left: 2px solid; margin-left: 5px;">
+                        <div style="margin: 0px 5px; padding-top: 100px;">
+                            <!--<div>-->
+                                <!--<a class="btn btn-primary" v-on:click="expandTable()"><span class="glyphicon glyphicon-chevron-right"></span></a>-->
+                            <!--</div>-->
+                            <!--<div style="margin-top: 5px;">-->
+                                <!--<a class="btn btn-primary" v-on:click="expandDescription()"><span class="glyphicon glyphicon-chevron-left"></span></a>-->
+                            <!--</div>-->
+                            <a class="btn btn-default" v-on:click="expandDescription()"><span class="glyphicon glyphicon-option-vertical" style="color: #1f648b;"></span></a>
                         </div>
                     </div>
-                    <div v-if="descriptionFlag >= 0" v-bind:class="{'width-95per':descriptionFlag == 1}" style="position:relative; min-width: 25%; word-wrap: break-word;" class="panel">
-                        <div class="panel-heading">Description</div>
+                    <div v-if="descriptionFlag == true" style="position:relative; min-width: 25%; word-wrap: break-word;" class="panel">
+                        <div class="panel-heading"><b>Generated Description</b></div>
                         <div class="panel-body" style="min-height: 100px;" v-html="descriptionText">
                         </div>
-                        <div class="text-right">
+                        <div class="text-right" style="position: absolute; right: 10px; bottom: 10px;">
                             <a class="btn btn-primary" v-on:click="updateDescription()">Update</a>
                             <a class="btn btn-primary" v-on:click="exportDescription()">Export</a>
                         </div>
@@ -206,14 +216,22 @@
                                                 <br>
                                                 <br>
                                                 <div class="row">
-                                                    <div class="col-md-3">
-                                                        <select v-model="firstCharacter" style="height: 26px;">
-                                                            <option>Length</option>
-                                                            <option>Width</option>
-                                                            <option>Depth</option>
-                                                            <option>Diameter</option>
-                                                            <option>Distance</option>
-                                                        </select>
+                                                    <div class="col-md-4">
+                                                        <input style="height: 26px; width: 100%;" type="text" list="first_characters" v-model="firstCharacter"/>
+                                                        <datalist id="first_characters">
+                                                            <option value="Length">Length</option>
+                                                            <option value="Width">Width</option>
+                                                            <option value="Depth">Depth</option>
+                                                            <option value="Diameter">Diameter</option>
+                                                            <option value="Distance">Distance</option>
+                                                        </datalist>
+                                                        <!--<select v-model="firstCharacter" style="height: 26px;">-->
+                                                            <!--<option>Length</option>-->
+                                                            <!--<option>Width</option>-->
+                                                            <!--<option>Depth</option>-->
+                                                            <!--<option>Diameter</option>-->
+                                                            <!--<option>Distance</option>-->
+                                                        <!--</select>-->
                                                     </div>
                                                     <div class="col-md-3">
                                                         <select v-model="middleCharacter" style="height: 26px;">
@@ -221,7 +239,7 @@
                                                             <option>between</option>
                                                         </select>
                                                     </div>
-                                                    <div class="col-md-6">
+                                                    <div class="col-md-5">
                                                         <input v-model="lastCharacter">
                                                     </div>
 
@@ -265,12 +283,12 @@
                                                                 Unit<br><span class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
                                                             <li class="tag"><a
-                                                                    v-on:click="showDetails('tag', metadataFlag)">
-                                                                Tag</a>
+                                                                    v-on:click="showDetails('tag', metadataFlag)">3.
+                                                                Tag<br><span class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
                                                             <li class="summary"><a
-                                                                    v-on:click="showDetails('summary', metadataFlag)">
-                                                                Summary<br>Function</a>
+                                                                    v-on:click="showDetails('summary', metadataFlag)">4.
+                                                                Summary<br>Function<br><span class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
                                                             <li class="creator"><a
                                                                     v-on:click="showDetails('creator', metadataFlag)">Creator</a>
@@ -462,7 +480,7 @@
                 userTags: [],
                 currentTab : '',
                 descriptionText: '',
-                descriptionFlag : 0,
+                descriptionFlag : false,
             }
         },
         components: {
@@ -735,6 +753,10 @@
                     checkFields = false;
                 }
 
+                if (!app.checkHaveUnit(app.character.name)) {
+                    checkFields = true;
+                }
+
                 if (checkFields) {
                     app.confirmMethod = true;
                 } else {
@@ -749,16 +771,17 @@
                 console.log('use', characterId);
 
                 var checkFields = true;
-                if ((this.character['method_as'] == null || this.character['method_as'] == '') &&
+                if (((this.character['method_as'] == null || this.character['method_as'] == '') &&
                     (this.character['method_from'] == null || this.character['method_from'] == '') &&
                     (this.character['method_to'] == null || this.character['method_to'] == '') &&
                     (this.character['method_include'] == null || this.character['method_include'] == '') &&
                     (this.character['method_exclude'] == null || this.character['method_exclude'] == '') &&
-                    (this.character['method_where'] == null || this.character['method_where'] == '')) {
+                    (this.character['method_where'] == null || this.character['method_where'] == '')) &&
+                    app.checkHaveUnit(app.character.name)) {
                     checkFields = false;
                 }
 
-                if (!app.character['unit']) {
+                if (!app.character['unit'] && app.checkHaveUnit(app.character.name)) {
                     checkFields = false;
                 }
 
@@ -1048,6 +1071,10 @@
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
+                        var height = $('.cr-table').height();
+                        $('.table-responsive').css('height', height + 150 + 'px');
+                        console.log('height', height);
+                        console.log('long height', $('.table-responsive').height());
                         app.refreshUserCharacters();
                     });
             },
@@ -1076,6 +1103,21 @@
                     unit: unit
                 };
                 axios.post('/chrecorder/public/api/v1/character/update-unit', jsonPost)
+                    .then(function(resp) {
+                        app.userCharacters = resp.data.characters;
+                        app.headers = resp.data.headers;
+                        app.values = resp.data.values;
+                        app.refreshUserCharacters();
+                    });
+            },
+            changeSummary(characterId, summary) {
+                var app = this;
+
+                var jsonPost = {
+                    character_id: characterId,
+                    summary: summary
+                };
+                axios.post('/chrecorder/public/api/v1/character/update-summary', jsonPost)
                     .then(function(resp) {
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
@@ -1139,17 +1181,15 @@
                     app.standardCharacters.push(temp);
                 }
             },
-            expandTable() {
-                var app = this;
-                if (app.descriptionFlag != -1) {
-                    app.descriptionFlag--;
-                }
-            },
+//            expandTable() {
+//                var app = this;
+//                if (app.descriptionFlag != -1) {
+//                    app.descriptionFlag--;
+//                }
+//            },
             expandDescription() {
                 var app = this;
-                if (app.descriptionFlag != 1) {
-                    app.descriptionFlag++;
-                }
+                app.descriptionFlag = !app.descriptionFlag;
             },
             checkHaveUnit(string) {
                 var app = this;
@@ -1191,7 +1231,7 @@
                         }
                         if (app.checkHaveUnit(filteredCharacters[j].name)) {
                             switch (filteredCharacters[j].summary) {
-                                case "range-percentile":
+                                case "rp":
                                     if (filteredCharacters[j].name.startsWith('Distance')) {
                                         app.descriptionText += filteredCharacters[j].name + ' ';
                                     }
@@ -1211,7 +1251,7 @@
 
 
                                     break;
-                                case "mean":
+                                case "mn":
                                     tempValueArray.sort((a, b) => a - b);
                                     if (tempValueArray.length % 2 == 0) {
                                         app.descriptionText += (tempValueArray[tempValueArray.length / 2 - 1] + tempValueArray[tempValueArray.length / 2]) + filteredCharacters[j].unit;
@@ -1219,7 +1259,7 @@
                                         app.descriptionText += tempValueArray[tempValueArray.length / 2 - 0.5] + filteredCharacters[j].unit;
                                     }
                                     break;
-                                case "median":
+                                case "md":
                                     var sum = 0;
                                     for( var l = 0; l < tempValueArray.length; l++ ){
                                         sum += parseInt( tempValueArray[l], 10 ); //don't forget to add the base
@@ -1266,7 +1306,7 @@
             },
             exportDescription() {
                 var app = this;
-                axios.post('/chrecorder/public/api/v1/export-description', {template: app.descriptionText})
+                axios.post('/chrecorder/public/api/v1/export-description', {template: app.descriptionText, taxon: app.taxonName})
                     .then(function(resp) {
                         console.log('resp', resp.data);
                         if (resp.data.is_scucess == 1){
@@ -1332,6 +1372,7 @@
                                     app.matrixShowFlag = true;
                                     app.collapsedFlag = true;
                                     app.showTableForTab(app.userTags[0].tag_name);
+
                                 }
                             }
 
@@ -1349,6 +1390,8 @@
             var app = this;
             app.user.name = app.user.email.split('@')[0];
             sessionStorage.setItem('userId', app.user.id);
+
+
         },
     }
 

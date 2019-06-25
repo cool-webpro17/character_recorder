@@ -12,4 +12,4 @@ yarn-error.log
 .env
 public/fonts/
 public/js/
-/public
+public/*.docx

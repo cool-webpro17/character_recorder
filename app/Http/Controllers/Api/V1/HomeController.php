@@ -34,10 +34,11 @@ class HomeController extends Controller
             'changeTaxon',
             'addMoreColumn',
             'addCharacter',
-            'updateCharacter',
+            'updateValue',
             'addStandardCharacter',
             'removeAll',
             'removeAllStandard',
+            'updateCharacter',
         ]);
     }
 
@@ -108,8 +109,31 @@ class HomeController extends Controller
 
 
     public function getStandardCharacters() {
-        $standardCharacters = StandardCharacter::all()->toArray();
-        $userCharacters = Character::where('standard', '=', 0)->where('username', 'not like', 'onlyUsed by%')->get()->toArray();
+        $standardCharacters = StandardCharacter::all();
+        $userCharacters = Character::where('standard', '=', 0)->where('username', 'not like', 'onlyUsed by%')->get();
+        foreach ($standardCharacters as $eachCharacter) {
+            $character = Character::where('name', '=', $eachCharacter->name)->first();
+            if ($character) {
+                $usageCount = count(explode(',', $character->username)) - 1;
+                $eachCharacter->usage_count = $usageCount;
+            }
+
+        }
+
+        foreach ($userCharacters as $eachCharacter) {
+            if (StandardCharacter::where('name', '=', $eachCharacter->name)->first()) {
+                $character = Character::where('name', '=', $eachCharacter->name)->first();
+                $usageCount = count(explode(',', $character->username)) - 1;
+                $eachCharacter->usage_count = $usageCount;
+            } else {
+                $character = Character::where('name', '=', $eachCharacter->name)->first();
+                $usageCount = count(explode(',', $character->username));
+                $eachCharacter->usage_count = $usageCount;
+            }
+        }
+
+        $standardCharacters = $standardCharacters->toArray();
+        $userCharacters = $userCharacters->toArray();
         $result = array_merge($standardCharacters, $userCharacters);
 
         return $result;
@@ -422,7 +446,7 @@ class HomeController extends Controller
         return $data;
     }
 
-    public function updateCharacter(Request $request) {
+    public function updateValue(Request $request) {
         $value = Value::where('id', '=', $request->input('id'))->first();
 
         $v = $request->input('value');
@@ -474,6 +498,7 @@ class HomeController extends Controller
                 'usage_count' => $eachCharacter['usage_count'],
                 'show_flag' => $eachCharacter['show_flag'],
                 'standard_tag' => $eachCharacter['standard_tag'],
+                'summary' => $eachCharacter['summary'],
             ]);
 
             $character->save();
@@ -724,6 +749,41 @@ class HomeController extends Controller
             'headers' => $returnHeaders,
             'characters' => $returnCharacters,
             'values' => $returnValues,
+        ];
+
+        return $data;
+    }
+
+    public function updateCharacter(Request $request) {
+        $character = Character::where('id', '=', $request->input('id'))->first();
+
+        $character->name = $request->input('name');
+        $character->method_from = $request->input('method_from');
+        $character->method_to = $request->input('method_to');
+        $character->method_include = $request->input('method_include');
+        $character->method_exclude = $request->input('method_exclude');
+        $character->method_where = $request->input('method_where');
+        $character->unit = $request->input('unit');
+        $character->standard = $request->input('standard');
+        $character->creator = $request->input('creator');
+        $character->username = $request->input('username');
+        $character->usage_count = $request->input('usage_count');
+        $character->show_flag = $request->input('show_flag');
+        $character->standard_tag = $request->input('standard_tag');
+        $character->summary = $request->input('summary');
+
+        $character->save();
+
+        $returnHeaders = $this->getHeaders();
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+        $returnDefaultCharacters = $this->getDefaultCharacters();
+
+        $data = [
+            'headers' => $returnHeaders,
+            'characters' => $returnCharacters,
+            'values' => $returnValues,
+            'defaultCharacters' => $returnDefaultCharacters
         ];
 
         return $data;

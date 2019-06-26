@@ -28,7 +28,8 @@ Route::group([
         Route::post('add-character',                    ['as' => 'add_character',               'uses' => 'HomeController@addCharacter']);
         Route::get('{userId}',                          ['as' => 'get_character',               'uses' => 'HomeController@getCharacter']);
         Route::get('all',                               ['as' => 'get_all_character',           'uses' => 'HomeController@getAllCharacter']);
-        Route::post('update',                           ['as' => 'update_character',            'uses' => 'HomeController@updateCharacter']);
+        Route::post('update',                           ['as' => 'update_value',                'uses' => 'HomeController@updateValue']);
+        Route::post('update-character',                 ['as' => 'update_character',            'uses' => 'HomeController@updateCharacter']);
         Route::post('update-unit',                      ['as' => 'update_unit',                 'uses' => 'HomeController@updateUnit']);
         Route::post('update-summary',                   ['as' => 'update_summary',              'uses' => 'HomeController@updateSummary']);
         Route::post('delete/{userId}/{characterId}',    ['as' => 'delete_character',            'uses' => 'HomeController@deleteCharacter']);

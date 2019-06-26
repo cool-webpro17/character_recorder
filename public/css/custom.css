@@ -763,6 +763,15 @@ body {
 .width-95per {
     width: 95%;
 }
+
+.back-grey a {
+    background: radial-gradient(transparent 40%, #555555 25%) !important;
+    background-image: -webkit-radial-gradient(50% 50%,circle closest-side, rgba(0,0,0,0) 58%, #555555 58%, #555555 99%, rgba(0,0,0,0) 99%) !important;
+}
+
+.table-responsive {
+    min-height: 600px;
+}
 /*.container .table-responsive {*/
     /*min-height: 500px;*/
 /*}*/

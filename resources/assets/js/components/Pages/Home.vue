@@ -141,7 +141,12 @@
                                         <div style="line-height: 44px;">
                                             {{ value.value }}
                                         </div>
-                                        <div class="btn-group" style="margin-left: 10px;">
+                                        <div>
+                                            <a class="btn btn-add" v-on:click="editCharacter(row[row.length - 1], true)" style="line-height: 30px;">
+                                                <span class="glyphicon glyphicon-edit"></span>
+                                            </a>
+                                        </div>
+                                        <div class="btn-group">
                                             <a v-if="checkHaveUnit(value.value)"
                                                class="btn btn-add dropdown-toggle" style="line-height: 30px;" data-toggle="dropdown">
                                                 <span><b>{{ value.unit }}</b></span>
@@ -180,17 +185,17 @@
                         </div>
                     </div>
                     <div style="border-left: 2px solid; margin-left: 5px;">
-                        <div style="margin: 0px 5px; padding-top: 100px;">
+                        <div style="padding-top: 100px;">
                             <!--<div>-->
                                 <!--<a class="btn btn-primary" v-on:click="expandTable()"><span class="glyphicon glyphicon-chevron-right"></span></a>-->
                             <!--</div>-->
                             <!--<div style="margin-top: 5px;">-->
                                 <!--<a class="btn btn-primary" v-on:click="expandDescription()"><span class="glyphicon glyphicon-chevron-left"></span></a>-->
                             <!--</div>-->
-                            <a class="btn btn-default" v-on:click="expandDescription()"><span class="glyphicon glyphicon-option-vertical" style="color: #1f648b;"></span></a>
+                            <a class="btn btn-default" style="border: none;" v-on:click="expandDescription()"><span class="glyphicon glyphicon-option-vertical" style="color: #1f648b;"></span></a>
                         </div>
                     </div>
-                    <div v-if="descriptionFlag == true" style="position:relative; min-width: 25%; word-wrap: break-word;" class="panel">
+                    <div v-if="descriptionFlag == true" style="position:relative; min-width: 25%; max-width: 600px; overflow-y: scroll; word-wrap: break-word;" class="panel">
                         <div class="panel-heading"><b>Generated Description</b></div>
                         <div class="panel-body" style="min-height: 100px;" v-html="descriptionText">
                         </div>
@@ -274,11 +279,13 @@
                                                     <div class="col-md-6 radial-menu">
                                                         <ul style="margin-left: auto; margin-right: auto;">
                                                             <li><a v-on:click="showDetails('', metadataFlag)"></a></li>
-                                                            <li class="method"><a
+                                                            <li class="method" v-bind:class="{'back-grey': !checkHaveUnit(character.name)}"><a
+                                                                    :disabled="!checkHaveUnit(character.name)"
                                                                     v-on:click="showDetails('method', metadataFlag)">1.
                                                                 Method<br><span class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
-                                                            <li class="unit"><a
+                                                            <li class="unit" v-bind:class="{'back-grey': !checkHaveUnit(character.name)}"><a
+                                                                    :disabled="!checkHaveUnit(character.name)"
                                                                     v-on:click="showDetails('unit', metadataFlag)">2.
                                                                 Unit<br><span class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
@@ -481,6 +488,7 @@
                 currentTab : '',
                 descriptionText: '',
                 descriptionFlag : false,
+                editFlag: false,
             }
         },
         components: {
@@ -566,19 +574,32 @@
                 }
                 console.log('selectedCharacter', selectedCharacter);
             },
-            editCharacter(character) {
+            editCharacter(character, editFlag = false) {
                 var app = this;
+
+                app.editFlag = editFlag;
+                if (editFlag) {
+                    app.character = app.userCharacters.find(ch => ch.id == character.character_id);
+                }
                 sessionStorage.setItem("characterName", character.name);
-                app.parentData = [];
-                app.parentData.push(app.character.method_as);
-                app.parentData[3] = app.user;
-                app.parentData[4] = app.character.method_from;
-                app.parentData[5] = app.character.method_to;
-                app.parentData[6] = app.character.method_include;
-                app.parentData[7] = app.character.method_exclude;
-                app.parentData[8] = app.character.method_where;
-                app.metadataFlag = 'method';
-                app.currentMetadata = method;
+
+                if (app.checkHaveUnit(app.character.name)) {
+                    app.parentData = [];
+                    app.parentData.push(app.character.method_as);
+                    app.parentData[3] = app.user;
+                    app.parentData[4] = app.character.method_from;
+                    app.parentData[5] = app.character.method_to;
+                    app.parentData[6] = app.character.method_include;
+                    app.parentData[7] = app.character.method_exclude;
+                    app.parentData[8] = app.character.method_where;
+                    app.metadataFlag = 'method';
+                    app.currentMetadata = method;
+                } else {
+                    app.parentData = app.character.standard_tag;
+                    app.metadataFlag = 'tag';
+                    app.currentMetadata = tag;
+                }
+
                 app.detailsFlag = true;
             },
             storeCharacter() {
@@ -607,48 +628,53 @@
             showDetails(metadata, previousMetadata = null) {
                 var app = this;
 
+                console.log('checkHaveUnit', app.checkHaveUnit(app.character.name));
+
                 console.log("metadata", metadata);
                 console.log("app.character=", app.character);
-                app.metadataFlag = metadata;
-                switch (metadata) {
-                    case 'method':
-                        app.parentData = [];
-                        app.parentData[0] = app.character.method_as;
-                        app.parentData[3] = app.user;
-                        app.parentData[4] = app.character.method_from;
-                        app.parentData[5] = app.character.method_to;
-                        app.parentData[6] = app.character.method_include;
-                        app.parentData[7] = app.character.method_exclude;
-                        app.parentData[8] = app.character.method_where;
-                        app.currentMetadata = method;
-                        break;
-                    case 'unit':
-                        app.parentData = app.character.unit;
-                        app.currentMetadata = unit;
-                        break;
-                    case 'tag':
-                        app.parentData = app.character.standard_tag;
-                        app.currentMetadata = tag;
-                        break;
-                    case 'summary':
-                        app.parentData = app.character.summary;
-                        app.currentMetadata = summary;
-                        break;
-                    case 'creator':
-                        app.parentData = app.character.username + ' via CR';//app.character.creator;
-                        app.currentMetadata = creator;
-                        break;
-                    case 'usage':
-                        app.parentData = app.character.usage;
-                        app.currentMetadata = usage;
-                        break;
-                    case 'history':
-                        app.parentData = app.character.history;
-                        app.currentMetadata = history;
-                        break;
-                    default:
-                        break;
+                if (app.checkHaveUnit(app.character.name) || (metadata != 'method' && metadata != 'unit')) {
+                    app.metadataFlag = metadata;
+                    switch (metadata) {
+                        case 'method':
+                            app.parentData = [];
+                            app.parentData[0] = app.character.method_as;
+                            app.parentData[3] = app.user;
+                            app.parentData[4] = app.character.method_from;
+                            app.parentData[5] = app.character.method_to;
+                            app.parentData[6] = app.character.method_include;
+                            app.parentData[7] = app.character.method_exclude;
+                            app.parentData[8] = app.character.method_where;
+                            app.currentMetadata = method;
+                            break;
+                        case 'unit':
+                            app.parentData = app.character.unit;
+                            app.currentMetadata = unit;
+                            break;
+                        case 'tag':
+                            app.parentData = app.character.standard_tag;
+                            app.currentMetadata = tag;
+                            break;
+                        case 'summary':
+                            app.parentData = app.character.summary;
+                            app.currentMetadata = summary;
+                            break;
+                        case 'creator':
+                            app.parentData = app.character.username + ' via CR';//app.character.creator;
+                            app.currentMetadata = creator;
+                            break;
+                        case 'usage':
+                            app.parentData = app.character.usage;
+                            app.currentMetadata = usage;
+                            break;
+                        case 'history':
+                            app.parentData = app.character.history;
+                            app.currentMetadata = history;
+                            break;
+                        default:
+                            break;
+                    }
                 }
+
             },
             showStandardCharacters() {
                 var app = this;
@@ -668,10 +694,15 @@
                             || character.name.startsWith('Count of')
                             || character.name.startsWith('Distance between')) {
                             character.unit = 'cm';
+                            character.summary = 'mn';
+                        } else {
+                            character.summary = '';
                         }
                         postCharacters.push(character);
                     }
                 }
+
+                console.log('postCharacters', postCharacters);
 
                 axios.post('/chrecorder/public/api/v1/character/add-standard', postCharacters)
                     .then(function(resp) {
@@ -735,7 +766,8 @@
                 var app = this;
                 console.log('app.character = ', app.character);
                 console.log('saveCharacter', metadataFlag);
-                if (app.character['id']) {
+
+                if (app.character['id'] && !app.editFlag) {
                     delete app.character['id'];
                 }
 
@@ -834,7 +866,47 @@
                         console.log('getCharacter', resp);
                         var currentCharacters = resp.data.characters;
                         if (currentCharacters.find(ch => ch.name == app.character.name)) {
-                            alert("The character already exists for this user!!");
+                            if (app.editFlag) {
+                                if (app.character.standard_tag == app.currentTab) {
+                                    app.character.show_flag = true;
+                                } else {
+                                    app.character.show_flag = false;
+                                }
+                                axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
+                                    .then(function(resp) {
+                                        if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
+                                            var jsonUserTag = {
+                                                user_id: app.user.id,
+                                                user_tag: app.character.standard_tag
+                                            };
+                                            console.log('jsonUserTag', jsonUserTag);
+                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
+                                                .then(function(resp) {
+                                                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                                        .then(function(resp) {
+                                                            app.userTags = resp.data;
+                                                        });
+                                                    console.log("create UserTag", resp.data);
+                                                });
+                                        } else {
+                                            axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                                .then(function(resp) {
+                                                    app.userTags = resp.data;
+                                                });
+                                        }
+                                        app.userCharacters = resp.data.characters;
+                                        app.headers = resp.data.headers;
+                                        app.values = resp.data.values;
+                                        app.taxonName = resp.data.taxon;
+                                        app.defaultCharacters = resp.data.defaultCharacters;
+                                        app.refreshDefaultCharacters();
+                                        app.refreshUserCharacters();
+
+                                        app.detailsFlag = false;
+                                    });
+                            } else {
+                                alert("The character already exists for this user!!");
+                            }
                         } else {
                             app.character.standard = 0;
                             if (app.character.standard_tag == app.currentTab) {
@@ -843,7 +915,7 @@
                                 app.character.show_flag = false;
                             }
                             if (app.matrixShowFlag) {
-                                axios.post('api/v1/character/add-character', app.character)
+                                axios.post('/chrecorder/public/api/v1/character/add-character', app.character)
                                     .then(function(resp) {
                                         if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
                                             var jsonUserTag = {
@@ -1071,10 +1143,8 @@
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
-                        var height = $('.cr-table').height();
-                        $('.table-responsive').css('height', height + 150 + 'px');
-                        console.log('height', height);
-                        console.log('long height', $('.table-responsive').height());
+//                        var height = $('.cr-table').height();
+//                        $('.table-responsive').css('height', height + 150 + 'px');
                         app.refreshUserCharacters();
                     });
             },
@@ -1229,71 +1299,77 @@
                                 tempValueArray.push(filteredValues[k].value);
                             }
                         }
-                        if (app.checkHaveUnit(filteredCharacters[j].name)) {
-                            switch (filteredCharacters[j].summary) {
-                                case "rp":
-                                    if (filteredCharacters[j].name.startsWith('Distance')) {
-                                        app.descriptionText += filteredCharacters[j].name + ' ';
-                                    }
-                                    tempValueArray.sort((a, b) => a - b);
-                                    var minValue = tempValueArray[0];
-                                    var maxValue = tempValueArray[tempValueArray.length - 1];
-                                    var minPercentileValue = 0;
-                                    var maxPercentileValue = 0;
-                                    if (tempValueArray.length % 2 == 0) {
-                                        minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1];
-                                        maxPercentileValue = tempValueArray[tempValueArray.length / 2];
-                                    } else {
-                                        minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1.5];
-                                        maxPercentileValue = tempValueArray[tempValueArray.length / 2 + 0.5];
-                                    }
-                                    app.descriptionText += '(' + minValue + '-)' + minPercentileValue + '-' + maxPercentileValue + '(-' + maxValue + ') ' + filteredCharacters[j].unit;
+                        if (app.checkValueArray(tempValueArray)) {
+                            if (app.checkHaveUnit(filteredCharacters[j].name)) {
+                                switch (filteredCharacters[j].summary) {
+                                    case "rp":
+                                        if (filteredCharacters[j].name.startsWith('Distance')) {
+                                            app.descriptionText += filteredCharacters[j].name + ' ';
+                                        }
+                                        tempValueArray.sort((a, b) => a - b);
+                                        var minValue = tempValueArray[0];
+                                        var maxValue = tempValueArray[tempValueArray.length - 1];
+                                        var minPercentileValue = 0;
+                                        var maxPercentileValue = 0;
+                                        if (tempValueArray.length % 2 == 0) {
+                                            minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1];
+                                            maxPercentileValue = tempValueArray[tempValueArray.length / 2];
+                                        } else {
+                                            minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1.5];
+                                            maxPercentileValue = tempValueArray[tempValueArray.length / 2 + 0.5];
+                                        }
+                                        app.descriptionText += '(' + minValue + '-)' + minPercentileValue + '-' + maxPercentileValue + '(-' + maxValue + ') ' + filteredCharacters[j].unit;
 
 
-                                    break;
-                                case "mn":
-                                    tempValueArray.sort((a, b) => a - b);
-                                    if (tempValueArray.length % 2 == 0) {
-                                        app.descriptionText += (tempValueArray[tempValueArray.length / 2 - 1] + tempValueArray[tempValueArray.length / 2]) + filteredCharacters[j].unit;
-                                    } else {
-                                        app.descriptionText += tempValueArray[tempValueArray.length / 2 - 0.5] + filteredCharacters[j].unit;
-                                    }
-                                    break;
-                                case "md":
-                                    var sum = 0;
-                                    for( var l = 0; l < tempValueArray.length; l++ ){
-                                        sum += parseInt( tempValueArray[l], 10 ); //don't forget to add the base
-                                    }
+                                        break;
+                                    case "mn":
+                                        tempValueArray.sort((a, b) => a - b);
+                                        if (tempValueArray.length % 2 == 0) {
+                                            app.descriptionText += (tempValueArray[tempValueArray.length / 2 - 1] + tempValueArray[tempValueArray.length / 2]) + filteredCharacters[j].unit;
+                                        } else {
+                                            app.descriptionText += tempValueArray[tempValueArray.length / 2 - 0.5] + filteredCharacters[j].unit;
+                                        }
+                                        break;
+                                    case "md":
+                                        var sum = 0;
+                                        for( var l = 0; l < tempValueArray.length; l++ ){
+                                            sum += parseInt( tempValueArray[l], 10 ); //don't forget to add the base
+                                        }
 
-                                    var avg = sum/tempValueArray.length;
-                                    app.descriptionText += avg + filteredCharacters[j].unit;
+                                        var avg = sum/tempValueArray.length;
+                                        app.descriptionText += avg + filteredCharacters[j].unit;
 
-                                    break;
-                                default:
-                                    break;
-                            }
-                            if (filteredCharacters[j].name.startsWith('Length')) {
-                                app.descriptionText += ' long; ';
-                            } else if (filteredCharacters[j].name.startsWith('Width')) {
-                                app.descriptionText += ' wide; ';
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                if (filteredCharacters[j].name.startsWith('Length')) {
+                                    app.descriptionText += ' long; ';
+                                } else if (filteredCharacters[j].name.startsWith('Width')) {
+                                    app.descriptionText += ' wide; ';
 
-                            } else if (filteredCharacters[j].name.startsWith('Height')) {
-                                app.descriptionText += ' tall; ';
+                                } else if (filteredCharacters[j].name.startsWith('Height')) {
+                                    app.descriptionText += ' tall; ';
 
-                            } else if (filteredCharacters[j].name.startsWith('Diameter')) {
-                                app.descriptionText += ' diameter; ';
-                            } else {
-                                app.descriptionText += ' ; ' ;
-                            }
-                        } else {
-                            if (tempValueArray.find(v => v == 'green')) {
-                                if (tempValueArray.find(v => v == 'grey')) {
-                                    app.descriptionText += 'frequently grey, occasionally green; '
+                                } else if (filteredCharacters[j].name.startsWith('Diameter')) {
+                                    app.descriptionText += ' diameter; ';
                                 } else {
-                                    app.descriptionText += 'usually light grey, occasionally dark grey or green; '
+                                    app.descriptionText += ' ; ' ;
                                 }
                             } else {
-                                app.descriptionText += 'sometimes hairy at base or middle part, sometimes ciliate, or occasionally smooth throughout; '
+                                if (tempValueArray.find(v => v == 'green')) {
+                                    if (tempValueArray.find(v => v == 'grey')) {
+                                        app.descriptionText += 'frequently grey, occasionally green; '
+                                    } else {
+                                        app.descriptionText += 'usually light grey, occasionally dark grey or green; '
+                                    }
+                                } else {
+                                    app.descriptionText += 'sometimes hairy at base or middle part, sometimes ciliate, or occasionally smooth throughout; '
+                                }
+                            }
+                        } else {
+                            if (app.descriptionText.slice(-4) == '</b>') {
+                                app.descriptionText += '; ';
                             }
                         }
                     }
@@ -1316,6 +1392,16 @@
                         }
 
                     });
+            },
+            checkValueArray(tempArray) {
+                var app = this;
+                var returnFlag = false;
+                for (var i = 0; i < tempArray.length; i++) {
+                    if (tempArray[i] != '') {
+                        returnFlag = true;
+                    }
+                }
+                return returnFlag;
             },
             importMatrix() {
 

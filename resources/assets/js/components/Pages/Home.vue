@@ -411,7 +411,7 @@
                                                 </div>
                                                 <div class="modal-footer">
                                                     <a class="btn btn-primary ok-btn"
-                                                       v-on:click="confirmSave(metadataFlag)">
+                                                       v-on:click="unitConfirm()">
                                                         &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
                                                     <a v-on:click="cancelConfirmUnit()" class="btn btn-danger">Cancel</a>
                                                 </div>
@@ -422,10 +422,55 @@
                             </transition>
                         </div>
                     </div>
-
+                    <div v-if="confirmTag" @close="confirmTag = false">
+                        <transition name="modal">
+                            <div class="modal-mask character-modal">
+                                <div class="modal-wrapper">
+                                    <div class="modal-container">
+                                        <div class="modal-header">
+                                            Confirm Tag
+                                        </div>
+                                        <div class="modal-body">
+                                            <div>
+                                                You've select <b>{{ character.standard_tag }}</b> as the Tag for <i>{{ character.name }}</i>.
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a class="btn btn-primary ok-btn"
+                                                   v-on:click="tagConfirm()">
+                                                    &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
+                                                <a v-on:click="cancelConfirmTag()" class="btn btn-danger">Cancel</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition>
+                    </div>
                 </div>
-
-
+                <div v-if="confirmSummary" @close="confirmSummary = false">
+                    <transition name="modal">
+                        <div class="modal-mask character-modal">
+                            <div class="modal-wrapper">
+                                <div class="modal-container">
+                                    <div class="modal-header">
+                                        Confirm Summary
+                                    </div>
+                                    <div class="modal-body">
+                                        <div>
+                                            You've select <b>{{ character.summary }}</b> as the Summary for <i>{{ character.name }}</i>.
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a class="btn btn-primary ok-btn"
+                                               v-on:click="confirmSave(metadataFlag)">
+                                                &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
+                                            <a v-on:click="cancelConfirmSummary()" class="btn btn-danger">Cancel</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
             </form>
         </div>
     </div>
@@ -474,6 +519,8 @@
                 standardCharactersTooltip: '',
                 confirmMethod: false,
                 confirmUnit: false,
+                confirmTag: false,
+                confirmSummary: false,
                 columnCount: 0,
                 taxonName: 'Carex capitata',
                 matrixShowFlag: false,
@@ -567,21 +614,35 @@
                 } else {
                     app.character = selectedCharacter;
                     app.item = selectedItem;
-                    app.viewFlag = true;
-                    sessionStorage.setItem('viewFlag', true);
-                    sessionStorage.setItem('edit_created_other', true);
-                    app.editCharacter(app.character);
+                    console.log('selectedCharacter.username', app.character.username.substr(app.character.username.length - app.user.name.length));
+
+                    if (app.character.username.substr(app.character.username.length - app.user.name.length) == app.user.name) {
+//                        app.viewFlag = false;
+//                        sessionStorage.setItem('viewFlag', false);
+//                        sessionStorage.setItem('edit_created_other', false);
+                        app.editCharacter({character_id: app.character.id}, true);
+                    } else {
+                        app.viewFlag = true;
+                        sessionStorage.setItem('viewFlag', true);
+                        sessionStorage.setItem('edit_created_other', true);
+                        app.editCharacter(app.character);
+                    }
                 }
                 console.log('selectedCharacter', selectedCharacter);
             },
             editCharacter(character, editFlag = false) {
                 var app = this;
-
                 app.editFlag = editFlag;
+                console.log('app.editFlag', app.editFlag);
                 if (editFlag) {
+                    app.viewFlag = !editFlag;
+                    sessionStorage.setItem('viewFlag', !editFlag);
+                    sessionStorage.setItem('edit_created_other', !editFlag);
                     app.character = app.userCharacters.find(ch => ch.id == character.character_id);
+                } else {
+                    app.character = character;
                 }
-                sessionStorage.setItem("characterName", character.name);
+                sessionStorage.setItem("characterName", app.character.name);
 
                 if (app.checkHaveUnit(app.character.name)) {
                     app.parentData = [];
@@ -608,12 +669,19 @@
                 app.character.name = app.firstCharacter + ' ' + app.middleCharacter + ' ' + app.lastCharacter;
                 app.character.username = app.user.name;
                 app.character.creator = app.user.name + ' via CR';
-                app.parentData = [];
-                app.parentData[3] = app.user;
-                app.metadataFlag = 'method';
-                app.currentMetadata = method;
+
+                if (app.checkHaveUnit(app.character.name)) {
+                    app.parentData = [];
+                    app.parentData[3] = app.user;
+                    app.metadataFlag = 'method';
+                    app.currentMetadata = method;
+                } else {
+                    app.parentData = '';
+                    app.metadataFlag = 'tag';
+                    app.currentMetadata = tag;
+                }
+
                 sessionStorage.setItem("characterName", app.character.name);
-                console.log("parentData", app.parentData);
                 app.newCharacterFlag = false;
                 app.detailsFlag = true;
             },
@@ -790,7 +858,11 @@
                 }
 
                 if (checkFields) {
-                    app.confirmMethod = true;
+                    if (app.checkHaveUnit(app.character.name)) {
+                        app.confirmMethod = true;
+                    } else {
+                        app.confirmTag = true;
+                    }
                 } else {
                     app.showDetails('unit', app.metadataFlag);
                 }
@@ -849,9 +921,27 @@
                 var app = this;
                 app.confirmMethod = false;
             },
+            unitConfirm() {
+                var app = this;
+                app.confirmUnit = false;
+                app.confirmTag = true;
+            },
             cancelConfirmUnit() {
                 var app = this;
                 app.confirmUnit = false;
+            },
+            tagConfirm() {
+                var app = this;
+                app.confirmTag = false;
+                app.confirmSummary = true;
+            },
+            cancelConfirmTag() {
+                var app = this;
+                app.confirmTag = false;
+            },
+            cancelConfirmSummary() {
+                var app = this;
+                app.confirmSummary = false;
             },
             checkUserTag(userTag) {
                 var app = this;
@@ -860,7 +950,7 @@
             confirmSave(metadataFlag) {
                 var app = this;
                 var userId = sessionStorage.getItem("userId");
-                app.confirmUnit = false;
+                app.confirmSummary = false;
                 axios.get("/chrecorder/public/api/v1/character/" + userId)
                     .then(function(resp) {
                         console.log('getCharacter', resp);
@@ -874,26 +964,27 @@
                                 }
                                 axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
                                     .then(function(resp) {
-                                        if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
-                                            var jsonUserTag = {
-                                                user_id: app.user.id,
-                                                user_tag: app.character.standard_tag
-                                            };
-                                            console.log('jsonUserTag', jsonUserTag);
-                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
-                                                .then(function(resp) {
-                                                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                                        .then(function(resp) {
-                                                            app.userTags = resp.data;
-                                                        });
-                                                    console.log("create UserTag", resp.data);
-                                                });
-                                        } else {
-                                            axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                                .then(function(resp) {
-                                                    app.userTags = resp.data;
-                                                });
-                                        }
+//                                        if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
+//                                            var jsonUserTag = {
+//                                                user_id: app.user.id,
+//                                                user_tag: app.character.standard_tag
+//                                            };
+//                                            console.log('jsonUserTag', jsonUserTag);
+//                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
+//                                                .then(function(resp) {
+//                                                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+//                                                        .then(function(resp) {
+//                                                            app.userTags = resp.data;
+//                                                        });
+//                                                    console.log("create UserTag", resp.data);
+//                                                });
+//                                        } else {
+//                                            axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+//                                                .then(function(resp) {
+//                                                    app.userTags = resp.data;
+//                                                });
+//                                        }
+                                        app.userTags = resp.data.userTags;
                                         app.userCharacters = resp.data.characters;
                                         app.headers = resp.data.headers;
                                         app.values = resp.data.values;
@@ -901,6 +992,7 @@
                                         app.defaultCharacters = resp.data.defaultCharacters;
                                         app.refreshDefaultCharacters();
                                         app.refreshUserCharacters();
+                                        app.showTableForTab(app.userTags[0].tag_name);
 
                                         app.detailsFlag = false;
                                     });
@@ -1374,7 +1466,7 @@
                         }
                     }
                     app.descriptionText = app.descriptionText.substring(0, app.descriptionText.length - 2);
-                    app.descriptionText += '.';
+                    app.descriptionText += '. ';
                     app.descriptionText += '<br/>';
 
                 }

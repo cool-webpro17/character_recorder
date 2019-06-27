@@ -718,12 +718,12 @@ class HomeController extends Controller
         $section = $phpWord->addSection();
 
         $textLines = explode('<br/>', $request->input('template'));
+        $textrun = $section->addTextRun();
         foreach ($textLines as $eachText) {
             $eachText = str_replace('<b>', '', $eachText);
             $eachText = str_replace('</b>', '', $eachText);
             $separatedTexts = explode(':', $eachText);
             if (count($separatedTexts) > 1) {
-                $textrun = $section->addTextRun();
                 $textrun->addText($separatedTexts[0] . ': ', ['bold' => true]);
                 $textrun->addText($separatedTexts[1]);
             }
@@ -755,7 +755,12 @@ class HomeController extends Controller
     }
 
     public function updateCharacter(Request $request) {
+        $user = User::where('id', '=', Auth::id())->first();
+        $username = explode('@', $user['email'])[0];
+
         $character = Character::where('id', '=', $request->input('id'))->first();
+
+        $oldTag = $character->standard_tag;
 
         $character->name = $request->input('name');
         $character->method_from = $request->input('method_from');
@@ -774,6 +779,22 @@ class HomeController extends Controller
 
         $character->save();
 
+        if ($oldTag != $character->standard_tag) {
+            if (Character::where('username', 'like', '%' . $username)->where('standard_tag', '=', $oldTag)->first() == null) {
+                UserTag::where('tag_name', '=', $oldTag)->where('user_id', '=', Auth::id())->delete();
+            }
+
+            if (UserTag::where('tag_name', '=', $character->standard_tag)->where('user_id', '=', Auth::id())->first() == null) {
+                $userTag = new UserTag([
+                    'tag_name'  =>  $character->standard_tag,
+                    'user_id'   =>  Auth::id()
+                ]);
+
+                $userTag->save();
+            }
+        }
+
+        $returnUserTags = UserTag::where('user_id', '=', Auth::id())->get();
         $returnHeaders = $this->getHeaders();
         $returnValues = $this->getValuesByCharacter();
         $returnCharacters = $this->getArrayCharacters();
@@ -783,7 +804,8 @@ class HomeController extends Controller
             'headers' => $returnHeaders,
             'characters' => $returnCharacters,
             'values' => $returnValues,
-            'defaultCharacters' => $returnDefaultCharacters
+            'defaultCharacters' => $returnDefaultCharacters,
+            'userTags'  => $returnUserTags
         ];
 
         return $data;

@@ -17,6 +17,7 @@ class character extends Model
         'unit',
         'standard',
         'username',
+        'owner_name',
         'standard_tag',
         'usage_count',
         'show_flag',

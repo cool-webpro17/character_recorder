@@ -40,12 +40,12 @@
                                     </div>
                                 </div>
                                 <hr style="border-top: 2px solid; margin-top: 20px;">
-                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 0)">
+                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 0 && ch.username.includes(user.name))">
                                     <h4><b><u>Characters selected</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <a class="btn btn-add display-block" v-on:click="removeAllCharacters()"><span
                                                 class="glyphicon glyphicon-remove"></span></a>
                                     </h4>
-                                    <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 0" v-tooltip="eachCharacter.tooltip"
+                                    <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 0 && eachCharacter.username.includes(user.name)" v-tooltip="eachCharacter.tooltip"
                                          style="display: table; font-weight: bold; cursor: pointer;">
                                         {{ eachCharacter.name }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <a class="btn btn-add display-block"
@@ -53,13 +53,13 @@
                                                 class="glyphicon glyphicon-remove"></span></a>
                                     </div>
                                 </div>
-                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 1)">
+                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 1 || !ch.standard.includes(user.name))">
                                     <h4><b><u>Selected Standard Characters</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
                                         <a class="btn btn-add display-block"
                                                v-on:click="removeAllStandardCharacters()"><span
                                             class="glyphicon glyphicon-remove"></span></a></h4>
 
-                                    <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 1" v-tooltip="eachCharacter.tooltip"
+                                    <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 1 || !eachCharacter.username.includes(user.name)" v-tooltip="eachCharacter.tooltip"
                                          style="display: table; cursor: pointer;">
                                         <b>{{ eachCharacter.name }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             <a class="btn btn-add display-block"
@@ -142,12 +142,12 @@
                                             {{ value.value }}
                                         </div>
                                         <div>
-                                            <a class="btn btn-add" v-on:click="editCharacter(row[row.length - 1], true)" style="line-height: 30px;">
+                                            <a class="btn btn-add" v-on:click="editCharacter(row[row.length - 1], true, row[row.length - 1].standard)" style="line-height: 30px;">
                                                 <span class="glyphicon glyphicon-edit"></span>
                                             </a>
                                         </div>
                                         <div class="btn-group">
-                                            <a v-if="checkHaveUnit(value.value)"
+                                            <a v-if="checkHaveUnit(value.value) && !value.value.startsWith('Number of') && !value.value.startsWith('Ratio of')"
                                                class="btn btn-add dropdown-toggle" style="line-height: 30px;" data-toggle="dropdown">
                                                 <span><b>{{ value.unit }}</b></span>
                                                 <span class="sr-only">Toggle Dropdown</span>
@@ -382,7 +382,7 @@
                                                     <div>
                                                         <img class="img-method"
                                                              style="width: 100%;"
-                                                             v-bind:src="'https://drive.google.com/uc?id=' + character.method_as.split('id=')[1].substring(0, character.method_as.split('id=')[1].length)"/>
+                                                             v-bind:src="'https://drive.google.com/uc?id=' + character.method_as.split('id=')[1].substring(0, character.method_where.split('id=')[1].length)"/>
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
@@ -536,6 +536,9 @@
                 descriptionText: '',
                 descriptionFlag : false,
                 editFlag: false,
+                characterUsername: '',
+                oldCharacter: {},
+                enhanceFlag: false,
             }
         },
         components: {
@@ -593,15 +596,13 @@
             },
             onSelect(selectedItem) {
                 var app = this;
-                var selectedCharacter = app.defaultCharacters.find(ch => ch.id == selectedItem);
-                console.log("app.defaultCharacters", app.defaultCharacters);
-                console.log('selectedItem', selectedItem);
-                console.log('selectedCharacter', selectedCharacter);
+                var selectedCharacter = app.defaultCharacters.find(ch => ch.id == selectedItem)
+
                 if (!selectedCharacter) {
                     selectedCharacter = app.userCharacters.find(ch => ch.id == selectedItem);
+                } else if (app.userCharacters.find(ch => ch.name == selectedCharacter.name)) {
+                    selectedCharacter = app.userCharacters.find(ch => ch.name == selectedCharacter.name);
                 }
-                console.log('selectedItem', selectedItem);
-                console.log('selectedCharacter', selectedCharacter);
                 if (!selectedCharacter) {
                     app.firstCharacter = '';
                     app.middleCharacter = '';
@@ -616,7 +617,7 @@
                     app.item = selectedItem;
                     console.log('selectedCharacter.username', app.character.username.substr(app.character.username.length - app.user.name.length));
 
-                    if (app.character.username.substr(app.character.username.length - app.user.name.length) == app.user.name) {
+                    if (app.character.username.includes(app.user.name)) {
 //                        app.viewFlag = false;
 //                        sessionStorage.setItem('viewFlag', false);
 //                        sessionStorage.setItem('edit_created_other', false);
@@ -630,7 +631,7 @@
                 }
                 console.log('selectedCharacter', selectedCharacter);
             },
-            editCharacter(character, editFlag = false) {
+            editCharacter(character, editFlag = false, standardFlag = false) {
                 var app = this;
                 app.editFlag = editFlag;
                 console.log('app.editFlag', app.editFlag);
@@ -639,9 +640,19 @@
                     sessionStorage.setItem('viewFlag', !editFlag);
                     sessionStorage.setItem('edit_created_other', !editFlag);
                     app.character = app.userCharacters.find(ch => ch.id == character.character_id);
+//                    app.character.standard = 0;
                 } else {
                     app.character = character;
+//                    app.character.standard = 0;
                 }
+
+                if (standardFlag || (editFlag && !app.character.username.includes(app.user.name))) {
+                    app.editFlag = false;
+                    app.viewFlag = true;
+                    sessionStorage.setItem('viewFlag', true);
+                    sessionStorage.setItem('edit_created_other', true);
+                }
+                app.item = app.character.id;
                 sessionStorage.setItem("characterName", app.character.name);
 
                 if (app.checkHaveUnit(app.character.name)) {
@@ -668,6 +679,8 @@
                 app.character = {};
                 app.character.name = app.firstCharacter + ' ' + app.middleCharacter + ' ' + app.lastCharacter;
                 app.character.username = app.user.name;
+                app.characterUsername = app.user.name;
+                app.character.standard = 0;
                 app.character.creator = app.user.name + ' via CR';
 
                 if (app.checkHaveUnit(app.character.name)) {
@@ -748,22 +761,27 @@
                 var app = this;
                 app.isLoading = true;
                 app.standardShowFlag = !app.standardShowFlag;
+                console.log('test', app.userCharacters);
                 var postCharacters = [];
                 for (var i = 0; i < app.defaultCharacters.length; i++) {
                     var character = app.defaultCharacters[i];
                     if (!app.userCharacters.find(ch => ch.name == character.name)) {
-                        character.username = app.user.name;
+//                        character.username = app.user.name;
                         character.show_flag = false;
                         if (character.name.startsWith('Length of')
                             || character.name.startsWith('Width of')
-                            || character.name.startsWith('Number of')
                             || character.name.startsWith('Depth of')
                             || character.name.startsWith('Diameter of')
                             || character.name.startsWith('Count of')
                             || character.name.startsWith('Distance between')) {
                             character.unit = 'cm';
                             character.summary = 'mn';
+                        } else if (character.name.startsWith('Number of')
+                            || character.name.startsWith('Ratio of')) {
+                            character.unit = '';
+                            character.summary = 'mn';
                         } else {
+                            character.unit = '';
                             character.summary = '';
                         }
                         postCharacters.push(character);
@@ -835,13 +853,12 @@
                 console.log('app.character = ', app.character);
                 console.log('saveCharacter', metadataFlag);
 
-                if (app.character['id'] && !app.editFlag) {
-                    delete app.character['id'];
-                }
+//                if (app.character['id'] && !app.editFlag) {
+//                    delete app.character['id'];
+//                }
 
                 var checkFields = true;
-                if ((this.character['method_as'] == null || this.character['method_as'] == '') &&
-                    (this.character['method_from'] == null || this.character['method_from'] == '') &&
+                if ((this.character['method_from'] == null || this.character['method_from'] == '') &&
                     (this.character['method_to'] == null || this.character['method_to'] == '') &&
                     (this.character['method_include'] == null || this.character['method_include'] == '') &&
                     (this.character['method_exclude'] == null || this.character['method_exclude'] == '') &&
@@ -861,6 +878,9 @@
                     if (app.checkHaveUnit(app.character.name)) {
                         app.confirmMethod = true;
                     } else {
+                        console.log("***********************userCharacter", app.userCharacters);
+                        console.log("***********************values", app.values);
+                        console.log("***********************character", app.character);
                         app.confirmTag = true;
                     }
                 } else {
@@ -869,47 +889,73 @@
             },
             use(characterId) {
                 var app = this;
-                app.character = app.defaultCharacters.find(ch => ch.id == characterId);
-                app.character.show_flag = false;
-                app.character.username = 'onlyUsed by ' + app.user.name;
                 console.log('use', characterId);
+                app.character = app.userCharacters.find(ch => ch.id == characterId);
+                if (!app.character) {
+                    app.character = app.defaultCharacters.find(ch => ch.id == characterId);
+                    if (!app.userCharacters.find(ch => ch.name == app.character.name)) {
+                        console.log('app.character', app.character);
+//                app.character.show_flag = false;
+                        app.character.standard = 1;
+                        app.characterUsername = app.character.username;
 
-                var checkFields = true;
-                if (((this.character['method_as'] == null || this.character['method_as'] == '') &&
-                    (this.character['method_from'] == null || this.character['method_from'] == '') &&
-                    (this.character['method_to'] == null || this.character['method_to'] == '') &&
-                    (this.character['method_include'] == null || this.character['method_include'] == '') &&
-                    (this.character['method_exclude'] == null || this.character['method_exclude'] == '') &&
-                    (this.character['method_where'] == null || this.character['method_where'] == '')) &&
-                    app.checkHaveUnit(app.character.name)) {
-                    checkFields = false;
-                }
+                        var checkFields = true;
+                        if (((this.character['method_from'] == null || this.character['method_from'] == '') &&
+                            (this.character['method_to'] == null || this.character['method_to'] == '') &&
+                            (this.character['method_include'] == null || this.character['method_include'] == '') &&
+                            (this.character['method_exclude'] == null || this.character['method_exclude'] == '') &&
+                            (this.character['method_where'] == null || this.character['method_where'] == '')) &&
+                            app.checkHaveUnit(app.character.name)) {
+                            checkFields = false;
+                        }
 
-                if (!app.character['unit'] && app.checkHaveUnit(app.character.name)) {
-                    checkFields = false;
-                }
+                        if (!app.character['unit']
+                            && app.checkHaveUnit(app.character.name)
+                            && !app.character.name.startsWith('Number of')
+                            && !app.character.name.startsWith('Ratio of') ) {
+                            checkFields = false;
+                        }
 
-                if (checkFields) {
-                    if (app.character['id']) {
-                        delete app.character['id'];
+                        if (checkFields) {
+//                    if (app.character['id']) {
+//                        delete app.character['id'];
+//                    }
+
+                            app.confirmMethod = true;
+                        } else {
+                            app.showDetails('unit', app.metadataFlag);
+                        }
+                    } else {
+                        app.detailsFlag = false;
                     }
-                    app.confirmMethod = true;
                 } else {
-                    app.showDetails('unit', app.metadataFlag);
+                    app.detailsFlag = false;
                 }
+
             },
             enhance(characterId) {
                 var app = this;
+                app.item = characterId;
+                console.log('characterId', characterId);
                 var selectedCharacter = app.defaultCharacters.find(ch => ch.id == characterId);
                 if (!selectedCharacter) {
                     selectedCharacter = app.userCharacters.find(ch => ch.id == characterId);
                 }
-                selectedCharacter.username = selectedCharacter.username + ', ' + app.user.name;
+                console.log('selectedCharacter.username', selectedCharacter.username);
+//                selectedCharacter.username = selectedCharacter.username + ', ' + app.user.name;
+//                app.characterUsername = selectedCharacter.username + ', ' + app.user.name;
+                app.oldCharacter.method_from = selectedCharacter.method_from;
+                app.oldCharacter.method_to = selectedCharacter.method_to;
+                app.oldCharacter.method_include = selectedCharacter.method_include;
+                app.oldCharacter.method_exclude = selectedCharacter.method_exclude;
+                app.oldCharacter.method_where = selectedCharacter.method_where;
+//                app.editFlag = true;
                 selectedCharacter.creator = app.user.name + ' via CR';
                 app.detailsFlag = false;
                 sessionStorage.setItem('viewFlag', false);
                 sessionStorage.setItem('edit_created_other', false);
                 app.viewFlag = false;
+                app.enhanceFlag = true;
                 setTimeout(function() { app.editCharacter(selectedCharacter); }, 1);
             },
             methodConfirm() {
@@ -955,35 +1001,34 @@
                     .then(function(resp) {
                         console.log('getCharacter', resp);
                         var currentCharacters = resp.data.characters;
+//                        app.character.standard = 0;
+//                        app.character.username = app.characterUsername;
                         if (currentCharacters.find(ch => ch.name == app.character.name)) {
-                            if (app.editFlag) {
+                            if (app.editFlag || app.enhanceFlag) {
                                 if (app.character.standard_tag == app.currentTab) {
                                     app.character.show_flag = true;
                                 } else {
                                     app.character.show_flag = false;
                                 }
+                                console.log('oldCharacter', app.oldCharacter);
+                                console.log('currentCharacter', app.character);
+                                if ((app.character.method_from != app.oldCharacter.method_from)
+                                    || (app.character.method_to != app.oldCharacter.method_to)
+                                    || (app.character.method_include != app.oldCharacter.method_include)
+                                    || (app.character.method_exclude != app.oldCharacter.method_exclude)
+                                    || (app.character.method_where != app.oldCharacter.method_where)) {
+                                    console.log('******1');
+                                    console.log('app.character.username', app.character.username);
+                                    console.log('app.character.owner_name', app.character.owner_name);
+                                    if (!app.character.username.includes(app.character.owner_name)) {
+                                        console.log('******2');
+                                        app.character.standard = 0;
+                                        app.character.username += ', ' + app.character.owner_name;
+                                    }
+                                }
+
                                 axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
                                     .then(function(resp) {
-//                                        if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
-//                                            var jsonUserTag = {
-//                                                user_id: app.user.id,
-//                                                user_tag: app.character.standard_tag
-//                                            };
-//                                            console.log('jsonUserTag', jsonUserTag);
-//                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
-//                                                .then(function(resp) {
-//                                                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-//                                                        .then(function(resp) {
-//                                                            app.userTags = resp.data;
-//                                                        });
-//                                                    console.log("create UserTag", resp.data);
-//                                                });
-//                                        } else {
-//                                            axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-//                                                .then(function(resp) {
-//                                                    app.userTags = resp.data;
-//                                                });
-//                                        }
                                         app.userTags = resp.data.userTags;
                                         app.userCharacters = resp.data.characters;
                                         app.headers = resp.data.headers;
@@ -994,18 +1039,35 @@
                                         app.refreshUserCharacters();
                                         app.showTableForTab(app.userTags[0].tag_name);
 
+                                        app.enhanceFlag = false;
                                         app.detailsFlag = false;
                                     });
                             } else {
                                 alert("The character already exists for this user!!");
                             }
                         } else {
-                            app.character.standard = 0;
                             if (app.character.standard_tag == app.currentTab) {
                                 app.character.show_flag = true;
                             } else {
                                 app.character.show_flag = false;
                             }
+                            if (app.enhanceFlag) {
+                                if ((app.character.method_from != app.oldCharacter.method_from)
+                                    || (app.character.method_to != app.oldCharacter.method_to)
+                                    || (app.character.method_include != app.oldCharacter.method_include)
+                                    || (app.character.method_exclude != app.oldCharacter.method_exclude)
+                                    || (app.character.method_where != app.oldCharacter.method_where)) {
+                                    console.log('******1');
+                                    console.log('app.character.username', app.character.username);
+                                    console.log('app.character.owner_name', app.character.owner_name);
+                                    if (!app.character.username.includes(app.character.owner_name)) {
+                                        console.log('******2');
+                                        app.character.standard = 0;
+                                        app.character.username += ', ' + app.user.name;
+                                    }
+                                }
+                            }
+
                             if (app.matrixShowFlag) {
                                 axios.post('/chrecorder/public/api/v1/character/add-character', app.character)
                                     .then(function(resp) {
@@ -1034,11 +1096,11 @@
                                         app.values = resp.data.values;
                                         app.taxonName = resp.data.taxon;
                                         app.defaultCharacters = resp.data.defaultCharacters;
+                                        console.log('defaultCharacters', app.defaultCharacters);
                                         app.refreshDefaultCharacters();
-
-
                                         app.refreshUserCharacters();
 
+                                        app.enhanceFlag = false;
                                         app.detailsFlag = false;
                                     });
                             } else {
@@ -1224,6 +1286,7 @@
                         app.userCharacters[i].tooltip += 'Where: ' + app.userCharacters[i].method_where;
                     }
                 }
+                app.characterUsername = app.user.name;
             },
             showTableForTab(tagName) {
                 var app = this;
@@ -1373,9 +1436,6 @@
 
                 app.descriptionText = '';
 
-                console.log('characters', app.userCharacters);
-                console.log('tabs', app.userTags);
-                console.log('values', app.values);
                 for (var i = 0; i < app.userTags.length; i++) {
                     app.descriptionText += '<b>' + app.userTags[i].tag_name + ': ' + '</b>';
                     var filteredCharacters = app.userCharacters.filter(function(eachCharacter){
@@ -1410,16 +1470,18 @@
                                             minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1.5];
                                             maxPercentileValue = tempValueArray[tempValueArray.length / 2 + 0.5];
                                         }
-                                        app.descriptionText += '(' + minValue + '-)' + minPercentileValue + '-' + maxPercentileValue + '(-' + maxValue + ') ' + filteredCharacters[j].unit;
-
+                                        app.descriptionText += '(' + minValue + '-)' + minPercentileValue + '-' + maxPercentileValue + '(-' + maxValue + ') ';
 
                                         break;
                                     case "mn":
                                         tempValueArray.sort((a, b) => a - b);
                                         if (tempValueArray.length % 2 == 0) {
-                                            app.descriptionText += (tempValueArray[tempValueArray.length / 2 - 1] + tempValueArray[tempValueArray.length / 2]) + filteredCharacters[j].unit;
+                                            app.descriptionText += (tempValueArray[tempValueArray.length / 2 - 1] + tempValueArray[tempValueArray.length / 2]);
                                         } else {
-                                            app.descriptionText += tempValueArray[tempValueArray.length / 2 - 0.5] + filteredCharacters[j].unit;
+                                            app.descriptionText += tempValueArray[tempValueArray.length / 2 - 0.5];
+                                        }
+                                        if (filteredCharacters[j].unit && !filteredCharacters[j].name.startsWith('Number of') && !filteredCharacters[j].name.startsWith('Ratio of')) {
+                                            app.descriptionText += filteredCharacters[j].unit
                                         }
                                         break;
                                     case "md":
@@ -1429,8 +1491,10 @@
                                         }
 
                                         var avg = sum/tempValueArray.length;
-                                        app.descriptionText += avg + filteredCharacters[j].unit;
-
+                                        app.descriptionText += avg;
+                                        if (filteredCharacters[j].unit) {
+                                            app.descriptionText += filteredCharacters[j].unit
+                                        }
                                         break;
                                     default:
                                         break;
@@ -1567,6 +1631,7 @@
         mounted() {
             var app = this;
             app.user.name = app.user.email.split('@')[0];
+            app.characterUsername = app.user.name;
             sessionStorage.setItem('userId', app.user.id);
 
 

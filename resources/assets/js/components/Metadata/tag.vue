@@ -3,6 +3,15 @@
         <div class="col-md-12" style="font-size: 20px;">
             Tag of "{{ character_name }}" is:
         </div>
+        <div class="col-md-12" style="font-size: 14px;">
+            Choose a meaningful tag for a character! For an example, a group of characters about leaves should use the tag "Leaves".
+            <br/>
+            <br/>
+            Tags are used to organize characters in the matrix view. Characters with the same tag will be in the same group and included on the same tab in the matrix.
+            <br/>
+            <br/>
+            Tags are also used to as the headings for a group of characters in the text description generated from the matrix.
+        </div>
         <div class="col-md-12">
             <input v-if="viewFlag == false" style="width: 100%;" @change="handleDataFc()" :disabled="edit_created_other" type="text" list="user_tags" v-model="childData"/>
             <datalist id="user_tags" v-if="userTags.length > 0">

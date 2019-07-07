@@ -5,9 +5,9 @@
         </div>
         <div class="col-md-12">
             <select v-if="viewFlag == false" style="width: 100%;" v-model="childData" @change="handleDataFc()" :disabled="edit_created_other">
-                <option value="rp">range-percentile</option>
-                <option value="mn">mean</option>
-                <option value="md">median</option>
+                <option value="range-percentile">range-percentile</option>
+                <option value="mean">mean</option>
+                <option value="median">median</option>
             </select>
             <div v-if="viewFlag == true" style="border: 1px solid grey;">
                 {{ childData ? childData : '&nbsp;' }}

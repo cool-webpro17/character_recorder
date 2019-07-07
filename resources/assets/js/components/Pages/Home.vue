@@ -165,9 +165,9 @@
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </a>
                                             <ul class="dropdown-menu" role="menu">
-                                                <li><a v-on:click="changeSummary(value.character_id, 'rp')">rp</a></li>
-                                                <li><a v-on:click="changeSummary(value.character_id, 'mn')">mn</a></li>
-                                                <li><a v-on:click="changeSummary(value.character_id, 'md')">md</a></li>
+                                                <li><a v-on:click="changeSummary(value.character_id, 'range-percentile')">range-percentile</a></li>
+                                                <li><a v-on:click="changeSummary(value.character_id, 'mean')">mean</a></li>
+                                                <li><a v-on:click="changeSummary(value.character_id, 'median')">median</a></li>
                                             </ul>
                                         </div>
                                         <div style="margin-left: 5px; line-height: 44px;">
@@ -708,6 +708,7 @@
                 app.character.standard = 0;
                 app.character.creator = app.user.name + ' via CR';
 
+
                 if (app.checkHaveUnit(app.character.name)) {
                     app.parentData = [];
                     app.parentData[3] = app.user;
@@ -800,11 +801,11 @@
                             || character.name.startsWith('Count of')
                             || character.name.startsWith('Distance between')) {
                             character.unit = 'cm';
-                            character.summary = 'mn';
+                            character.summary = 'mean';
                         } else if (character.name.startsWith('Number of')
                             || character.name.startsWith('Ratio of')) {
                             character.unit = '';
-                            character.summary = 'mn';
+                            character.summary = 'mean';
                         } else {
                             character.unit = '';
                             character.summary = '';
@@ -878,6 +879,12 @@
                 console.log('app.character = ', app.character);
                 console.log('saveCharacter', metadataFlag);
 
+                if (app.character.summary == ''
+                    || app.character.summary == null
+                    || app.character.summary == undefined) {
+                    app.character.summary = 'mean';
+                }
+
 //                if (app.character['id'] && !app.editFlag) {
 //                    delete app.character['id'];
 //                }
@@ -899,17 +906,24 @@
                     checkFields = true;
                 }
 
+
                 if (checkFields) {
-                    if (app.checkHaveUnit(app.character.name)) {
-                        app.confirmMethod = true;
+                    if (app.checkHaveUnit(app.character.name)
+                        && (app.character.standard_tag == null
+                        || app.character.standard_tag == ''
+                        || app.character.standard_tag == undefined)) {
+                        app.showDetails('tag', app.metadataFlag);
+
                     } else {
-                        console.log("***********************userCharacter", app.userCharacters);
-                        console.log("***********************values", app.values);
-                        console.log("***********************character", app.character);
-                        app.confirmTag = true;
+                        if (app.checkHaveUnit(app.character.name)) {
+                            app.confirmMethod = true;
+                        } else {
+                            app.confirmTag = true;
+                        }
                     }
+
                 } else {
-                    app.showDetails('unit', app.metadataFlag);
+                        app.showDetails('unit', app.metadataFlag);
                 }
             },
             use(characterId) {
@@ -1028,137 +1042,130 @@
                         var currentCharacters = resp.data.characters;
 //                        app.character.standard = 0;
 //                        app.character.username = app.characterUsername;
-                        if (app.character.standard_tag == null
-                            || app.character.standard_tag == ''
-                            || app.character.standard_tag == undefined) {
-                            alert('You need to fill the Tag Name in Tag Segment!');
-                        } else {
-                            if (currentCharacters.find(ch => ch.name == app.character.name)) {
-                                if (app.editFlag || app.enhanceFlag) {
-                                    if (app.character.standard_tag == app.currentTab) {
-                                        app.character.show_flag = true;
-                                    } else {
-                                        app.character.show_flag = false;
-                                    }
-                                    console.log('oldCharacter', app.oldCharacter);
-                                    console.log('currentCharacter', app.character);
-                                    if ((app.character.method_from != app.oldCharacter.method_from)
-                                        || (app.character.method_to != app.oldCharacter.method_to)
-                                        || (app.character.method_include != app.oldCharacter.method_include)
-                                        || (app.character.method_exclude != app.oldCharacter.method_exclude)
-                                        || (app.character.method_where != app.oldCharacter.method_where)) {
-                                        console.log('******1');
-                                        console.log('app.character.username', app.character.username);
-                                        console.log('app.character.owner_name', app.character.owner_name);
-                                        if (!app.character.username.includes(app.character.owner_name)) {
-                                            console.log('******2');
-                                            app.character.standard = 0;
-                                            app.character.username += ', ' + app.character.owner_name;
-                                        }
-                                    }
-
-                                    axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
-                                        .then(function(resp) {
-                                            app.userTags = resp.data.userTags;
-                                            app.userCharacters = resp.data.characters;
-                                            app.headers = resp.data.headers;
-                                            app.values = resp.data.values;
-                                            app.taxonName = resp.data.taxon;
-                                            app.defaultCharacters = resp.data.defaultCharacters;
-                                            app.refreshDefaultCharacters();
-                                            app.refreshUserCharacters();
-                                            app.showTableForTab(app.character.standard_tag);
-
-                                            app.enhanceFlag = false;
-                                            app.detailsFlag = false;
-                                        });
-                                } else {
-                                    alert("The character already exists for this user!!");
-                                }
-                            } else {
+                        if (currentCharacters.find(ch => ch.name == app.character.name)) {
+                            if (app.editFlag || app.enhanceFlag) {
                                 if (app.character.standard_tag == app.currentTab) {
                                     app.character.show_flag = true;
                                 } else {
                                     app.character.show_flag = false;
                                 }
-                                if (app.enhanceFlag) {
-                                    if ((app.character.method_from != app.oldCharacter.method_from)
-                                        || (app.character.method_to != app.oldCharacter.method_to)
-                                        || (app.character.method_include != app.oldCharacter.method_include)
-                                        || (app.character.method_exclude != app.oldCharacter.method_exclude)
-                                        || (app.character.method_where != app.oldCharacter.method_where)) {
-                                        console.log('******1');
-                                        console.log('app.character.username', app.character.username);
-                                        console.log('app.character.owner_name', app.character.owner_name);
-                                        if (!app.character.username.includes(app.character.owner_name)) {
-                                            console.log('******2');
-                                            app.character.standard = 0;
-                                            app.character.username += ', ' + app.user.name;
-                                        }
+                                console.log('oldCharacter', app.oldCharacter);
+                                console.log('currentCharacter', app.character);
+                                if ((app.character.method_from != app.oldCharacter.method_from)
+                                    || (app.character.method_to != app.oldCharacter.method_to)
+                                    || (app.character.method_include != app.oldCharacter.method_include)
+                                    || (app.character.method_exclude != app.oldCharacter.method_exclude)
+                                    || (app.character.method_where != app.oldCharacter.method_where)) {
+                                    console.log('******1');
+                                    console.log('app.character.username', app.character.username);
+                                    console.log('app.character.owner_name', app.character.owner_name);
+                                    if (!app.character.username.includes(app.character.owner_name)) {
+                                        console.log('******2');
+                                        app.character.standard = 0;
+                                        app.character.username += ', ' + app.character.owner_name;
                                     }
                                 }
 
-                                if (app.matrixShowFlag) {
-                                    axios.post('/chrecorder/public/api/v1/character/add-character', app.character)
-                                        .then(function(resp) {
-                                            if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
-                                                var jsonUserTag = {
-                                                    user_id: app.user.id,
-                                                    user_tag: app.character.standard_tag
-                                                };
-                                                console.log('jsonUserTag', jsonUserTag);
-                                                axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
-                                                    .then(function(resp) {
-                                                        axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                                            .then(function(resp) {
-                                                                app.userTags = resp.data;
-                                                            });
-                                                        console.log("create UserTag", resp.data);
-                                                    });
-                                            } else {
-                                                axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                                    .then(function(resp) {
-                                                        app.userTags = resp.data;
-                                                    });
-                                            }
-                                            app.userCharacters = resp.data.characters;
-                                            app.headers = resp.data.headers;
-                                            app.values = resp.data.values;
-                                            app.taxonName = resp.data.taxon;
-                                            app.defaultCharacters = resp.data.defaultCharacters;
-                                            console.log('defaultCharacters', app.defaultCharacters);
-                                            app.refreshDefaultCharacters();
-                                            app.refreshUserCharacters();
+                                axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
+                                    .then(function(resp) {
+                                        app.userTags = resp.data.userTags;
+                                        app.userCharacters = resp.data.characters;
+                                        app.headers = resp.data.headers;
+                                        app.values = resp.data.values;
+                                        app.taxonName = resp.data.taxon;
+                                        app.defaultCharacters = resp.data.defaultCharacters;
+                                        app.refreshDefaultCharacters();
+                                        app.refreshUserCharacters();
+                                        app.showTableForTab(app.character.standard_tag);
 
-                                            app.enhanceFlag = false;
-                                            app.detailsFlag = false;
-                                        });
-                                } else {
-                                    axios.post("/chrecorder/public/api/v1/character/create", app.character)
-                                        .then(function(resp) {
-                                            if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
-                                                var jsonUserTag = {
-                                                    user_id: app.user.id,
-                                                    user_tag: app.character.standard_tag
-                                                };
-                                                console.log('jsonUserTag', jsonUserTag);
-                                                axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
-                                                    .then(function(resp) {
-                                                        console.log("create UserTag", resp.data);
-                                                    });
-                                            }
-                                            app.userCharacters = resp.data.characters;
-                                            app.refreshUserCharacters();
-                                            app.defaultCharacters = resp.data.defaultCharacters;
-                                            app.refreshDefaultCharacters();
-
-
-                                            app.detailsFlag = false;
-                                        });
+                                        app.enhanceFlag = false;
+                                        app.detailsFlag = false;
+                                    });
+                            } else {
+                                alert("The character already exists for this user!!");
+                            }
+                        } else {
+                            if (app.character.standard_tag == app.currentTab) {
+                                app.character.show_flag = true;
+                            } else {
+                                app.character.show_flag = false;
+                            }
+                            if (app.enhanceFlag) {
+                                if ((app.character.method_from != app.oldCharacter.method_from)
+                                    || (app.character.method_to != app.oldCharacter.method_to)
+                                    || (app.character.method_include != app.oldCharacter.method_include)
+                                    || (app.character.method_exclude != app.oldCharacter.method_exclude)
+                                    || (app.character.method_where != app.oldCharacter.method_where)) {
+                                    console.log('******1');
+                                    console.log('app.character.username', app.character.username);
+                                    console.log('app.character.owner_name', app.character.owner_name);
+                                    if (!app.character.username.includes(app.character.owner_name)) {
+                                        console.log('******2');
+                                        app.character.standard = 0;
+                                        app.character.username += ', ' + app.user.name;
+                                    }
                                 }
                             }
-                        }
 
+                            if (app.matrixShowFlag) {
+                                axios.post('/chrecorder/public/api/v1/character/add-character', app.character)
+                                    .then(function(resp) {
+                                        if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
+                                            var jsonUserTag = {
+                                                user_id: app.user.id,
+                                                user_tag: app.character.standard_tag
+                                            };
+                                            console.log('jsonUserTag', jsonUserTag);
+                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
+                                                .then(function(resp) {
+                                                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                                        .then(function(resp) {
+                                                            app.userTags = resp.data;
+                                                        });
+                                                    console.log("create UserTag", resp.data);
+                                                });
+                                        } else {
+                                            axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                                .then(function(resp) {
+                                                    app.userTags = resp.data;
+                                                });
+                                        }
+                                        app.userCharacters = resp.data.characters;
+                                        app.headers = resp.data.headers;
+                                        app.values = resp.data.values;
+                                        app.taxonName = resp.data.taxon;
+                                        app.defaultCharacters = resp.data.defaultCharacters;
+                                        console.log('defaultCharacters', app.defaultCharacters);
+                                        app.refreshDefaultCharacters();
+                                        app.refreshUserCharacters();
+
+                                        app.enhanceFlag = false;
+                                        app.detailsFlag = false;
+                                    });
+                            } else {
+                                axios.post("/chrecorder/public/api/v1/character/create", app.character)
+                                    .then(function(resp) {
+                                        if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
+                                            var jsonUserTag = {
+                                                user_id: app.user.id,
+                                                user_tag: app.character.standard_tag
+                                            };
+                                            console.log('jsonUserTag', jsonUserTag);
+                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
+                                                .then(function(resp) {
+                                                    console.log("create UserTag", resp.data);
+                                                });
+                                        }
+                                        app.userCharacters = resp.data.characters;
+                                        app.refreshUserCharacters();
+                                        app.defaultCharacters = resp.data.defaultCharacters;
+                                        app.refreshDefaultCharacters();
+
+
+                                        app.detailsFlag = false;
+                                    });
+                            }
+                        }
 
                     });
                 console.log("app.character", app.character);
@@ -1283,7 +1290,9 @@
                                 app.userCharacters = resp.data.characters;
                                 app.headers = resp.data.headers;
                                 app.values = resp.data.values;
+                                app.defaultCharacters = resp.data.defaultCharacters;
                                 app.refreshUserCharacters();
+                                app.refreshDefaultCharacters();
                             }
                         });
                 }
@@ -1445,10 +1454,14 @@
             refreshDefaultCharacters() {
                 var app = this;
                 app.standardCharacters = [];
+                console.log("temp.text");
                 for (var i = 0; i < app.defaultCharacters.length; i++) {
                     var temp = {};
                     temp.name = app.defaultCharacters[i].name;
                     temp.text = app.defaultCharacters[i].name + ' by ' + app.defaultCharacters[i].username + ' (' + app.defaultCharacters[i].usage_count + ')';
+                    if (app.defaultCharacters[i].name == 'Growth form of plant') {
+                        console.log('temp.text', temp.text);
+                    }
                     temp.value = app.defaultCharacters[i].id;
                     temp.tooltip = '';
 
@@ -1518,43 +1531,60 @@
                         if (app.checkValueArray(tempValueArray)) {
                             if (app.checkHaveUnit(filteredCharacters[j].name)) {
                                 switch (filteredCharacters[j].summary) {
-                                    case "rp":
+                                    case "range-percentile":
                                         if (filteredCharacters[j].name.startsWith('Distance')) {
                                             app.descriptionText += filteredCharacters[j].name + ' ';
                                         }
-                                        tempValueArray.sort((a, b) => a - b);
-                                        var minValue = tempValueArray[0];
-                                        var maxValue = tempValueArray[tempValueArray.length - 1];
+                                        var tempRpArray = [];
+                                        for (var l = 0; l < tempValueArray.length; l++) {
+                                            if (tempValueArray[l] != null && tempValueArray[l] != '' && tempValueArray[l] != undefined) {
+                                                tempRpArray.push(tempValueArray[l]);
+                                            }
+                                        }
+
+                                        tempRpArray.sort((a, b) => a - b);
+                                        var minValue = tempRpArray[0];
+                                        var maxValue = tempRpArray[tempRpArray.length - 1];
                                         var minPercentileValue = 0;
                                         var maxPercentileValue = 0;
-                                        if (tempValueArray.length % 2 == 0) {
-                                            minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1];
-                                            maxPercentileValue = tempValueArray[tempValueArray.length / 2];
+                                        if (tempRpArray.length % 2 == 0) {
+                                            minPercentileValue = tempRpArray[tempRpArray.length / 2 - 1];
+                                            maxPercentileValue = tempRpArray[tempRpArray.length / 2];
                                         } else {
-                                            minPercentileValue = tempValueArray[tempValueArray.length / 2 - 1.5];
-                                            maxPercentileValue = tempValueArray[tempValueArray.length / 2 + 0.5];
+                                            minPercentileValue = tempRpArray[tempRpArray.length / 2 - 1.5];
+                                            maxPercentileValue = tempRpArray[tempRpArray.length / 2 + 0.5];
                                         }
                                         app.descriptionText += '(' + minValue + '-)' + minPercentileValue + '-' + maxPercentileValue + '(-' + maxValue + ') ';
 
                                         break;
-                                    case "mn":
-                                        tempValueArray.sort((a, b) => a - b);
-                                        if (tempValueArray.length % 2 == 0) {
-                                            app.descriptionText += (tempValueArray[tempValueArray.length / 2 - 1] + tempValueArray[tempValueArray.length / 2]);
+                                    case "median":
+                                        var tempMedianArray = [];
+                                        for (var l = 0; l < tempValueArray.length; l++) {
+                                            if (tempValueArray[l] != null && tempValueArray[l] != '' && tempValueArray[l] != undefined) {
+                                                tempMedianArray.push(tempValueArray[l]);
+                                            }
+                                        }
+                                        tempMedianArray.sort((a, b) => a - b);
+                                        if (tempMedianArray.length % 2 == 0) {
+                                            app.descriptionText += (tempMedianArray[tempMedianArray.length / 2 - 1] + tempMedianArray[tempMedianArray.length / 2]);
                                         } else {
-                                            app.descriptionText += tempValueArray[tempValueArray.length / 2 - 0.5];
+                                            app.descriptionText += tempMedianArray[tempMedianArray.length / 2 - 0.5];
                                         }
                                         if (filteredCharacters[j].unit && !filteredCharacters[j].name.startsWith('Number of') && !filteredCharacters[j].name.startsWith('Ratio of')) {
                                             app.descriptionText += filteredCharacters[j].unit
                                         }
                                         break;
-                                    case "md":
+                                    case "mean":
                                         var sum = 0;
+                                        var arrayLength = 0;
                                         for( var l = 0; l < tempValueArray.length; l++ ){
-                                            sum += parseInt( tempValueArray[l], 10 ); //don't forget to add the base
+                                            if (tempValueArray[l] != null && tempValueArray[l] != '' && tempValueArray[l] != undefined) {
+                                                sum += parseInt( tempValueArray[l], 10 ); //don't forget to add the base
+                                                arrayLength++;
+                                            }
                                         }
 
-                                        var avg = sum/tempValueArray.length;
+                                        var avg = sum/arrayLength;
                                         app.descriptionText += avg;
                                         if (filteredCharacters[j].unit) {
                                             app.descriptionText += filteredCharacters[j].unit

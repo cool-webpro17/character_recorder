@@ -97,12 +97,27 @@ class HomeController extends Controller
         $user = User::where('id', '=', Auth::id())->first();
         $username = explode('@', $user['email'])[0];
 
-        $standardCharacters = StandardCharacter::all()->toArray();
+        $standardCharacters = StandardCharacter::all();
+
+        foreach ($standardCharacters as $eachCharacter) {
+            $tempArray = Character::where('username', '=', $eachCharacter->username)
+                ->where('name', '=', $eachCharacter->name)
+                ->get();
+            $tempCount = 0;
+            foreach ($tempArray as $tempCharacter) {
+                $tempCount += $tempCharacter->usage_count;
+            }
+            $eachCharacter->usage_count = $tempCount;
+        }
+        $standardCharacters = $standardCharacters->toArray();
+
         $userCharacters = Character::where('standard', '=', 0)
             ->whereRaw('username LIKE CONCAT("%", owner_name)')
             ->get();
         foreach ($userCharacters as $eachCharacter) {
-            $tempArray = Character::where('username', '=', $eachCharacter->username)->get();
+            $tempArray = Character::where('username', '=', $eachCharacter->username)
+                ->where('name', '=', $eachCharacter->name)
+                ->get();
             $tempCount = 0;
             foreach ($tempArray as $tempCharacter) {
                 $tempCount += $tempCharacter->usage_count;

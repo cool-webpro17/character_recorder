@@ -1028,130 +1028,138 @@
                         var currentCharacters = resp.data.characters;
 //                        app.character.standard = 0;
 //                        app.character.username = app.characterUsername;
-                        if (currentCharacters.find(ch => ch.name == app.character.name)) {
-                            if (app.editFlag || app.enhanceFlag) {
+                        if (app.character.standard_tag == null
+                            || app.character.standard_tag == ''
+                            || app.character.standard_tag == undefined) {
+                            alert('You need to fill the Tag Name in Tag Segment!');
+                        } else {
+                            if (currentCharacters.find(ch => ch.name == app.character.name)) {
+                                if (app.editFlag || app.enhanceFlag) {
+                                    if (app.character.standard_tag == app.currentTab) {
+                                        app.character.show_flag = true;
+                                    } else {
+                                        app.character.show_flag = false;
+                                    }
+                                    console.log('oldCharacter', app.oldCharacter);
+                                    console.log('currentCharacter', app.character);
+                                    if ((app.character.method_from != app.oldCharacter.method_from)
+                                        || (app.character.method_to != app.oldCharacter.method_to)
+                                        || (app.character.method_include != app.oldCharacter.method_include)
+                                        || (app.character.method_exclude != app.oldCharacter.method_exclude)
+                                        || (app.character.method_where != app.oldCharacter.method_where)) {
+                                        console.log('******1');
+                                        console.log('app.character.username', app.character.username);
+                                        console.log('app.character.owner_name', app.character.owner_name);
+                                        if (!app.character.username.includes(app.character.owner_name)) {
+                                            console.log('******2');
+                                            app.character.standard = 0;
+                                            app.character.username += ', ' + app.character.owner_name;
+                                        }
+                                    }
+
+                                    axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
+                                        .then(function(resp) {
+                                            app.userTags = resp.data.userTags;
+                                            app.userCharacters = resp.data.characters;
+                                            app.headers = resp.data.headers;
+                                            app.values = resp.data.values;
+                                            app.taxonName = resp.data.taxon;
+                                            app.defaultCharacters = resp.data.defaultCharacters;
+                                            app.refreshDefaultCharacters();
+                                            app.refreshUserCharacters();
+                                            app.showTableForTab(app.character.standard_tag);
+
+                                            app.enhanceFlag = false;
+                                            app.detailsFlag = false;
+                                        });
+                                } else {
+                                    alert("The character already exists for this user!!");
+                                }
+                            } else {
                                 if (app.character.standard_tag == app.currentTab) {
                                     app.character.show_flag = true;
                                 } else {
                                     app.character.show_flag = false;
                                 }
-                                console.log('oldCharacter', app.oldCharacter);
-                                console.log('currentCharacter', app.character);
-                                if ((app.character.method_from != app.oldCharacter.method_from)
-                                    || (app.character.method_to != app.oldCharacter.method_to)
-                                    || (app.character.method_include != app.oldCharacter.method_include)
-                                    || (app.character.method_exclude != app.oldCharacter.method_exclude)
-                                    || (app.character.method_where != app.oldCharacter.method_where)) {
-                                    console.log('******1');
-                                    console.log('app.character.username', app.character.username);
-                                    console.log('app.character.owner_name', app.character.owner_name);
-                                    if (!app.character.username.includes(app.character.owner_name)) {
-                                        console.log('******2');
-                                        app.character.standard = 0;
-                                        app.character.username += ', ' + app.character.owner_name;
+                                if (app.enhanceFlag) {
+                                    if ((app.character.method_from != app.oldCharacter.method_from)
+                                        || (app.character.method_to != app.oldCharacter.method_to)
+                                        || (app.character.method_include != app.oldCharacter.method_include)
+                                        || (app.character.method_exclude != app.oldCharacter.method_exclude)
+                                        || (app.character.method_where != app.oldCharacter.method_where)) {
+                                        console.log('******1');
+                                        console.log('app.character.username', app.character.username);
+                                        console.log('app.character.owner_name', app.character.owner_name);
+                                        if (!app.character.username.includes(app.character.owner_name)) {
+                                            console.log('******2');
+                                            app.character.standard = 0;
+                                            app.character.username += ', ' + app.user.name;
+                                        }
                                     }
                                 }
 
-                                axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
-                                    .then(function(resp) {
-                                        app.userTags = resp.data.userTags;
-                                        app.userCharacters = resp.data.characters;
-                                        app.headers = resp.data.headers;
-                                        app.values = resp.data.values;
-                                        app.taxonName = resp.data.taxon;
-                                        app.defaultCharacters = resp.data.defaultCharacters;
-                                        app.refreshDefaultCharacters();
-                                        app.refreshUserCharacters();
-                                        app.showTableForTab(app.character.standard_tag);
+                                if (app.matrixShowFlag) {
+                                    axios.post('/chrecorder/public/api/v1/character/add-character', app.character)
+                                        .then(function(resp) {
+                                            if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
+                                                var jsonUserTag = {
+                                                    user_id: app.user.id,
+                                                    user_tag: app.character.standard_tag
+                                                };
+                                                console.log('jsonUserTag', jsonUserTag);
+                                                axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
+                                                    .then(function(resp) {
+                                                        axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                                            .then(function(resp) {
+                                                                app.userTags = resp.data;
+                                                            });
+                                                        console.log("create UserTag", resp.data);
+                                                    });
+                                            } else {
+                                                axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                                    .then(function(resp) {
+                                                        app.userTags = resp.data;
+                                                    });
+                                            }
+                                            app.userCharacters = resp.data.characters;
+                                            app.headers = resp.data.headers;
+                                            app.values = resp.data.values;
+                                            app.taxonName = resp.data.taxon;
+                                            app.defaultCharacters = resp.data.defaultCharacters;
+                                            console.log('defaultCharacters', app.defaultCharacters);
+                                            app.refreshDefaultCharacters();
+                                            app.refreshUserCharacters();
 
-                                        app.enhanceFlag = false;
-                                        app.detailsFlag = false;
-                                    });
-                            } else {
-                                alert("The character already exists for this user!!");
-                            }
-                        } else {
-                            if (app.character.standard_tag == app.currentTab) {
-                                app.character.show_flag = true;
-                            } else {
-                                app.character.show_flag = false;
-                            }
-                            if (app.enhanceFlag) {
-                                if ((app.character.method_from != app.oldCharacter.method_from)
-                                    || (app.character.method_to != app.oldCharacter.method_to)
-                                    || (app.character.method_include != app.oldCharacter.method_include)
-                                    || (app.character.method_exclude != app.oldCharacter.method_exclude)
-                                    || (app.character.method_where != app.oldCharacter.method_where)) {
-                                    console.log('******1');
-                                    console.log('app.character.username', app.character.username);
-                                    console.log('app.character.owner_name', app.character.owner_name);
-                                    if (!app.character.username.includes(app.character.owner_name)) {
-                                        console.log('******2');
-                                        app.character.standard = 0;
-                                        app.character.username += ', ' + app.user.name;
-                                    }
+                                            app.enhanceFlag = false;
+                                            app.detailsFlag = false;
+                                        });
+                                } else {
+                                    axios.post("/chrecorder/public/api/v1/character/create", app.character)
+                                        .then(function(resp) {
+                                            if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
+                                                var jsonUserTag = {
+                                                    user_id: app.user.id,
+                                                    user_tag: app.character.standard_tag
+                                                };
+                                                console.log('jsonUserTag', jsonUserTag);
+                                                axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
+                                                    .then(function(resp) {
+                                                        console.log("create UserTag", resp.data);
+                                                    });
+                                            }
+                                            app.userCharacters = resp.data.characters;
+                                            app.refreshUserCharacters();
+                                            app.defaultCharacters = resp.data.defaultCharacters;
+                                            app.refreshDefaultCharacters();
+
+
+                                            app.detailsFlag = false;
+                                        });
                                 }
-                            }
-
-                            if (app.matrixShowFlag) {
-                                axios.post('/chrecorder/public/api/v1/character/add-character', app.character)
-                                    .then(function(resp) {
-                                        if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
-                                            var jsonUserTag = {
-                                                user_id: app.user.id,
-                                                user_tag: app.character.standard_tag
-                                            };
-                                            console.log('jsonUserTag', jsonUserTag);
-                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
-                                                .then(function(resp) {
-                                                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                                        .then(function(resp) {
-                                                            app.userTags = resp.data;
-                                                        });
-                                                    console.log("create UserTag", resp.data);
-                                                });
-                                        } else {
-                                            axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                                .then(function(resp) {
-                                                    app.userTags = resp.data;
-                                                });
-                                        }
-                                        app.userCharacters = resp.data.characters;
-                                        app.headers = resp.data.headers;
-                                        app.values = resp.data.values;
-                                        app.taxonName = resp.data.taxon;
-                                        app.defaultCharacters = resp.data.defaultCharacters;
-                                        console.log('defaultCharacters', app.defaultCharacters);
-                                        app.refreshDefaultCharacters();
-                                        app.refreshUserCharacters();
-
-                                        app.enhanceFlag = false;
-                                        app.detailsFlag = false;
-                                    });
-                            } else {
-                                axios.post("/chrecorder/public/api/v1/character/create", app.character)
-                                    .then(function(resp) {
-                                        if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
-                                            var jsonUserTag = {
-                                                user_id: app.user.id,
-                                                user_tag: app.character.standard_tag
-                                            };
-                                            console.log('jsonUserTag', jsonUserTag);
-                                            axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
-                                                .then(function(resp) {
-                                                    console.log("create UserTag", resp.data);
-                                                });
-                                        }
-                                        app.userCharacters = resp.data.characters;
-                                        app.refreshUserCharacters();
-                                        app.defaultCharacters = resp.data.defaultCharacters;
-                                        app.refreshDefaultCharacters();
-
-
-                                        app.detailsFlag = false;
-                                    });
                             }
                         }
+
+
                     });
                 console.log("app.character", app.character);
             },

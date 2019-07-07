@@ -53,7 +53,7 @@ class HomeController extends Controller
         $user = User::where('id', '=', Auth::id())->first();
         $username = explode('@', $user['email'])[0];
 
-        $allCharacters = Character::where('owner_name', '=', $username)->orderBy('standard_tag', 'ASC')->get();
+        $allCharacters = Character::where('owner_name', '=', $username)->orderBy('order', 'ASC')->get();
         $headers = $this->getHeaders();
         $characters = [];
         foreach ($allCharacters as $eachCharacter) {
@@ -80,7 +80,7 @@ class HomeController extends Controller
 
         $arrayCharacters = [];
         if (Character::where('owner_name', '=', $username)->first()) {
-            $arrayCharacters = Character::where('owner_name', '=', $username)->orderBy('standard_tag', 'ASC')->get();
+            $arrayCharacters = Character::where('owner_name', '=', $username)->orderBy('standard_tag', 'ASC')->orderBy('order', 'ASC')->get();
         }
         foreach ($arrayCharacters as $c) {
 
@@ -100,7 +100,17 @@ class HomeController extends Controller
         $standardCharacters = StandardCharacter::all()->toArray();
         $userCharacters = Character::where('standard', '=', 0)
             ->whereRaw('username LIKE CONCAT("%", owner_name)')
-            ->get()->toArray();
+            ->get();
+        foreach ($userCharacters as $eachCharacter) {
+            $tempArray = Character::where('username', '=', $eachCharacter->username)->get();
+            $tempCount = 0;
+            foreach ($tempArray as $tempCharacter) {
+                $tempCount += $tempCharacter->usage_count;
+            }
+            $eachCharacter->usage_count = $tempCount;
+        }
+        $userCharacters = $userCharacters->toArray();
+
         $defaultCharacters = array_merge($standardCharacters, $userCharacters);
 
         return $defaultCharacters;
@@ -115,33 +125,7 @@ class HomeController extends Controller
 
 
     public function getStandardCharacters() {
-        $standardCharacters = StandardCharacter::all();
-        $userCharacters = Character::where('standard', '=', 0)
-            ->whereRaw('username LIKE CONCAT("%", owner_name)')
-            ->get();
-        foreach ($standardCharacters as $eachCharacter) {
-            $character = Character::where('name', '=', $eachCharacter->name)->first();
-            if ($character) {
-                $usageCount = count(explode(',', $character->username)) - 1;
-                $eachCharacter->usage_count = $usageCount;
-            }
-        }
-
-        foreach ($userCharacters as $eachCharacter) {
-            if (StandardCharacter::where('name', '=', $eachCharacter->name)->first()) {
-                $character = Character::where('name', '=', $eachCharacter->name)->first();
-                $usageCount = count(explode(',', $character->username)) - 1;
-                $eachCharacter->usage_count = $usageCount;
-            } else {
-                $character = Character::where('name', '=', $eachCharacter->name)->first();
-                $usageCount = count(explode(',', $character->username));
-                $eachCharacter->usage_count = $usageCount;
-            }
-        }
-
-        $standardCharacters = $standardCharacters->toArray();
-        $userCharacters = $userCharacters->toArray();
-        $result = array_merge($standardCharacters, $userCharacters);
+        $result = $this->getDefaultCharacters();
 
         return $result;
     }
@@ -215,12 +199,14 @@ class HomeController extends Controller
             'creator' => $request->input('creator'),
             'username' => $request->input('username'),
             'owner_name' => $username,
-            'usage_count' => $request->input('usage_count'),
+            'usage_count' => 0,
             'show_flag' => $request->input('show_flag'),
             'standard_tag' => $request->input('standard_tag'),
             'summary' => $request->input('summary'),
         ]);
 
+        $character->save();
+        $character->order = $character->id;
         $character->save();
 
         $returnHeaders = $this->getHeaders();
@@ -332,7 +318,7 @@ class HomeController extends Controller
                 Value::create([
                     'character_id' => $eachCharacter->id,
                     'header_id' => 1,
-                    'value' => $eachCharacter->name
+                    'value' => $eachCharacter->name,
                 ]);
 
             }
@@ -344,7 +330,7 @@ class HomeController extends Controller
                     Value::create([
                         'character_id' => $eachCharacter->id,
                         'header_id' => $header->id,
-                        'value' => ''
+                        'value' => '',
                     ]);
                 }
             }
@@ -380,7 +366,7 @@ class HomeController extends Controller
                         Value::create([
                             'character_id' => $eachCharacter->id,
                             'header_id' => $header->id,
-                            'value' => ''
+                            'value' => '',
                         ]);
                     }
                     break;
@@ -418,25 +404,29 @@ class HomeController extends Controller
             'creator' => $request->input('creator'),
             'username' => $request->input('username'),
             'owner_name' => $username,
-            'usage_count' => $request->input('usage_count'),
+            'usage_count' => 0,
             'show_flag' => $request->input('show_flag'),
             'standard_tag' => $request->input('standard_tag'),
             'summary' => $request->input('summary'),
         ]);
 
         $character->save();
+
+        $character->order = $character->id;
+        $character->save();
+
         $headers = Header::where('user_id', '=', Auth::id())->get();
 
         $value = Value::create([
             'header_id' => 1,
             'character_id' => $character->id,
-            'value' => $character->name
+            'value' => $character->name,
         ]);
         foreach ($headers as $eachHeader) {
             $value = Value::create([
                 'header_id' => $eachHeader->id,
                 'character_id' => $character->id,
-                'value' => ''
+                'value' => '',
             ]);
         }
 
@@ -477,14 +467,25 @@ class HomeController extends Controller
 
         $value->save();
 
+        $character = Character::where('id', '=', $value->character_id)->first();
+
+        $character->usage_count = Value::where('character_id', '=', $character->id)
+            ->where('value', '<>', '')
+            ->where('value', '<>', null)
+            ->where('value', '<>', $character->name)
+            ->count();
+        $character->save();
+
         $returnHeaders = $this->getHeaders();
         $returnValues = $this->getValuesByCharacter();
         $returnCharacters = $this->getArrayCharacters();
+        $returnDefaultCharacters = $this->getDefaultCharacters();
         $data = [
             'error_input' => 0,
             'headers' => $returnHeaders,
             'characters' => $returnCharacters,
             'values' => $returnValues,
+            'defaultCharacters' => $returnDefaultCharacters
         ];
 
         return $data;
@@ -508,12 +509,15 @@ class HomeController extends Controller
                 'creator' => $eachCharacter['creator'],
                 'username' => $eachCharacter['username'],
                 'owner_name' => $username,
-                'usage_count' => $eachCharacter['usage_count'],
+                'usage_count' => 0,
                 'show_flag' => $eachCharacter['show_flag'],
                 'standard_tag' => $eachCharacter['standard_tag'],
                 'summary' => $eachCharacter['summary'],
             ]);
 
+            $character->save();
+
+            $character->order = $character->id;
             $character->save();
 
             if (!UserTag::where('user_id', '=', Auth::id())->where('tag_name', '=', $eachCharacter['standard_tag'])->first()) {
@@ -552,10 +556,13 @@ class HomeController extends Controller
         $returnHeaders = $this->getHeaders();
         $returnValues = $this->getValuesByCharacter();
         $returnCharacters = $this->getArrayCharacters();
+        $returnUserTags = UserTag::where('user_id', '=', Auth::id())->get();
+
         $data = [
             'headers' => $returnHeaders,
             'characters' => $returnCharacters,
             'values' => $returnValues,
+            'tags' => $returnUserTags
         ];
 
         return $data;
@@ -822,6 +829,36 @@ class HomeController extends Controller
             'values' => $returnValues,
             'defaultCharacters' => $returnDefaultCharacters,
             'userTags'  => $returnUserTags
+        ];
+
+        return $data;
+    }
+
+    public function changeOrder(Request $request) {
+        $characterId = $request->input('characterId');
+        $order = $request->input('order');
+        if ($order == 'up') {
+            $character = Character::where('id', '=', $characterId)->first();
+            $beforeCharacter = Character::where('order', '=', ($character->order - 1))->first();
+            $character->order = $character->order - 1;
+            $character->save();
+            $beforeCharacter->order = $beforeCharacter->order + 1;
+            $beforeCharacter->save();
+        } else if ($order == 'down') {
+            $character = Character::where('id', '=', $characterId)->first();
+            $afterCharacter = Character::where('order', '=', ($character->order + 1))->first();
+            $character->order = $character->order + 1;
+            $character->save();
+            $afterCharacter->order = $afterCharacter->order - 1;
+            $afterCharacter->save();
+        }
+
+        $returnValues = $this->getValuesByCharacter();
+        $returnCharacters = $this->getArrayCharacters();
+
+        $data = [
+            'values' => $returnValues,
+            'characters' => $returnCharacters
         ];
 
         return $data;

@@ -53,10 +53,10 @@
                                                 class="glyphicon glyphicon-remove"></span></a>
                                     </div>
                                 </div>
-                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 1 || !ch.standard.includes(user.name))">
+                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 1 || !ch.username.includes(user.name))">
                                     <h4><b><u>Selected Standard Characters</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
                                         <a class="btn btn-add display-block"
-                                               v-on:click="removeAllStandardCharacters()"><span
+                                               v-on:click="removeAllStandardFlag = true;"><span
                                             class="glyphicon glyphicon-remove"></span></a></h4>
 
                                     <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 1 || !eachCharacter.username.includes(user.name)" v-tooltip="eachCharacter.tooltip"
@@ -471,6 +471,30 @@
                         </div>
                     </transition>
                 </div>
+                <div v-if="removeAllStandardFlag" @close="removeAllStandardFlag = false">
+                    <transition name="modal">
+                        <div class="modal-mask character-modal">
+                            <div class="modal-wrapper">
+                                <div class="modal-container">
+                                    <div class="modal-header">
+                                        Confirm to Remove Standard Characters
+                                    </div>
+                                    <div class="modal-body">
+                                        <div>
+                                            Do you want to remove all standard characters from your matrix?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a class="btn btn-primary ok-btn"
+                                               v-on:click="removeAllStandardCharacters()">
+                                                &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
+                                            <a v-on:click="removeAllStandardFlag = false;" class="btn btn-danger">Cancel</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
             </form>
         </div>
     </div>
@@ -539,6 +563,7 @@
                 characterUsername: '',
                 oldCharacter: {},
                 enhanceFlag: false,
+                removeAllStandardFlag: false,
             }
         },
         components: {
@@ -765,7 +790,7 @@
                 var postCharacters = [];
                 for (var i = 0; i < app.defaultCharacters.length; i++) {
                     var character = app.defaultCharacters[i];
-                    if (!app.userCharacters.find(ch => ch.name == character.name)) {
+                    if (!app.userCharacters.find(ch => ch.name == character.name) && character.standard == 1) {
 //                        character.username = app.user.name;
                         character.show_flag = false;
                         if (character.name.startsWith('Length of')
@@ -1037,7 +1062,7 @@
                                         app.defaultCharacters = resp.data.defaultCharacters;
                                         app.refreshDefaultCharacters();
                                         app.refreshUserCharacters();
-                                        app.showTableForTab(app.userTags[0].tag_name);
+                                        app.showTableForTab(app.character.standard_tag);
 
                                         app.enhanceFlag = false;
                                         app.detailsFlag = false;
@@ -1232,7 +1257,9 @@
                                     app.userCharacters = resp.data.characters;
                                     app.headers = resp.data.headers;
                                     app.values = resp.data.values;
+                                    app.defaultCharacters = resp.data.defaultCharacters;
                                     app.refreshUserCharacters();
+                                    app.refreshDefaultCharacters();
                                 }
                             });
                     }
@@ -1259,10 +1286,12 @@
                 app.isLoading = true;
                 axios.post('/chrecorder/public/api/v1/character/remove-all-standard')
                     .then(function(resp) {
+                        app.removeAllStandardFlag = false;
                         app.isLoading = false;
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
+                        app.userTags = resp.data.tags;
                         app.refreshUserCharacters();
                     });
             },
@@ -1354,27 +1383,54 @@
                 var app = this;
                 var showedCharacters = app.userCharacters.filter(ch => ch.show_flag == true);
                 var index = showedCharacters.indexOf(showedCharacters.find(ch => ch.id == valueId));
-                app.swap(showedCharacters[index].id, false);
+                app.swap(showedCharacters[index].id, false, showedCharacters.length);
             },
             downUserValue(valueId) {
                 var app = this;
                 var showedCharacters = app.userCharacters.filter(ch => ch.show_flag == true);
                 var index = showedCharacters.indexOf(showedCharacters.find(ch => ch.id == valueId));
-                app.swap(showedCharacters[index].id, true);
+                app.swap(showedCharacters[index].id, true, showedCharacters.length);
 
             },
-            swap(valueId, directionFlag = true) {
+            swap(valueId, directionFlag = true, maxLength) {
                 var app = this;
-                var valueIndex = app.values.indexOf(app.values.find(value => value[0].character_id == valueId));
-
-                if ((directionFlag == true) && (valueIndex < app.values.length)) {
-                    var tmp = app.values[valueIndex];
-                    app.values.splice(valueIndex, 1);
-                    app.values.splice(valueIndex + 1, 0, tmp);
+                var showedValues = app.values.filter(function(eachValue) {
+                    return app.userCharacters.find(ch => ch.id == eachValue[0].character_id).show_flag == true;
+                });
+                var valueIndex = showedValues.indexOf(app.values.find(value => value[0].character_id == valueId));
+                if ((directionFlag == true) && (valueIndex < maxLength - 1)) {
+                    var tmp = showedValues[valueIndex];
+                    app.isLoading = true;
+                    console.log('tmp', tmp);
+//                    app.values.splice(valueIndex, 1);
+//                    app.values.splice(valueIndex + 1, 0, tmp);
+                    axios.post('/chrecorder/public/api/v1/character/change-order', {
+                        order: 'down',
+                        characterId: tmp[0].character_id,
+                    })
+                        .then(function(resp) {
+                            console.log('resp', resp);
+                            app.isLoading = false;
+                            app.values = resp.data.values;
+                            app.userCharacters = resp.data.characters;
+                            console.log('app.userCharacters', app.userCharacters);
+                            app.refreshUserCharacters();
+                        });
                 } else if ((directionFlag == false) && (valueIndex > 0)) {
-                    var tmp = app.values[valueIndex];
-                    app.values.splice(valueIndex, 1);
-                    app.values.splice(valueIndex - 1, 0, tmp);
+                    var tmp = showedValues[valueIndex];
+                    app.isLoading = true;
+//                    app.values.splice(valueIndex, 1);
+//                    app.values.splice(valueIndex - 1, 0, tmp);
+                    axios.post('/chrecorder/public/api/v1/character/change-order', {
+                        order: 'up',
+                        characterId: tmp[0].character_id,
+                    })
+                        .then(function(resp) {
+                            app.isLoading = false;
+                            app.values = resp.data.values;
+                            app.userCharacters = resp.data.characters;
+                            app.refreshUserCharacters();
+                        });
                 }
 
             },
@@ -1524,12 +1580,16 @@
                                 }
                             }
                         } else {
-                            if (app.descriptionText.slice(-4) == '</b>') {
-                                app.descriptionText += '; ';
-                            }
+//                            if (app.descriptionText.slice(-4) == '</b>') {
+//                                app.descriptionText += '; ';
+//                            }
                         }
                     }
-                    app.descriptionText = app.descriptionText.substring(0, app.descriptionText.length - 2);
+//                    app.descriptionText = app.descriptionText.substring(0, app.descriptionText.length - 2);
+//                    if (app.descriptionText[app.descriptionText.length - 1])
+                    if (app.descriptionText.slice(-2) == '; ') {
+                        app.descriptionText = app.descriptionText.substring(0, app.descriptionText.length - 2);
+                    }
                     app.descriptionText += '. ';
                     app.descriptionText += '<br/>';
 
@@ -1553,7 +1613,7 @@
                 var app = this;
                 var returnFlag = false;
                 for (var i = 0; i < tempArray.length; i++) {
-                    if (tempArray[i] != '') {
+                    if (tempArray[i] != '' && tempArray[i] != null && tempArray[i] != ' ' && tempArray[i] != undefined) {
                         returnFlag = true;
                     }
                 }

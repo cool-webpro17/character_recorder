@@ -40,5 +40,6 @@ Route::group([
 
         Route::get('usage/{characterId}',               ['as' => 'usage',                       'uses' => 'HomeController@usage']);
         Route::post('delete-header/{headerId}',         ['as' => 'delete-header',               'uses' => 'HomeController@deleteHeader']);
+        Route::post('change-order',                     ['as' => 'change-order',                'uses' => 'HomeController@changeOrder']);
     });
 });

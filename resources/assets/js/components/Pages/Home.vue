@@ -456,8 +456,11 @@
                                         Confirm Summary
                                     </div>
                                     <div class="modal-body">
-                                        <div>
+                                        <div v-if="character.summary">
                                             You've select <b>{{ character.summary }}</b> as the Summary for <i>{{ character.name }}</i>.
+                                        </div>
+                                        <div v-if="!character.summary">
+                                            Summary function not selected.
                                         </div>
                                         <div class="modal-footer">
                                             <a class="btn btn-primary ok-btn"
@@ -898,7 +901,11 @@
                 if (app.character.summary == ''
                     || app.character.summary == null
                     || app.character.summary == undefined) {
-                    app.character.summary = 'mean';
+                    if (app.checkHaveUnit(app.character.name)) {
+                        app.character.summary = 'mean';
+                    } else {
+                        app.character.summary = '';
+                    }
                 }
 
 //                if (app.character['id'] && !app.editFlag) {

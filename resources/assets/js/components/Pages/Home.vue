@@ -918,8 +918,7 @@
 
 
                 if (checkFields) {
-                    if (app.checkHaveUnit(app.character.name)
-                        && (app.character.standard_tag == null
+                    if ((app.character.standard_tag == null
                         || app.character.standard_tag == ''
                         || app.character.standard_tag == undefined)) {
                         app.showDetails('tag', app.metadataFlag);

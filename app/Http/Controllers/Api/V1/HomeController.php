@@ -894,7 +894,10 @@ class HomeController extends Controller
 
     public function getUsage(Request $request, $characterId) {
         $character = Character::where('id', '=', $characterId)->first();
-        $usage = $character->usage_count;
+        $usage = 0;
+        if ($character) {
+            $usage = $character->usage_count;
+        }
 
         $data = [
             'usage_count' => $usage

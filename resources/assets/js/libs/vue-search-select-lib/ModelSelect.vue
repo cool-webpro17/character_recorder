@@ -111,10 +111,8 @@
             },
             textClass () {
                 if (!this.selectedOption && this.placeholder) {
-                    console.log('123');
                     return 'default'
                 } else {
-                    console.log('456');
                     return ''
                 }
             },

@@ -772,6 +772,7 @@
                         case 'usage':
                             axios.get('/chrecorder/public/api/v1/get-usage/' + app.character.id)
                                 .then(function(resp) {
+                                    app.parentData = [];
                                     app.parentData[0] = resp.data.usage_count;
                                     app.parentData[1] = app.user.name;
                                     app.parentData[2] = app.taxonName;
@@ -877,6 +878,9 @@
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
+                        if (app.userCharacters.length == 0) {
+                            app.matrixShowFlag = false;
+                        }
                         app.refreshUserCharacters();
                     });
             },
@@ -1319,6 +1323,9 @@
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
                         app.userTags = resp.data.tags;
+                        if (app.userCharacters.length == 0) {
+                            app.matrixShowFlag = false;
+                        }
                         app.refreshUserCharacters();
                     });
             },

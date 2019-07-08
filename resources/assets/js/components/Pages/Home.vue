@@ -839,6 +839,9 @@
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
+                        if (app.userCharacters.length == 0) {
+                            app.matrixShowFlag = false;
+                        }
                         app.refreshUserCharacters();
 
                     });
@@ -854,6 +857,9 @@
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
+                        if (app.userCharacters.length == 0) {
+                            app.matrixShowFlag = false;
+                        }
                         if (!app.userCharacters.find(ch => ch.standard_tag == oldUserTag)) {
                             var jsonUserTag = {
                                 user_id: app.user.id,
@@ -1379,6 +1385,9 @@
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
                         app.userTags = resp.data.userTags;
+                        if (app.userCharacters.length == 0) {
+                            app.matrixShowFlag = false;
+                        }
                         app.refreshUserCharacters();
                     });
             },

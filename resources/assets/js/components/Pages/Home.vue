@@ -898,7 +898,11 @@
                 if (app.character.summary == ''
                     || app.character.summary == null
                     || app.character.summary == undefined) {
-                    app.character.summary = 'mean';
+                    if (app.checkHaveUnit(app.character.name)) {
+                        app.character.summary = 'mean';
+                    } else {
+                        app.character.summary = '';
+                    }
                 }
 
 //                if (app.character['id'] && !app.editFlag) {

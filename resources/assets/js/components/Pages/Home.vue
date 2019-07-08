@@ -953,12 +953,7 @@
                             checkFields = false;
                         }
 
-                        if (!app.character['unit']
-                            && !app.checkHaveUnit(app.character.name)
-                            && !app.character.name.startsWith('Number of')
-                            && !app.character.name.startsWith('Ratio of') ) {
-                            checkFields = false;
-                        } else if (!app.character['unit'] && app.checkHaveUnit(app.character.name)) {
+                        if (!app.character['unit'] && app.checkHaveUnit(app.character.name)) {
                             app.character.unit = 'cm';
                             if (!app.character['summary']) {
                                 app.character.summary = 'mean';
@@ -969,8 +964,12 @@
 //                    if (app.character['id']) {
 //                        delete app.character['id'];
 //                    }
+                            if (app.checkHaveUnit(app.character.name)) {
+                                app.confirmMethod = true;
+                            } else {
+                                app.confirmTag = true;
+                            }
 
-                            app.confirmMethod = true;
                         } else {
                             app.showDetails('unit', app.metadataFlag);
                         }

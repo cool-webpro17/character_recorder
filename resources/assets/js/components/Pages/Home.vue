@@ -774,6 +774,7 @@
                                 .then(function(resp) {
                                     app.parentData[0] = resp.data.usage_count;
                                     app.parentData[1] = app.user.name;
+                                    app.parentData[2] = app.taxonName;
                                     app.currentMetadata = usage;
                                 });
 

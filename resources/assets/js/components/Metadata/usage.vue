@@ -5,7 +5,7 @@
         </div>
         <div class="col-md-12" v-if="childData[0] != 0 && childData[0] != '0'" >
             <div style="border: 1px solid;">
-                {{ childData[0]}} times for {{ character_name }} by {{ childData[1] }}
+                {{ childData[0]}} times for {{ childData[2] }} by {{ childData[1] }}
             </div>
             <!--<select style="width: 100%; height: 300px;" multiple>-->
                 <!--<option v-for="eachData in childData">-->

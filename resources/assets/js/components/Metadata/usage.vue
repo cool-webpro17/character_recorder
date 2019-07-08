@@ -3,12 +3,15 @@
         <div class="col-md-12" style="font-size: 20px;">
             "{{ character_name }}" has been used in the following descriptions:
         </div>
-        <div class="col-md-12">
-            <select style="width: 100%; height: 300px;" multiple>
-                <option v-for="eachData in childData">
-                    {{ eachData }}
-                </option>
-            </select>
+        <div class="col-md-12" v-if="childData[0] != 0 && childData[0] != '0'" >
+            <div style="border: 1px solid;">
+                {{ childData[0]}} times for {{ character_name }} by {{ childData[1] }}
+            </div>
+            <!--<select style="width: 100%; height: 300px;" multiple>-->
+                <!--<option v-for="eachData in childData">-->
+                    <!--{{ eachData }}-->
+                <!--</option>-->
+            <!--</select>-->
         </div>
     </div>
 </template>
@@ -18,7 +21,7 @@
     export default {
         data: function () {
             return {
-                childData: '',
+                childData: [],
                 character_name: null,
                 viewFlag: false,
             }

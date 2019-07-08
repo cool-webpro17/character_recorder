@@ -1199,16 +1199,16 @@
                             app.headers = resp.data.headers;
                             app.values = resp.data.values;
                             console.log('app.userTags', app.userTags);
-                            app.showTableForTab(app.userTags[0].tag_name);
-
+                            axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
+                                .then(function(resp) {
+                                    app.userTags = resp.data;
+                                    app.showTableForTab(app.userTags[0].tag_name);
+                                });
                             app.refreshUserCharacters(true);
 
                             console.log('userCharacters', app.userCharacters);
                         });
-                    axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                        .then(function(resp) {
-                            app.userTags = resp.data;
-                        });
+
                 } else {
                     app.isLoading = false;
                     alert("You need to fill the taxon name and specimen count in the input box!")

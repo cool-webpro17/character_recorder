@@ -878,4 +878,28 @@ class HomeController extends Controller
 
         return $data;
     }
+
+    public function updateHeader(Request $request) {
+        $header = Header::where('id', '=', $request->input('id'))->first();
+        $header->header = $request->input('header');
+        $header->save();
+        $returnHeaders = $this->getHeaders();
+
+        $data = [
+            'headers' => $returnHeaders,
+        ];
+
+        return $data;
+    }
+
+    public function getUsage(Request $request, $characterId) {
+        $character = Character::where('id', '=', $characterId)->first();
+        $usage = $character->usage_count;
+
+        $data = [
+            'usage_count' => $usage
+        ];
+
+        return $data;
+    }
 }

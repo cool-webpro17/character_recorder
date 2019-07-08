@@ -116,7 +116,7 @@
                                         Character
                                     </th>
                                     <th v-if="header.id != 1" v-for="header in headers" style="min-width: 200px;">
-                                        <input class="th-input" v-bind:value="header.header"/>
+                                        <input class="th-input" v-on:blur="saveHeader(header)" v-model="header.header"/>
                                         <a class="btn btn-add display-block"
                                            v-on:click="deleteHeader(header.id)"><span
                                                 class="glyphicon glyphicon-remove"></span></a>
@@ -770,8 +770,13 @@
                             app.currentMetadata = creator;
                             break;
                         case 'usage':
-                            app.parentData = app.character.usage;
-                            app.currentMetadata = usage;
+                            axios.get('/chrecorder/public/api/v1/get-usage/' + app.character.id)
+                                .then(function(resp) {
+                                    app.parentData[0] = resp.data.usage_count;
+                                    app.parentData[1] = app.user.name;
+                                    app.currentMetadata = usage;
+                                });
+
                             break;
                         case 'history':
                             app.parentData = app.character.history;
@@ -949,10 +954,15 @@
                         }
 
                         if (!app.character['unit']
-                            && app.checkHaveUnit(app.character.name)
+                            && !app.checkHaveUnit(app.character.name)
                             && !app.character.name.startsWith('Number of')
                             && !app.character.name.startsWith('Ratio of') ) {
                             checkFields = false;
+                        } else if (!app.character['unit'] && app.checkHaveUnit(app.character.name)) {
+                            app.character.unit = 'cm';
+                            if (!app.character['summary']) {
+                                app.character.summary = 'mean';
+                            }
                         }
 
                         if (checkFields) {
@@ -1551,8 +1561,13 @@
                                             minPercentileValue = tempRpArray[tempRpArray.length / 2 - 1];
                                             maxPercentileValue = tempRpArray[tempRpArray.length / 2];
                                         } else {
-                                            minPercentileValue = tempRpArray[tempRpArray.length / 2 - 1.5];
-                                            maxPercentileValue = tempRpArray[tempRpArray.length / 2 + 0.5];
+                                            if (tempRpArray.length == 1) {
+                                                minPercentileValue = tempRpArray[0];
+                                                maxPercentileValue = tempRpArray[0];
+                                            } else {
+                                                minPercentileValue = tempRpArray[tempRpArray.length / 2 - 1.5];
+                                                maxPercentileValue = tempRpArray[tempRpArray.length / 2 + 0.5];
+                                            }
                                         }
                                         app.descriptionText += '(' + minValue + '-)' + minPercentileValue + '-' + maxPercentileValue + '(-' + maxValue + ') ';
 
@@ -1566,7 +1581,7 @@
                                         }
                                         tempMedianArray.sort((a, b) => a - b);
                                         if (tempMedianArray.length % 2 == 0) {
-                                            app.descriptionText += (tempMedianArray[tempMedianArray.length / 2 - 1] + tempMedianArray[tempMedianArray.length / 2]);
+                                            app.descriptionText += (parseFloat(tempMedianArray[tempMedianArray.length / 2 - 1]) + parseFloat(tempMedianArray[tempMedianArray.length / 2])) / 2;
                                         } else {
                                             app.descriptionText += tempMedianArray[tempMedianArray.length / 2 - 0.5];
                                         }
@@ -1584,7 +1599,7 @@
                                             }
                                         }
 
-                                        var avg = sum/arrayLength;
+                                        var avg = parseFloat(sum/arrayLength).toFixed(1);
                                         app.descriptionText += avg;
                                         if (filteredCharacters[j].unit) {
                                             app.descriptionText += filteredCharacters[j].unit
@@ -1656,6 +1671,14 @@
                     }
                 }
                 return returnFlag;
+            },
+            saveHeader(header) {
+                var app = this;
+                console.log('header', header.header);
+                axios.post('/chrecorder/public/api/v1/update-header', header)
+                    .then(function(resp) {
+                        app.headers = resp.data.headers;
+                    });
             },
             importMatrix() {
 

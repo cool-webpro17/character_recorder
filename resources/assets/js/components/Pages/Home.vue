@@ -40,6 +40,11 @@
                                     </div>
                                 </div>
                                 <hr style="border-top: 2px solid; margin-top: 20px;">
+                                <div class="margin-top-10 text-right">
+                                    <a class="btn btn-primary" v-on:click="generateMatrix()" style="width: 200px;">Generate Matrix</a>
+                                    <a class="btn btn-primary" v-on:click="importMatrix()" style="width: 200px; background-color: grey; border-color: grey;">Import (CR) Matrix</a>
+                                    <a class="btn btn-primary" v-on:click="collapsedFlag = true;" style="width: 40px;"><span class="glyphicon glyphicon-chevron-up"></span></a>
+                                </div>
                                 <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 0 && ch.username.includes(user.name))">
                                     <h4><b><u>Characters selected</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <a class="btn btn-add display-block" v-on:click="removeAllCharacters()"><span
@@ -70,11 +75,7 @@
                                                 <!--X </a>-->
                                     </div>
                                 </div>
-                                <div class="margin-top-10 text-right">
-                                    <a class="btn btn-primary" v-on:click="generateMatrix()" style="width: 200px;">Generate Matrix</a>
-                                    <a class="btn btn-primary" v-on:click="importMatrix()" style="width: 200px; background-color: grey; border-color: grey;">Import (CR) Matrix</a>
-                                    <a class="btn btn-primary" v-on:click="collapsedFlag = true;" style="width: 40px;"><span class="glyphicon glyphicon-chevron-up"></span></a>
-                                </div>
+
                             </div>
                         </div>
                         <div v-if="collapsedFlag == true">

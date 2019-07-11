@@ -7,7 +7,17 @@ Vue.use(Vuex);
 
 //======= vuex store start ===========
 const store = new Vuex.Store({
+    state: {
+        colorTreeData: {},
+    },
+    mutations: {
+        INIT: (state) => {
+            state.colorTreeData = {};
+        },
+    },
+    actions: {
 
+    }
 });
 //======= vuex store end ===========
 export default store

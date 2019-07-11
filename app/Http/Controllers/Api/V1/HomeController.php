@@ -11,6 +11,7 @@ use App\UserTag;
 use App\User;
 use App\Header;
 use App\Value;
+use App\ColorDetails;
 
 class HomeController extends Controller
 {
@@ -901,6 +902,15 @@ class HomeController extends Controller
 
         $data = [
             'usage_count' => $usage
+        ];
+
+        return $data;
+    }
+    public function getColorDetails(Request $request, $valueId) {
+        $colorDetails = ColorDetails::where('value_id', '=', $valueId)->get();
+
+        $data = [
+            'colorDetails' => $colorDetails
         ];
 
         return $data;

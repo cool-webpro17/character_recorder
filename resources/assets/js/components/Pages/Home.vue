@@ -177,7 +177,7 @@
                                         </div>
                                     </td>
                                     <td v-if="value.header_id != 1" v-for="value in row">
-                                        <input class="td-input" v-model="value.value" v-on:focus=""
+                                        <input class="td-input" v-model="value.value" v-on:focus="focusedValue(value)"
                                                v-on:blur="saveItem($event, value)"/>
                                     </td>
                                 </tr>
@@ -499,6 +499,63 @@
                         </div>
                     </transition>
                 </div>
+                <div v-if="colorDetailsFlag" @close="colorDetailsFlag = false">
+                    <transition name="modal">
+                        <div class="modal-mask">
+                            <div class="modal-wrapper">
+                                <div class="modal-container">
+                                    <div class="modal-header">
+                                        Value Details
+                                    </div>
+                                    <div class="modal-body">
+                                        <div v-for="eachColor in colorDetails">
+                                            <div>
+                                                <input v-on:focus="changeColorSection(eachColor, 'negation')" style="width: 90px;" v-model="eachColor.negation" placeholder="not">
+                                                <input v-on:focus="changeColorSection(eachColor, 'pre_constraint')" style="width: 90px;" v-model="eachColor.pre_constraint">
+                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'brightness')" style="width: 90px;" v-model="eachColor.brightness" placeholder="bright">
+                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'reflectance')" style="width: 90px;" v-model="eachColor.reflectance" placeholder="shinny">
+                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'saturation')" style="width: 90px;" v-model="eachColor.saturation" placeholder="pale">
+                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'colored')" style="width: 90px;" v-model="eachColor.colored" placeholder="blue">
+                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'multi_colored')" style="width: 90px;" v-model="eachColor.multi_colored" placeholder="stripped">
+                                                <input v-on:focus="changeColorSection(eachColor, 'post_constraint')" style="width: 90px;" v-model="eachColor.post_constraint">
+                                            </div>
+                                            <div v-if="eachColor.detailFlag == 'negation'" style="margin-top: 10px;">
+                                                <input type="radio" id="not" v-model="eachColor.negation" value="Not"/> <label for="not">Not</label> <br/>
+                                                <input type="radio" id="unselect-not" v-model="eachColor.negation" value=""/> <label for="unselect-not">Unselect Not</label>
+                                            </div>
+                                            <div v-if="(eachColor.detailFlag == 'brightness'
+                                            || eachColor.detailFlag == 'reflectance'
+                                            || eachColor.detailFlag == 'saturation'
+                                            || eachColor.detailFlag == 'colored'
+                                            || eachColor.detailFlag == 'multi_colored') && colorExistFlag"  style="margin-top: 10px;">
+                                                <input style="width: 300px;" v-model="colorSearchText" placeholder="Enter a term to filter the term tree"/>
+                                                <tree
+                                                        :data="treeData"
+                                                        :options="colorTreeOption"
+                                                        :filter="colorSearchText"
+                                                        ref="tree"
+                                                        @node:selected="onTreeNodeSelected">
+                                                    <div slot-scope="{ node }" class="node-container">
+                                                        <div class="node-text" v-tooltip="node.text">{{ node.text }}</div>
+                                                    </div>
+                                                </tree>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a class="btn btn-primary ok-btn"
+                                           v-on:click="saveValue()">
+                                             Save  </a>
+                                        <a class="btn btn-primary ok-btn"
+                                           v-on:click="saveNewValue()">
+                                             Save & New  </a>
+                                        <a v-on:click="colorDetailsFlag = false;" class="btn btn-danger">Cancel</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
             </form>
         </div>
     </div>
@@ -515,17 +572,30 @@
     import creator from '../Metadata/creator.vue';
     import usage from '../Metadata/usage.vue';
     import history from '../Metadata/history.vue';
-    
+    import { mapState, mapGetters, mapMutations } from 'vuex';
+
     import {ModelSelect} from '../../libs/vue-search-select-lib'
-    Vue.use({ModelSelect});
 
     import Loading from 'vue-loading-overlay';
     import 'vue-loading-overlay/dist/vue-loading.css';
+
+    import LiquorTree from 'liquor-tree';
+
+    Vue.use(LiquorTree);
+    Vue.use({ModelSelect});
+
 
     export default {
         props: [
             'user',
         ],
+        computed: {
+            ...mapState([
+                'colorTreeData',
+            ]),
+            ...mapGetters([
+            ]),
+        },
         data: function () {
             return {
                 character: {},
@@ -568,6 +638,18 @@
                 oldCharacter: {},
                 enhanceFlag: false,
                 removeAllStandardFlag: false,
+                colorDetailsFlag: false,
+                colorDetails: [],
+                treeData: this.colorTreeData,
+                colorSearchText: null,
+                colorTreeOption:{
+                    checkbox: true,
+                    multiple: true,
+                    autoCheckChildren: false,
+                    parentSelect: false,
+                    checkOnSelect: true
+                },
+                colorExistFlag: false,
             }
         },
         components: {
@@ -1278,35 +1360,7 @@
             saveItem(event, value) {
                 var app = this;
                 var currentCharacter = app.userCharacters.find(ch => ch.id == value.character_id);
-                if (currentCharacter.name.startsWith('Length of')
-                    || currentCharacter.name.startsWith('Width of')
-                    || currentCharacter.name.startsWith('Number of')
-                    || currentCharacter.name.startsWith('Depth of')
-                    || currentCharacter.name.startsWith('Diameter of')
-                    || currentCharacter.name.startsWith('Count of')
-                    || currentCharacter.name.startsWith('Distance between')) {
-                    if (isNaN(value.value) || value.value < 0) {
-                        alert('Value should be only positive number.');
-                        value.value = '';
-                    } else {
-                        axios.post('/chrecorder/public/api/v1/character/update', value)
-                            .then(function(resp) {
-                                console.log('saveItem', resp.data);
-                                if (resp.data.error_input == 1) {
-                                    event.target.style.color = 'red';
-                                } else {
-                                    event.target.style.color = 'black';
-                                    app.userCharacters = resp.data.characters;
-                                    app.headers = resp.data.headers;
-                                    app.values = resp.data.values;
-                                    app.defaultCharacters = resp.data.defaultCharacters;
-                                    app.refreshUserCharacters();
-                                    app.refreshDefaultCharacters();
-                                }
-                            });
-                    }
-
-                } else {
+                if (app.checkHaveUnit(currentCharacter.name)) {
                     axios.post('/chrecorder/public/api/v1/character/update', value)
                         .then(function(resp) {
                             console.log('saveItem', resp.data);
@@ -1323,6 +1377,7 @@
                             }
                         });
                 }
+
 
             },
             removeAllStandardCharacters() {
@@ -1655,14 +1710,8 @@
                                     app.descriptionText += 'sometimes hairy at base or middle part, sometimes ciliate, or occasionally smooth throughout; '
                                 }
                             }
-                        } else {
-//                            if (app.descriptionText.slice(-4) == '</b>') {
-//                                app.descriptionText += '; ';
-//                            }
                         }
                     }
-//                    app.descriptionText = app.descriptionText.substring(0, app.descriptionText.length - 2);
-//                    if (app.descriptionText[app.descriptionText.length - 1])
                     if (app.descriptionText.slice(-2) == '; ') {
                         app.descriptionText = app.descriptionText.substring(0, app.descriptionText.length - 2);
                     }
@@ -1703,9 +1752,104 @@
                         app.headers = resp.data.headers;
                     });
             },
+            saveValue() {
+
+            },
+            saveNewValue() {
+
+            },
+            focusedValue(value) {
+                var app = this;
+
+                var currentCharacter = app.userCharacters.find(ch => ch.id == value.character_id);
+                if (!app.checkHaveUnit(currentCharacter.name)) {
+                    if (currentCharacter.name.startsWith('Color')) {
+                        app.colorDetailsFlag = true;
+                        axios.get('/chrecorder/public/api/v1/get-color-details/' + value.id)
+                            .then(function(resp) {
+                                console.log('get-color resp', resp.data);
+                                app.colorDetails = resp.data.colorDetails;
+                                if (app.colorDetails.length == 0) {
+                                    app.colorDetails.push({detailFlag: null});
+                                }
+                            });
+                    } else {
+
+                    }
+
+                }
+            },
+            changeColorSection(color, flag) {
+                var app = this;
+
+                color.detailFlag = null;
+                app.colorExistFlag = false;
+
+                if (app.checkHaveColorValueSet(flag)) {
+                    axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + color[flag])
+                        .then(function(resp) {
+                            console.log('subclass resp', resp.data);
+//                            app.colorTreeData = [];
+                            app.$store.state.colorTreeData = resp.data;
+                            console.log('colorTreeData', app.$store.state.colorTreeData);
+
+//                            app.$refs.tree.model = app.colorTreeData;
+//                            console.log('colorTreeData', app.colorTreeData);
+                            color.detailFlag = flag;
+                            if (resp.data.childData == [{}, {}]) {
+
+                            } else {
+                                app.colorExistFlag = true;
+                            }
+                        });
+                    switch (flag) {
+                        case 'brightness':
+
+                            break;
+                        case 'reflectance':
+
+                            break;
+                        case 'saturation':
+
+                            break;
+                        case 'colored':
+
+                            break;
+                        case 'multi_colored':
+
+                            break;
+                        default:
+                            break;
+                    }
+                } else {
+                    color.detailFlag = flag;
+                }
+                console.log('flag', flag);
+            },
+            onTreeNodeSelected(node) {
+                console.log('treeNode', node);
+            },
+            checkHaveColorValueSet(text) {
+                if (text == 'brightness'
+                    || text == 'reflectance'
+                    || text == 'saturation'
+                    || text == 'colored'
+                    || text == 'multi_colored') {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
             importMatrix() {
 
             },
+        },
+        watch: {
+            colorTreeData( newData ) {
+                this.treeData = newData;
+                // do data transformations etc
+                // trigger UI refresh
+            }
         },
         created() {
             var app = this;

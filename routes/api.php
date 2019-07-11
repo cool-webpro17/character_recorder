@@ -21,6 +21,7 @@ Route::group([
     Route::post('export-description',                   ['as' => 'export_description',          'uses' => 'HomeController@exportDescription']);
     Route::post('update-header',                        ['as' => 'update_header',               'uses' => 'HomeController@updateHeader']);
     Route::get('get-usage/{characterId}',               ['as' => 'get_usage',                   'uses' => 'HomeController@getUsage']);
+    Route::get('get-color-details/{valueId}',           ['as' => 'get_color_details',           'uses' => 'HomeController@getColorDetails']);
 
     Route::group([
         'prefix' => '/character',

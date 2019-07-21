@@ -512,7 +512,7 @@
                                             <div>
                                                 <input v-on:focus="changeColorSection(eachColor, 'negation', $event)"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachColor.negation" placeholder="not">
+                                                       v-model="eachColor.negation" placeholder="">
                                                 <input v-on:focus="changeColorSection(eachColor, 'pre_constraint', $event)"
                                                        style="width: 90px;"
                                                        v-model="eachColor.pre_constraint"
@@ -631,7 +631,7 @@
                                             <div>
                                                 <input v-on:focus="changeColorSection(eachValue, 'negation', $event)"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachValue.negation" placeholder="not">
+                                                       v-model="eachValue.negation" placeholder="">
                                                 <input v-on:focus="changeColorSection(eachValue, 'pre_constraint', $event)"
                                                        style="width: 90px;"
                                                        v-model="eachValue.pre_constraint"
@@ -2217,7 +2217,7 @@
                     event.target.placeholder = '';
                 } else if (app.checkHaveColorValueSet(flag)) {
                     $(":input").css('background', '#ffffff');
-                    event.target.style.background = '#efdddd';
+                    event.target.style.background = '#82c8fa';
                 }
                 color.detailFlag = null;
                 app.colorExistFlag = false;
@@ -2278,16 +2278,19 @@
                 var app = this;
                 app.nonColorSearchText = '';
 
+                var characterId = app.values.find(eachValue => eachValue.find(eachItem => eachItem.id == nonColor.value_id) != null)[0].character_id;
+                var characterName = app.userCharacters.find(ch => ch.id == characterId).name;
+                console.log('characterName', characterName);
+
+                var searchText = characterName.split(' ');
+
                 if (flag == 'negation') {
                     event.target.placeholder = '';
                 } else if (flag == 'main_value') {
                     event.target.placeholder = searchText[0];
                 }
 
-                var characterId = app.values.find(eachValue => eachValue.find(eachItem => eachItem.id == nonColor.value_id) != null)[0].character_id;
-                var characterName = app.userCharacters.find(ch => ch.id == characterId).name;
-                console.log('characterName', characterName);
-                var searchText = characterName.split(' ');
+
 
 
                 axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + searchText[0].toLowerCase())

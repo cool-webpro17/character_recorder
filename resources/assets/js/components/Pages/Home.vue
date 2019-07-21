@@ -508,20 +508,49 @@
                                         Value Details
                                     </div>
                                     <div class="modal-body">
-                                        <div v-for="eachColor in colorDetails">
+                                        <div v-for="(eachColor, index) in colorDetails">
                                             <div>
-                                                <input v-on:focus="changeColorSection(eachColor, 'negation')" style="width: 90px;" v-model="eachColor.negation" placeholder="not">
-                                                <input v-on:focus="changeColorSection(eachColor, 'pre_constraint')" style="width: 90px;" v-model="eachColor.pre_constraint">
-                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'brightness')" style="width: 90px;" v-model="eachColor.brightness" placeholder="bright">
-                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'reflectance')" style="width: 90px;" v-model="eachColor.reflectance" placeholder="shinny">
-                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'saturation')" style="width: 90px;" v-model="eachColor.saturation" placeholder="pale">
-                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'colored')" style="width: 90px;" v-model="eachColor.colored" placeholder="blue">
-                                                <input v-on:keyup.enter="changeColorSection(eachColor, 'multi_colored')" style="width: 90px;" v-model="eachColor.multi_colored" placeholder="stripped">
-                                                <input v-on:focus="changeColorSection(eachColor, 'post_constraint')" style="width: 90px;" v-model="eachColor.post_constraint">
+                                                <input v-on:focus="changeColorSection(eachColor, 'negation')"
+                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
+                                                       v-model="eachColor.negation" placeholder="not">
+                                                <input v-on:focus="changeColorSection(eachColor, 'pre_constraint')"
+                                                       style="width: 90px;"
+                                                       v-model="eachColor.pre_constraint"
+                                                       list="pre_list">
+                                                <datalist id="pre_list" v-if="preList.length > 0">
+                                                    <option v-for="each in preList" :value="each">{{ each }}</option>
+                                                </datalist>
+                                                <input v-on:focus="changeColorSection(eachColor, 'brightness')"
+                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'brightness')"
+                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
+                                                       v-model="eachColor.brightness" placeholder="bright">
+                                                <input v-on:focus="changeColorSection(eachColor, 'reflectance')"
+                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'reflectance')"
+                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
+                                                       v-model="eachColor.reflectance" placeholder="shinny">
+                                                <input v-on:focus="changeColorSection(eachColor, 'saturation')"
+                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'saturation')"
+                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
+                                                       v-model="eachColor.saturation" placeholder="pale">
+                                                <input v-on:focus="changeColorSection(eachColor, 'colored')"
+                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'colored')"
+                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
+                                                       v-model="eachColor.colored" placeholder="blue">
+                                                <input v-on:focus="changeColorSection(eachColor, 'multi_colored')"
+                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'multi_colored')"
+                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
+                                                       v-model="eachColor.multi_colored" placeholder="stripped">
+                                                <input v-on:focus="changeColorSection(eachColor, 'post_constraint')"
+                                                       style="width: 90px;"
+                                                       v-model="eachColor.post_constraint"
+                                                       list="post_list">
+                                                <datalist id="post_list" v-if="postList.length > 0">
+                                                    <option v-for="each in postList" :value="each">{{ each }}</option>
+                                                </datalist>
                                             </div>
                                             <div v-if="eachColor.detailFlag == 'negation'" style="margin-top: 10px;">
-                                                <input type="radio" id="not" v-model="eachColor.negation" value="Not"/> <label for="not">Not</label> <br/>
-                                                <input type="radio" id="unselect-not" v-model="eachColor.negation" value=""/> <label for="unselect-not">Unselect Not</label>
+                                                <input type="radio" id="not" v-model="eachColor.negation" v-bind:value="'Not'"/> <label for="not">Not</label> <br/>
+                                                <input type="radio" id="unselect-not" v-model="eachColor.negation" v-bind:value="''"/> <label for="unselect-not">Unselect Not</label>
                                             </div>
                                             <div v-if="(eachColor.detailFlag == 'brightness'
                                             || eachColor.detailFlag == 'reflectance'
@@ -540,16 +569,138 @@
                                                     </div>
                                                 </tree>
                                             </div>
+                                            <div v-if="(eachColor.detailFlag == 'brightness'
+                                            || eachColor.detailFlag == 'reflectance'
+                                            || eachColor.detailFlag == 'saturation'
+                                            || eachColor.detailFlag == 'colored'
+                                            || eachColor.detailFlag == 'multi_colored') && !colorExistFlag"  style="margin-top: 10px;">
+
+                                                <div v-if="searchColorFlag == 1">
+                                                    <div v-for="eachSynonym in colorSynonyms">
+                                                        <input type="radio" v-bind:id="eachSynonym.term" v-bind:value="eachSynonym.term" v-model="eachColor[eachColor.detailFlag]">
+                                                        <label v-bind:for="eachSynonym.term">{{ eachSynonym.term }} ({{ eachSynonym.parentTerm }}): </label> {{ eachSynonym.definition }}
+                                                        <a class="btn" v-on:click="expandCommentSection(eachSynonym, eachColor.detailFlag)">C</a>
+                                                        <div v-if="eachSynonym.commentFlag == true">
+                                                            Description: <input v-model="colorComment[index][eachColor.detailFlag]" style="width: 100%;">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div v-if="searchColorFlag == 2">
+                                                    Here is what we known about <b>{{ exactColor.term }}</b>
+                                                    Definition: <input v-model="colorDefinition[index][eachColor.detailFlag]" style="width: 70%;">
+
+                                                </div>
+                                                <div v-if="searchColorFlag !=2 ">
+                                                    <input type="radio" id="user-defined" v-bind:value="defaultColorValue + '(user defined)'" v-on:change="selectUserDefinedTerm(eachColor, eachColor.detailFlag, defaultColorValue)" v-model="eachColor[eachColor.detailFlag]">
+                                                    <label for="user-defined">Use a different term of my own:</label>
+                                                    <div for="user-defined">
+                                                        Taxon: <input v-model="colorTaxon[index][eachColor.detailFlag]">
+                                                        Sample Text: <input v-model="colorSampleText[index][eachColor.detailFlag]">
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
                                         <a class="btn btn-primary ok-btn"
-                                           v-on:click="saveValue()">
+                                           v-on:click="saveColorValue()">
                                              Save  </a>
                                         <a class="btn btn-primary ok-btn"
-                                           v-on:click="saveNewValue()">
+                                           v-on:click="saveNewColorValue()">
                                              Save & New  </a>
                                         <a v-on:click="colorDetailsFlag = false;" class="btn btn-danger">Cancel</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
+                <div v-if="nonColorDetailsFlag" @close="nonColorDetailsFlag = false">
+                    <transition name="modal">
+                        <div class="modal-mask">
+                            <div class="modal-wrapper">
+                                <div class="modal-container">
+                                    <div class="modal-header">
+                                        Value Details
+                                    </div>
+                                    <div class="modal-body">
+                                        <div v-for="(eachValue, index) in nonColorDetails">
+                                            <div>
+                                                <input v-on:focus="changeColorSection(eachValue, 'negation')"
+                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
+                                                       v-model="eachValue.negation" placeholder="not">
+                                                <input v-on:focus="changeColorSection(eachValue, 'pre_constraint')"
+                                                       style="width: 90px;"
+                                                       v-model="eachValue.pre_constraint"
+                                                       list="pre_non_list">
+                                                <datalist id="pre_non_list" v-if="preList.length > 0">
+                                                    <option v-for="each in preList" :value="each">{{ each }}</option>
+                                                </datalist>
+                                                <input v-on:focus="changeNonColorSection(eachValue, 'main_value')"
+                                                       v-on:keyup.enter="searchNonColorSelection(eachValue, 'main_value')"
+                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
+                                                       v-model="eachValue.main_value" placeholder="texture">
+                                                <input v-on:focus="changeColorSection(eachValue, 'post_constraint')"
+                                                       style="width: 90px;"
+                                                       v-model="eachValue.post_constraint"
+                                                       list="post_non_list">
+                                                <datalist id="post_non_list" v-if="postList.length > 0">
+                                                    <option v-for="each in postList" :value="each">{{ each }}</option>
+                                                </datalist>
+                                            </div>
+                                            <div v-if="eachValue.detailFlag == 'negation'" style="margin-top: 10px;">
+                                                <input type="radio" id="non-not" v-model="eachValue.negation" v-bind:value="'Not'"/> <label for="non-not">Not</label> <br/>
+                                                <input type="radio" id="non-unselect-not" v-model="eachValue.negation" v-bind:value="''"/> <label for="non-unselect-not">Unselect Not</label>
+                                            </div>
+                                            <div v-if="(eachValue.detailFlag == 'main_value') && nonColorExistFlag"  style="margin-top: 10px;">
+                                                <input style="width: 300px;" v-model="nonColorSearchText" placeholder="Enter a term to filter the term tree"/>
+                                                <tree
+                                                        :data="textureTreeData"
+                                                        :options="colorTreeOption"
+                                                        :filter="nonColorSearchText"
+                                                        ref="tree"
+                                                        @node:selected="onTextureTreeNodeSelected">
+                                                    <div slot-scope="{ node }" class="node-container">
+                                                        <div class="node-text" v-tooltip="node.text">{{ node.text }}</div>
+                                                    </div>
+                                                </tree>
+                                            </div>
+                                            <div v-if="(eachValue.detailFlag == 'main_value') && !nonColorExistFlag"  style="margin-top: 10px;">
+
+                                                <div v-if="searchNonColorFlag == 1">
+                                                    <div v-for="eachSynonym in nonColorSynonyms">
+                                                        <input type="radio" v-bind:id="eachSynonym.term" v-bind:value="eachSynonym.term" v-model="eachValue[eachValue.detailFlag]">
+                                                        <label v-bind:for="eachSynonym.term">{{ eachSynonym.term }} ({{ eachSynonym.parentTerm }}): </label> {{ eachSynonym.definition }}
+                                                        <a class="btn" v-on:click="expandCommentSection(eachSynonym, eachValue.detailFlag)">C</a>
+                                                        <div v-if="eachSynonym.commentFlag == true">
+                                                            Description: <input v-model="nonColorComment[index][eachValue.detailFlag]" style="width: 100%;">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div v-if="searchNonColorFlag == 2">
+                                                    Here is what we known about <b>{{ exactNonColor.term }}</b>
+                                                    Definition: <input v-model="nonColorDefinition[index][eachValue.detailFlag]" style="width: 70%;">
+
+                                                </div>
+                                                <div v-if="searchNonColorFlag !=2 ">
+                                                    <input type="radio" id="non-user-defined" v-bind:value="defaultNonColorValue + '(user defined)'" v-on:change="selectUserDefinedTerm(eachValue, eachValue.detailFlag, defaultNonColorValue)" v-model="eachValue[eachValue.detailFlag]">
+                                                    <label for="non-user-defined">Use a different term of my own:</label>
+                                                    <div for="user-defined">
+                                                        Taxon: <input v-model="nonColorTaxon[index][eachValue.detailFlag]">
+                                                        Sample Text: <input v-model="nonColorSampleText[index][eachValue.detailFlag]">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <a class="btn btn-primary ok-btn"
+                                           v-on:click="saveNonColorValue()">
+                                            Save  </a>
+                                        <a class="btn btn-primary ok-btn"
+                                           v-on:click="saveNewNonColorValue()">
+                                            Save & New  </a>
+                                        <a v-on:click="nonColorDetailsFlag = false;" class="btn btn-danger">Cancel</a>
                                     </div>
                                 </div>
                             </div>
@@ -592,6 +743,7 @@
         computed: {
             ...mapState([
                 'colorTreeData',
+                'nonColorTreeData',
             ]),
             ...mapGetters([
             ]),
@@ -643,13 +795,40 @@
                 treeData: this.colorTreeData,
                 colorSearchText: null,
                 colorTreeOption:{
-                    checkbox: true,
                     multiple: true,
                     autoCheckChildren: false,
                     parentSelect: false,
-                    checkOnSelect: true
                 },
                 colorExistFlag: false,
+                searchColor: [],
+                colorSynonyms: [],
+                colorExactSynonyms: [],
+                colorExactMatch: [],
+                searchColorFlag: 0,
+                exactColor: {},
+                colorDetailId: null,
+                defaultColorValue: '',
+                colorComment: [],
+                colorTaxon: [],
+                colorSampleText: [],
+                colorDefinition: [],
+                preList: [],
+                postList: [],
+                nonColorDetails: [],
+                nonColorDetailsFlag: false,
+                textureTreeData: this.nonColorTreeData,
+                nonColorSearchText: null,
+                nonColorExistFlag: false,
+                searchNonColor: [],
+                nonColorSynonyms: [],
+                exactNonColor: {},
+                nonColorDetailId: null,
+                defaultNonColorValue: null,
+                nonColorComment: [],
+                nonColorTaxon: [],
+                nonColorSampleText: [],
+                nonColorDefinition: [],
+                searchNonColorFlag: 0
             }
         },
         components: {
@@ -1752,10 +1931,178 @@
                         app.headers = resp.data.headers;
                     });
             },
-            saveValue() {
+            saveColorValue() {
+                var app = this;
+
+                var postValues = [];
+
+                for (var i = 0; i < app.colorDetails.length; i++) {
+                    var tempValue = {};
+                    tempValue['value_id'] = app.colorDetails[i]['value_id'];
+                    if (app.colorDetails[i].id) {
+                        tempValue['id'] = app.colorDetails[i].id;
+                    }
+                    for (var key in app.colorDetails[i]) {
+                        if (app.checkColorProperty(key)) {
+                            tempValue[key] = app.colorDetails[i][key];
+                            var requestBody = {};
+                            console.log('app.colorDetails[i][key]', app.colorDetails[i][key]);
+                            if (app.colorDetails[i][key] != null && app.colorDetails[i][key] != '') {
+                                if (app.colorDetails[i][key].endsWith('(user defined)')) {
+                                    tempValue[key] = app.colorDetails[i][key].substr(0, app.colorDetails[i][key].length - 14);
+                                    console.log('colorSampleText', app.colorSampleText[i][key]);
+                                    var date = new Date();
+                                    requestBody = {
+                                        "user": app.user.name,
+                                        "ontology": "exp",
+                                        "term": tempValue[key],
+                                        "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + app.changeToSubClassName(key),
+                                        "definition": "",
+                                        "elucidation": "",
+                                        "createdBy": app.user.name,
+                                        "creationDate": ("0" + date.getMonth()).slice(-2) + '-' +("0" +  date.getDate()).slice(-2) + '-' + date.getFullYear(),
+                                        "definitionSrc": app.user.name,
+                                        "examples": app.colorSampleText[i][key] + ", used in taxon " + app.colorTaxon[i][key],
+                                        "logicDefinition": "",
+                                    };
+                                    axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
+                                        .then(function(resp) {
+                                            console.log('shark api class resp', resp);
+                                        });
+                                } else if (app.colorDefinition[i][key]) {
+                                    requestBody = {
+                                        "user": app.user.name,
+                                        "ontology": "exp",
+                                        "definition": app.colorDefinition[i][key],
+                                        "providedBy": app.user.name,
+                                        "exampleSentence": "root apex rounded",
+                                        "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + tempValue[key]
+                                    };
+                                    axios.post('http://shark.sbs.arizona.edu:8080/definition', requestBody)
+                                        .then(function(resp) {
+                                            console.log('shark api definition resp', resp);
+                                        });
+                                    console.log('user defined', app.colorDefinition[i][key]);
+                                } else if (app.colorComment[i][key]) {
+                                    requestBody = {
+                                        "user": app.user.name,
+                                        "ontology": "exp",
+                                        "comment": app.colorComment[i][key],
+                                        "providedBy": app.user.name,
+                                        "exampleSentence": "",
+                                        "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + tempValue[key]
+                                    };
+                                    axios.post('http://shark.sbs.arizona.edu:8080/comment', requestBody)
+                                        .then(function(resp) {
+                                            console.log('shark api comment resp', resp);
+                                        });
+                                    console.log('colorComment', app.colorComment[i][key]);
+
+                                }
+                            }
+
+                        }
+                    }
+                    postValues.push(tempValue);
+                }
+                axios.post('/chrecorder/public/api/v1/save-color-value', postValues)
+                    .then(function(resp) {
+                        app.values = resp.data.values;
+                        app.colorDetailsFlag = false;
+                        console.log('save color value resp', postValues);
+                    });
+                console.log('postValues', postValues);
 
             },
-            saveNewValue() {
+            saveNonColorValue() {
+                var app = this;
+
+                var postValues = [];
+                for (var i = 0; i < app.nonColorDetails.length; i++) {
+                    var tempValue = {};
+                    tempValue['value_id'] = app.nonColorDetails[i]['value_id'];
+                    if (app.nonColorDetails[i].id) {
+                        tempValue['id'] = app.nonColorDetails[i].id;
+                    }
+                    tempValue['negation'] = app.nonColorDetails[i].negation;
+                    tempValue['pre_constraint'] = app.nonColorDetails[i].pre_constraint;
+                    tempValue['post_constraint'] = app.nonColorDetails[i].post_constraint;
+                    tempValue['main_value'] = app.nonColorDetails[i].main_value;
+                    var requestBody = {};
+                    if (app.nonColorDetails[i]['main_value'] != null && app.nonColorDetails[i]['main_value'] != '') {
+                        if (app.nonColorDetails[i]['main_value'].endsWith('(user defined)')) {
+                            tempValue['main_value'] = app.nonColorDetails[i]['main_value'].substr(0, app.nonColorDetails[i]['main_value'].length - 14);
+                            var date = new Date();
+                            requestBody = {
+                                "user": app.user.name,
+                                "ontology": "exp",
+                                "term": tempValue['main_value'],
+                                "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#texture",
+                                "definition": "",
+                                "elucidation": "",
+                                "createdBy": app.user.name,
+                                "creationDate": ("0" + date.getMonth()).slice(-2) + '-' +("0" +  date.getDate()).slice(-2) + '-' + date.getFullYear(),
+                                "definitionSrc": app.user.name,
+                                "examples": app.nonColorSampleText[i]['main_value'] + ", used in taxon " + app.nonColorTaxon[i]['main_value'],
+                                "logicDefinition": "",
+                            };
+                            axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
+                                .then(function(resp) {
+                                    console.log('shark api class resp', resp);
+                                });
+                        } else if (app.nonColorDefinition[i]['main_value']) {
+                            requestBody = {
+                                "user": app.user.name,
+                                "ontology": "exp",
+                                "definition": app.colorDefinition[i]['main_value'],
+                                "providedBy": app.user.name,
+                                "exampleSentence": "root apex rounded",
+                                "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + tempValue['main_value']
+                            };
+                            axios.post('http://shark.sbs.arizona.edu:8080/definition', requestBody)
+                                .then(function(resp) {
+                                    console.log('shark api definition resp', resp);
+                                });
+                        } else if (app.nonColorComment[i]['main_value']) {
+                            requestBody = {
+                                "user": app.user.name,
+                                "ontology": "exp",
+                                "comment": app.nonColorComment[i]['main_value'],
+                                "providedBy": app.user.name,
+                                "exampleSentence": "",
+                                "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + tempValue['main_value']
+                            };
+                            axios.post('http://shark.sbs.arizona.edu:8080/comment', requestBody)
+                                .then(function(resp) {
+                                    console.log('shark api comment resp', resp);
+                                });
+
+                        }
+                    }
+
+                    postValues.push(tempValue);
+                }
+                axios.post('/chrecorder/public/api/v1/save-non-color-value', postValues)
+                    .then(function(resp) {
+                        app.values = resp.data.values;
+                        app.nonColorDetailsFlag = false;
+                    });
+            },
+            checkColorProperty(property) {
+                if (property == 'negation'
+                    || property == 'pre_constraint'
+                    || property == 'brightness'
+                    || property == 'reflectance'
+                    || property == 'saturation'
+                    || property == 'colored'
+                    || property == 'multi_colored'
+                    || property == 'post_constraint') {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+            saveNewColorValue() {
 
             },
             focusedValue(value) {
@@ -1763,6 +2110,11 @@
 
                 var currentCharacter = app.userCharacters.find(ch => ch.id == value.character_id);
                 if (!app.checkHaveUnit(currentCharacter.name)) {
+                    axios.get('/chrecorder/public/api/v1/get-constraint/' + currentCharacter.name)
+                        .then(function(resp) {
+                            app.preList = resp.data.preList;
+                            app.postList = resp.data.postList;
+                        });
                     if (currentCharacter.name.startsWith('Color')) {
                         app.colorDetailsFlag = true;
                         axios.get('/chrecorder/public/api/v1/get-color-details/' + value.id)
@@ -1770,11 +2122,61 @@
                                 console.log('get-color resp', resp.data);
                                 app.colorDetails = resp.data.colorDetails;
                                 if (app.colorDetails.length == 0) {
-                                    app.colorDetails.push({detailFlag: null});
+                                    app.colorDetails.push({value_id: value.id, detailFlag: null});
+                                    app.colorComment.push({});
+                                    app.colorTaxon.push({
+                                        'brightness': app.taxonName,
+                                        'reflectance': app.taxonName,
+                                        'saturation': app.taxonName,
+                                        'colored': app.taxonName,
+                                        'multi_colored': app.taxonName,
+                                    });
+                                    app.colorSampleText.push({});
+                                    app.colorDefinition.push({});
+                                } else {
+                                    for (var i = 0; i < app.colorDetails.length; i++) {
+                                        app.colorDetails[i].taxon = app.taxonName;
+                                        app.colorDetails[i].detailFlag = null;
+                                        app.colorComment.push({});
+                                        app.colorTaxon.push({
+                                            'brightness': app.taxonName,
+                                            'reflectance': app.taxonName,
+                                            'saturation': app.taxonName,
+                                            'colored': app.taxonName,
+                                            'multi_colored': app.taxonName,
+                                        });
+                                        app.colorSampleText.push({});
+                                        app.colorDefinition.push({});
+                                    }
                                 }
                             });
                     } else {
+                        app.nonColorDetailsFlag = true;
 
+                        axios.get('/chrecorder/public/api/v1/get-non-color-details/' + value.id)
+                            .then(function(resp) {
+                                app.nonColorDetails = resp.data.nonColorDetails;
+                                if (app.nonColorDetails.length == 0) {
+                                    app.nonColorDetails.push({value_id: value.id, detailFlag: null});
+                                    app.nonColorComment.push({});
+                                    app.nonColorTaxon.push({
+                                        'main_value': app.taxonName,
+                                    });
+                                    app.nonColorSampleText.push({});
+                                    app.nonColorDefinition.push({});
+                                } else {
+                                    for (var i = 0; i < app.nonColorDetails.length; i++) {
+                                        app.nonColorDetails[i].taxon = app.taxonName;
+                                        app.nonColorDetails[i].detailFlag = null;
+                                        app.nonColorComment.push({});
+                                        app.nonColorTaxon.push({
+                                            'main_value': app.taxonName,
+                                        });
+                                        app.nonColorSampleText.push({});
+                                        app.nonColorDefinition.push({});
+                                    }
+                                }
+                            });
                     }
 
                 }
@@ -1786,48 +2188,222 @@
                 app.colorExistFlag = false;
 
                 if (app.checkHaveColorValueSet(flag)) {
-                    axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + color[flag])
+                    axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + app.changeToSubClassName(flag))
                         .then(function(resp) {
-                            console.log('subclass resp', resp.data);
-//                            app.colorTreeData = [];
                             app.$store.state.colorTreeData = resp.data;
-                            console.log('colorTreeData', app.$store.state.colorTreeData);
-
-//                            app.$refs.tree.model = app.colorTreeData;
-//                            console.log('colorTreeData', app.colorTreeData);
                             color.detailFlag = flag;
-                            if (resp.data.childData == [{}, {}]) {
+                            app.colorExistFlag = true;
+                            console.log('color', color);
+                            if (color.id) {
+                                app.colorDetailId = color.id;
+//                                color.detailFlag = flag;
+                                app.colorDetails.find(eachColor => eachColor.id == app.colorDetailId).detailFlag = flag;
+                                for (var i = 0; i < app.colorDetails.length; i++) {
+                                    if (app.colorDetails[i].id == color.id) {
+                                        app.colorDetails[i].detailFlag = flag;
+                                        app.colorDetails[i][flag] = app.colorDetails[i][flag] + ';';
+                                        app.colorDetails[i][flag] = app.colorDetails[i][flag].substring(0, app.colorDetails[i][flag].length - 1);
+                                        if (app.colorDetails[i][flag] == 'null' && app.colorDetails[i][flag] == null) {
+                                            app.colorDetails[i][flag] = '';
+                                        }
+                                    }
+                                }
 
-                            } else {
-                                app.colorExistFlag = true;
                             }
                         });
-                    switch (flag) {
-                        case 'brightness':
-
-                            break;
-                        case 'reflectance':
-
-                            break;
-                        case 'saturation':
-
-                            break;
-                        case 'colored':
-
-                            break;
-                        case 'multi_colored':
-
-                            break;
-                        default:
-                            break;
-                    }
                 } else {
                     color.detailFlag = flag;
+                    if (color.id) {
+                        app.colorDetailId = color.id;
+                        for (var i = 0; i < app.colorDetails.length; i++) {
+                            if (app.colorDetails[i].id == color.id) {
+                                app.colorDetails[i].detailFlag = flag;
+                                app.colorDetails[i][flag] = app.colorDetails[i][flag] + ';';
+                                app.colorDetails[i][flag] = app.colorDetails[i][flag].substring(0, app.colorDetails[i][flag].length - 1);
+                                if (app.colorDetails[i][flag] == 'null' || app.colorDetails[i][flag] == null) {
+                                    app.colorDetails[i][flag] = '';
+                                }
+                            }
+                        }
+                        console.log('app.colorDetails', app.colorDetails);
+                    }
                 }
                 console.log('flag', flag);
             },
+            changeNonColorSection(nonColor, flag) {
+                var app = this;
+                axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=texture')
+                    .then(function(resp) {
+//                        app.$store.state.nonColorTreeData = resp.data;
+                        app.textureTreeData = resp.data;
+                        nonColor.detailFlag = flag;
+                        app.nonColorExistFlag = true;
+                        if (nonColor.id) {
+                            app.nonColorDetailId = nonColor.id;
+                            for (var i = 0; i < app.nonColorDetails.length; i++) {
+                                if (app.nonColorDetails[i].id == nonColor.id) {
+                                    app.nonColorDetails[i].detailFlag = flag;
+                                    app.nonColorDetails[i][flag] = app.nonColorDetails[i][flag] + ';';
+                                    app.nonColorDetails[i][flag] = app.nonColorDetails[i][flag].substring(0, app.nonColorDetails[i][flag].length - 1);
+                                    if (app.nonColorDetails[i][flag] == 'null' || app.nonColorDetails[i][flag] == null) {
+                                        app.nonColorDetails[i][flag] = '';
+                                    }
+                                }
+                            }
+
+                        }
+                    });
+                app.nonColorExistFlag = false;
+
+            },
+            changeToSubClassName(flag) {
+                var searchFlag = null;
+                switch(flag) {
+                    case 'brightness':
+                        searchFlag = 'color brightness';
+                        break;
+                    case 'reflectance':
+                        searchFlag = 'reflectance';
+                        break;
+                    case 'saturation':
+                        searchFlag = 'color saturation';
+                        break;
+                    case 'colored':
+                        searchFlag = 'colored';
+                        break;
+                    case 'multi_colored':
+                        searchFlag = 'multi-colored';
+                        break;
+                    default:
+                        break;
+                }
+
+                return searchFlag;
+            },
+            searchColorSelection(color, flag) {
+                var app = this;
+                app.colorExistFlag = false;
+                app.defaultColorValue = color[flag];
+                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + color[flag])
+                    .then(function(resp) {
+                        console.log('search carex resp', resp.data);
+                        app.searchColor = resp.data.entries;
+                        if (app.searchColor.length == 0) {
+                            app.searchColorFlag = 0;
+                        } else if (app.searchColor.find(eachColor => eachColor.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == color[flag])
+                            || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == color[flag])))) {
+                            app.searchColorFlag = 1;
+                            app.colorSynonyms = app.searchColor.filter(function(eachColor) {
+                                return eachColor.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == color[flag])
+                                    || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == color[flag])
+                                    || (eachProperty => eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == color[flag])) != null || eachColor.term == color[flag];
+
+                            });
+                            for (var i = 0; i < app.colorSynonyms.length; i++) {
+                                if (app.colorSynonyms[i].resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115'))) {
+                                    app.colorSynonyms[i].definition = app.colorSynonyms[i].resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115')).value;
+                                    var index = app.colorDetails.indexOf(color);
+                                    app.colorDefinition[index][flag] = app.colorSynonyms[i].resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115')).value;
+                                } else {
+                                    var index = app.colorDetails.indexOf(color);
+                                    app.colorDefinition[index][flag] = null;
+                                }
+                            }
+                        } else if (app.searchColor.find(eachColor => eachColor.term == color[flag])) {
+                            app.searchColorFlag = 2;
+                            app.exactColor = app.searchColor.find(eachColor => eachColor.term == color[flag]);
+                            if (app.exactColor.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115'))) {
+                                app.exactColor.definition = app.exactColor.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115')).value;
+                                var index = app.colorDetails.indexOf(color);
+                                app.colorDefinition[index][flag] = app.exactColor.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115')).value;
+                            } else {
+                                var index = app.colorDetails.indexOf(color);
+                                app.colorDefinition[index][flag] = null;
+                            }
+                        } else if (app.searchColor.find(eachColor => eachColor.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == color[flag]))) {
+                            app.searchColorFlag = 2;
+                            app.exactColor = app.searchColor.find(eachColor => eachColor.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == color[flag]));
+                        }
+                        console.log('app.searchColorFlag', app.searchColorFlag);
+                    });
+            },
+            searchNonColorSelection(nonColor, flag) {
+                var app = this;
+                app.nonColorExistFlag = false;
+                app.defaultNonColorValue = nonColor[flag];
+                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag])
+                    .then(function(resp) {
+                        console.log('search carex resp', resp.data);
+                        app.searchNonColor = resp.data.entries;
+                        if (app.searchNonColor.length == 0) {
+                            app.searchNonColorFlag = 0;
+                        } else if (app.searchNonColor.find(eachValue => eachValue.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == nonColor[flag])
+                            || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == nonColor[flag])))) {
+                            app.searchNonColorFlag = 1;
+                            app.nonColorSynonyms = app.searchNonColor.filter(function(eachValue) {
+                                return eachValue.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == nonColor[flag])
+                                    || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == nonColor[flag])
+                                    || (eachProperty => eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == nonColor[flag])) != null || eachValue.term == nonColor[flag];
+
+                            });
+                            for (var i = 0; i < app.nonColorSynonyms.length; i++) {
+                                if (app.nonColorSynonyms[i].resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115'))) {
+                                    app.nonColorSynonyms[i].definition = app.nonColorSynonyms[i].resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115')).value;
+                                    var index = app.nonColorDetails.indexOf(nonColor);
+                                    app.nonColorDefinition[index][flag] = app.nonColorSynonyms[i].resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115')).value;
+                                } else {
+                                    var index = app.nonColorDetails.indexOf(nonColor);
+                                    app.nonColorDefinition[index][flag] = null;
+                                }
+                            }
+                        } else if (app.searchNonColor.find(eachValue => eachValue.term == nonColor[flag])) {
+                            app.searchNonColorFlag = 2;
+                            app.exactNonColor = app.searchNonColor.find(eachValue => eachValue.term == nonColor[flag]);
+                            if (app.exactNonColor.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115'))) {
+                                app.exactNonColor.definition = app.exactNonColor.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115')).value;
+                                var index = app.nonColorDetails.indexOf(nonColor);
+                                app.nonColorDefinition[index][flag] = app.exactNonColor.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('IAO_0000115')).value;
+                            } else {
+                                var index = app.nonColorDetails.indexOf(nonColor);
+                                app.nonColorDefinition[index][flag] = null;
+                            }
+                        } else if (app.searchNonColor.find(eachValue => eachValue.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == nonColor[flag]))) {
+                            app.searchNonColorFlag = 2;
+                            app.exactNonColor = app.searchNonColor.find(eachValue => eachValue.resultAnnotations.find(eachProperty => eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == nonColor[flag]));
+                        }
+                        console.log('app.searchNonColorFlag', app.searchNonColorFlag);
+                    });
+            },
             onTreeNodeSelected(node) {
+                var app = this;
+                app.colorDetailsFlag = false;
                 console.log('treeNode', node);
+                if (app.colorDetails.length == 1) {
+                    app.colorDetailsFlag = true;
+                    app.colorDetails[0][app.colorDetails[0].detailFlag] = app.colorDetails[0][app.colorDetails[0].detailFlag] + ';';
+                    app.colorDetails[0][app.colorDetails[0].detailFlag] = app.colorDetails[0][app.colorDetails[0].detailFlag].substring(0, app.colorDetails[0][app.colorDetails[0].detailFlag].length - 1);
+                    app.colorDetails[0][app.colorDetails[0].detailFlag] = node.data.text;
+                } else {
+                    for (var i = 0; i < app.colorDetails.length; i++) {
+
+                    }
+                }
+
+            },
+            onTextureTreeNodeSelected(node) {
+                var app = this;
+                app.nonColorDetailsFlag = false;
+                if (app.nonColorDetails.length == 1) {
+                    app.nonColorDetailsFlag = true;
+                    app.nonColorDetails[0]['main_value'] = app.nonColorDetails[0]['main_value'] + ';';
+                    app.nonColorDetails[0]['main_value'] = app.nonColorDetails[0]['main_value'].substring(0, app.nonColorDetails[0]['main_value'].length - 1);
+                    app.nonColorDetails[0]['main_value'] = node.data.text;
+
+                } else {
+                    for (var i = 0; i < app.colorDetails.length; i++) {
+
+                    }
+                }
             },
             checkHaveColorValueSet(text) {
                 if (text == 'brightness'
@@ -1840,6 +2416,57 @@
                     return false;
                 }
             },
+            expandCommentSection(synonym, flag) {
+                var app = this;
+
+                if (flag == 'main_value') {
+                    for (var i = 0; i < app.nonColorSynonyms.length; i++) {
+                        if (app.nonColorSynonyms[i].term == synonym.term
+                            && app.nonColorSynonyms[i].parentTerm == synonym.parentTerm) {
+                            var tempTermName = app.nonColorSynonyms[i].term;
+                            if (!app.nonColorSynonyms[i].commentFlag) {
+                                app.nonColorSynonyms[i].term = 'test1';
+                                app.nonColorSynonyms[i].commentFlag = true;
+                                app.nonColorSynonyms[i].term = tempTermName;
+                            } else {
+                                app.nonColorSynonyms[i].term = 'test2';
+                                app.nonColorSynonyms[i].commentFlag = false;
+                                app.nonColorSynonyms[i].term = tempTermName;
+                            }
+                        }
+                    }
+                } else {
+                    for (var i = 0; i < app.colorSynonyms.length; i++) {
+                        if (app.colorSynonyms[i].term == synonym.term
+                            && app.colorSynonyms[i].parentTerm == synonym.parentTerm) {
+                            console.log('123');
+                            console.log('app.colorSynonyms[i].commentFlag', app.colorSynonyms[i].commentFlag);
+                            var tempTermName = app.colorSynonyms[i].term;
+                            if (!app.colorSynonyms[i].commentFlag) {
+                                app.colorSynonyms[i].term = 'test1';
+                                app.colorSynonyms[i].commentFlag = true;
+                                app.colorSynonyms[i].term = tempTermName;
+                            } else {
+                                app.colorSynonyms[i].term = 'test2';
+                                app.colorSynonyms[i].commentFlag = false;
+                                app.colorSynonyms[i].term = tempTermName;
+                            }
+                        }
+                    }
+                }
+
+            },
+            selectUserDefinedTerm(color, flag, value) {
+                var app = this;
+
+                if (app.colorDetails.length == 1) {
+
+                }
+                console.log('color', color);
+                console.log('flag', flag);
+                console.log('value', value);
+                console.log('test');
+            },
             importMatrix() {
 
             },
@@ -1849,6 +2476,9 @@
                 this.treeData = newData;
                 // do data transformations etc
                 // trigger UI refresh
+            },
+            nonColorTreeData( newData ) {
+                this.textureTreeData = newData;
             }
         },
         created() {

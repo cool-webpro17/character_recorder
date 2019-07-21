@@ -22,6 +22,10 @@ Route::group([
     Route::post('update-header',                        ['as' => 'update_header',               'uses' => 'HomeController@updateHeader']);
     Route::get('get-usage/{characterId}',               ['as' => 'get_usage',                   'uses' => 'HomeController@getUsage']);
     Route::get('get-color-details/{valueId}',           ['as' => 'get_color_details',           'uses' => 'HomeController@getColorDetails']);
+    Route::post('save-color-value',                     ['as' => 'save_color_value',            'uses' => 'HomeController@saveColorValue']);
+    Route::post('save-non-color-value',                 ['as' => 'save_non_color_value',        'uses' => 'HomeController@saveNonColorValue']);
+    Route::get('get-constraint/{characterName}',        ['as' => 'get_constraint',              'uses' => 'HomeController@getConstraint']);
+    Route::get('get-non-color-details/{valueId}',       ['as' => 'get_non_color_details',       'uses' => 'HomeController@getNonColorDetails']);
 
     Route::group([
         'prefix' => '/character',

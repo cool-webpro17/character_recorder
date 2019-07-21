@@ -14,10 +14,10 @@ const store = new Vuex.Store({
         INIT: (state) => {
             state.colorTreeData = {};
         },
-    },
-    actions: {
+},
+actions: {
 
-    }
+}
 });
 //======= vuex store end ===========
 export default store

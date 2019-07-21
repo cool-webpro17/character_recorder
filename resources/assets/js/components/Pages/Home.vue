@@ -510,37 +510,37 @@
                                     <div class="modal-body">
                                         <div v-for="(eachColor, index) in colorDetails">
                                             <div>
-                                                <input v-on:focus="changeColorSection(eachColor, 'negation')"
+                                                <input v-on:focus="changeColorSection(eachColor, 'negation', $event)"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
                                                        v-model="eachColor.negation" placeholder="not">
-                                                <input v-on:focus="changeColorSection(eachColor, 'pre_constraint')"
+                                                <input v-on:focus="changeColorSection(eachColor, 'pre_constraint', $event)"
                                                        style="width: 90px;"
                                                        v-model="eachColor.pre_constraint"
                                                        list="pre_list">
                                                 <datalist id="pre_list" v-if="preList.length > 0">
                                                     <option v-for="each in preList" :value="each">{{ each }}</option>
                                                 </datalist>
-                                                <input v-on:focus="changeColorSection(eachColor, 'brightness')"
+                                                <input v-on:focus="changeColorSection(eachColor, 'brightness', $event)"
                                                        v-on:keyup.enter="searchColorSelection(eachColor, 'brightness')"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
                                                        v-model="eachColor.brightness" placeholder="bright">
-                                                <input v-on:focus="changeColorSection(eachColor, 'reflectance')"
+                                                <input v-on:focus="changeColorSection(eachColor, 'reflectance', $event)"
                                                        v-on:keyup.enter="searchColorSelection(eachColor, 'reflectance')"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
                                                        v-model="eachColor.reflectance" placeholder="shinny">
-                                                <input v-on:focus="changeColorSection(eachColor, 'saturation')"
+                                                <input v-on:focus="changeColorSection(eachColor, 'saturation', $event)"
                                                        v-on:keyup.enter="searchColorSelection(eachColor, 'saturation')"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
                                                        v-model="eachColor.saturation" placeholder="pale">
-                                                <input v-on:focus="changeColorSection(eachColor, 'colored')"
+                                                <input v-on:focus="changeColorSection(eachColor, 'colored', $event)"
                                                        v-on:keyup.enter="searchColorSelection(eachColor, 'colored')"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
                                                        v-model="eachColor.colored" placeholder="blue">
-                                                <input v-on:focus="changeColorSection(eachColor, 'multi_colored')"
+                                                <input v-on:focus="changeColorSection(eachColor, 'multi_colored', $event)"
                                                        v-on:keyup.enter="searchColorSelection(eachColor, 'multi_colored')"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
                                                        v-model="eachColor.multi_colored" placeholder="stripped">
-                                                <input v-on:focus="changeColorSection(eachColor, 'post_constraint')"
+                                                <input v-on:focus="changeColorSection(eachColor, 'post_constraint', $event)"
                                                        style="width: 90px;"
                                                        v-model="eachColor.post_constraint"
                                                        list="post_list">
@@ -557,6 +557,9 @@
                                             || eachColor.detailFlag == 'saturation'
                                             || eachColor.detailFlag == 'colored'
                                             || eachColor.detailFlag == 'multi_colored') && colorExistFlag"  style="margin-top: 10px;">
+                                                <div>
+                                                    Search Tree for  <b>{{ eachColor.detailFlag }}</b>
+                                                </div>
                                                 <input style="width: 300px;" v-model="colorSearchText" placeholder="Enter a term to filter the term tree"/>
                                                 <tree
                                                         :data="treeData"
@@ -603,6 +606,9 @@
                                     </div>
                                     <div class="modal-footer">
                                         <a class="btn btn-primary ok-btn"
+                                           v-on:click="removeColorValue()">
+                                            Remove Value  </a>
+                                        <a class="btn btn-primary ok-btn"
                                            v-on:click="saveColorValue()">
                                              Save  </a>
                                         <a class="btn btn-primary ok-btn"
@@ -626,21 +632,21 @@
                                     <div class="modal-body">
                                         <div v-for="(eachValue, index) in nonColorDetails">
                                             <div>
-                                                <input v-on:focus="changeColorSection(eachValue, 'negation')"
+                                                <input v-on:focus="changeColorSection(eachValue, 'negation', $event)"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
                                                        v-model="eachValue.negation" placeholder="not">
-                                                <input v-on:focus="changeColorSection(eachValue, 'pre_constraint')"
+                                                <input v-on:focus="changeColorSection(eachValue, 'pre_constraint', $event)"
                                                        style="width: 90px;"
                                                        v-model="eachValue.pre_constraint"
                                                        list="pre_non_list">
                                                 <datalist id="pre_non_list" v-if="preList.length > 0">
                                                     <option v-for="each in preList" :value="each">{{ each }}</option>
                                                 </datalist>
-                                                <input v-on:focus="changeNonColorSection(eachValue, 'main_value')"
+                                                <input v-on:focus="changeNonColorSection(eachValue, 'main_value', $event)"
                                                        v-on:keyup.enter="searchNonColorSelection(eachValue, 'main_value')"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
                                                        v-model="eachValue.main_value" placeholder="texture">
-                                                <input v-on:focus="changeColorSection(eachValue, 'post_constraint')"
+                                                <input v-on:focus="changeColorSection(eachValue, 'post_constraint', $event)"
                                                        style="width: 90px;"
                                                        v-model="eachValue.post_constraint"
                                                        list="post_non_list">
@@ -653,6 +659,9 @@
                                                 <input type="radio" id="non-unselect-not" v-model="eachValue.negation" v-bind:value="''"/> <label for="non-unselect-not">Unselect Not</label>
                                             </div>
                                             <div v-if="(eachValue.detailFlag == 'main_value') && nonColorExistFlag"  style="margin-top: 10px;">
+                                                <div>
+                                                    Search Tree for <b>Texture</b>
+                                                </div>
                                                 <input style="width: 300px;" v-model="nonColorSearchText" placeholder="Enter a term to filter the term tree"/>
                                                 <tree
                                                         :data="textureTreeData"
@@ -694,6 +703,9 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
+                                        <a class="btn btn-primary ok-btn"
+                                           v-on:click="removeNonColorValue()">
+                                            Remove Value  </a>
                                         <a class="btn btn-primary ok-btn"
                                            v-on:click="saveNonColorValue()">
                                             Save  </a>
@@ -2014,6 +2026,16 @@
                 console.log('postValues', postValues);
 
             },
+            removeColorValue() {
+                var app = this;
+
+                console.log('app.colorDetails[0].value_id', app.colorDetails[0].value_id);
+                axios.post('/chrecorder/public/api/v1/remove-color-value', {value_id: app.colorDetails[0].value_id})
+                    .then(function(resp) {
+                        app.values = resp.data.values;
+                        app.colorDetailsFlag = false;
+                    });
+            },
             saveNonColorValue() {
                 var app = this;
 
@@ -2083,6 +2105,15 @@
                     postValues.push(tempValue);
                 }
                 axios.post('/chrecorder/public/api/v1/save-non-color-value', postValues)
+                    .then(function(resp) {
+                        app.values = resp.data.values;
+                        app.nonColorDetailsFlag = false;
+                    });
+            },
+            removeNonColorValue() {
+                var app = this;
+
+                axios.post('/chrecorder/public/api/v1/remove-non-color-value', {value_id: app.nonColorDetails[0].value_id})
                     .then(function(resp) {
                         app.values = resp.data.values;
                         app.nonColorDetailsFlag = false;
@@ -2181,9 +2212,19 @@
 
                 }
             },
-            changeColorSection(color, flag) {
+            changeColorSection(color, flag, event) {
                 var app = this;
 
+                app.colorSearchText = '';
+                app.nonColorSearchText = '';
+
+                console.log('event.target', event.target);
+                if (flag == 'negation') {
+                    event.target.placeholder = '';
+                } else if (app.checkHaveColorValueSet(flag)) {
+                    $(":input").css('background', '#ffffff');
+                    event.target.style.background = '#efdddd';
+                }
                 color.detailFlag = null;
                 app.colorExistFlag = false;
 
@@ -2203,7 +2244,7 @@
                                         app.colorDetails[i].detailFlag = flag;
                                         app.colorDetails[i][flag] = app.colorDetails[i][flag] + ';';
                                         app.colorDetails[i][flag] = app.colorDetails[i][flag].substring(0, app.colorDetails[i][flag].length - 1);
-                                        if (app.colorDetails[i][flag] == 'null' && app.colorDetails[i][flag] == null) {
+                                        if (app.colorDetails[i][flag] == 'null' || app.colorDetails[i][flag] == null) {
                                             app.colorDetails[i][flag] = '';
                                         }
                                     }
@@ -2230,8 +2271,13 @@
                 }
                 console.log('flag', flag);
             },
-            changeNonColorSection(nonColor, flag) {
+            changeNonColorSection(nonColor, flag, event) {
                 var app = this;
+                app.nonColorSearchText = '';
+
+                if (flag == 'negation') {
+                    event.target.placeholder = '';
+                }
                 axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=texture')
                     .then(function(resp) {
 //                        app.$store.state.nonColorTreeData = resp.data;

@@ -527,7 +527,7 @@
                                                 <input v-on:focus="changeColorSection(eachColor, 'reflectance', $event)"
                                                        v-on:keyup.enter="searchColorSelection(eachColor, 'reflectance')"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachColor.reflectance" placeholder="shinny">
+                                                       v-model="eachColor.reflectance" placeholder="shiny">
                                                 <input v-on:focus="changeColorSection(eachColor, 'saturation', $event)"
                                                        v-on:keyup.enter="searchColorSelection(eachColor, 'saturation')"
                                                        style="width: 90px; border:none; border-bottom: 1px solid;"
@@ -557,14 +557,11 @@
                                             || eachColor.detailFlag == 'saturation'
                                             || eachColor.detailFlag == 'colored'
                                             || eachColor.detailFlag == 'multi_colored') && colorExistFlag"  style="margin-top: 10px;">
-                                                <div>
-                                                    Search Tree for  <b>{{ eachColor.detailFlag }}</b>
-                                                </div>
-                                                <input style="width: 300px;" v-model="colorSearchText" placeholder="Enter a term to filter the term tree"/>
+                                                <!--<input style="width: 300px;" v-model="colorSearchText" placeholder="Enter a term to filter the term tree"/>-->
                                                 <tree
                                                         :data="treeData"
                                                         :options="colorTreeOption"
-                                                        :filter="colorSearchText"
+                                                        :filter="eachColor[eachColor.detailFlag]"
                                                         ref="tree"
                                                         @node:selected="onTreeNodeSelected">
                                                     <div slot-scope="{ node }" class="node-container">
@@ -639,7 +636,7 @@
                                                        style="width: 90px;"
                                                        v-model="eachValue.pre_constraint"
                                                        list="pre_non_list">
-                                                <datalist id="pre_non_list" v-if="preList.length > 0">
+                                                <datalist id="pre_non_list">
                                                     <option v-for="each in preList" :value="each">{{ each }}</option>
                                                 </datalist>
                                                 <input v-on:focus="changeNonColorSection(eachValue, 'main_value', $event)"
@@ -659,14 +656,11 @@
                                                 <input type="radio" id="non-unselect-not" v-model="eachValue.negation" v-bind:value="''"/> <label for="non-unselect-not">Unselect Not</label>
                                             </div>
                                             <div v-if="(eachValue.detailFlag == 'main_value') && nonColorExistFlag"  style="margin-top: 10px;">
-                                                <div>
-                                                    Search Tree for <b>Texture</b>
-                                                </div>
-                                                <input style="width: 300px;" v-model="nonColorSearchText" placeholder="Enter a term to filter the term tree"/>
+                                                <!--<input style="width: 300px;" v-model="nonColorSearchText" placeholder="Enter a term to filter the term tree"/>-->
                                                 <tree
                                                         :data="textureTreeData"
                                                         :options="colorTreeOption"
-                                                        :filter="nonColorSearchText"
+                                                        :filter="eachValue.main_value"
                                                         ref="tree"
                                                         @node:selected="onTextureTreeNodeSelected">
                                                     <div slot-scope="{ node }" class="node-container">
@@ -2227,6 +2221,15 @@
                 }
                 color.detailFlag = null;
                 app.colorExistFlag = false;
+//                if (!color.id) {
+//                    app.colorDetails[app.colorDetails.length - 1][flag] = '';
+//                } else {
+//                    for (var i = 0; i < app.colorDetails.length; i++) {
+//                        if (app.colorDetails[i].id == color.id) {
+//                            app.colorDetails[i][flag] = '';
+//                        }
+//                    }
+//                }
 
                 if (app.checkHaveColorValueSet(flag)) {
                     axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + app.changeToSubClassName(flag))
@@ -2278,9 +2281,14 @@
                 if (flag == 'negation') {
                     event.target.placeholder = '';
                 }
-                axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=texture')
+
+                var characterId = app.values.find(eachValue => eachValue.find(eachItem => eachItem.id == nonColor.value_id) != null)[0].character_id;
+                var characterName = app.userCharacters.find(ch => ch.id == characterId).name;
+                console.log('characterName', characterName);
+                var searchText = characterName.split(' ');
+
+                axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + searchText[0].toLowerCase())
                     .then(function(resp) {
-//                        app.$store.state.nonColorTreeData = resp.data;
                         app.textureTreeData = resp.data;
                         nonColor.detailFlag = flag;
                         app.nonColorExistFlag = true;

@@ -78,7 +78,11 @@ class HomeController extends Controller
                                     ($eachColor->multi_colored ? ($eachColor->multi_colored . ' ') : '') .
                                     ($eachColor->post_constraint ? ($eachColor->post_constraint . ' ') : '');
                             }
-                            $value->value = substr($value->value, 0, -2);
+                            if ($value->value != '') {
+                                $value->value = substr($value->value, 0, -1);
+                            } else {
+                                $value->value = 'undefined';
+                            }
 //                            $value->save();
                         }
 
@@ -92,7 +96,11 @@ class HomeController extends Controller
                                     ($eachValue->main_value ? ($eachValue->main_value . ' ') : '') .
                                     ($eachValue->post_constraint ? ($eachValue->post_constraint . ' ') : '');
                             }
-                            $value->value = substr($value->value, 0, -2);
+                            if ($value->value != '') {
+                                $value->value = substr($value->value, 0, -1);
+                            } else {
+                                $value->value = 'undefined';
+                            }
                         }
                     }
 
@@ -1076,6 +1084,34 @@ class HomeController extends Controller
                 $value->save();
             }
         }
+
+        $returnValues = $this->getValuesByCharacter();
+
+        $data = [
+            'values' => $returnValues
+        ];
+
+        return $data;
+    }
+
+    public function removeColorValue(Request $request) {
+        $valueId = $request->input('value_id');
+
+        ColorDetails::where('value_id', '=', $valueId)->delete();
+
+        $returnValues = $this->getValuesByCharacter();
+
+        $data = [
+            'values' => $returnValues
+        ];
+
+        return $data;
+    }
+
+    public function removeNonColorValue(Request $request) {
+        $valueId = $request->input('value_id');
+
+        NonColorDetails::where('value_id', '=', $valueId)->delete();
 
         $returnValues = $this->getValuesByCharacter();
 

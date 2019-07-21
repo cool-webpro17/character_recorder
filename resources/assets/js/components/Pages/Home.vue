@@ -2280,12 +2280,15 @@
 
                 if (flag == 'negation') {
                     event.target.placeholder = '';
+                } else if (flag == 'main_value') {
+                    event.target.placeholder = searchText[0];
                 }
 
                 var characterId = app.values.find(eachValue => eachValue.find(eachItem => eachItem.id == nonColor.value_id) != null)[0].character_id;
                 var characterName = app.userCharacters.find(ch => ch.id == characterId).name;
                 console.log('characterName', characterName);
                 var searchText = characterName.split(' ');
+
 
                 axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + searchText[0].toLowerCase())
                     .then(function(resp) {

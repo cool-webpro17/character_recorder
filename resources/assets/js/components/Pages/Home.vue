@@ -2655,7 +2655,7 @@
                 app.colorExistFlag = false;
                 app.defaultColorValue = color[flag];
 //                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + color[flag])
-                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + color[flag] + '&ancestorIRI=http://biosemantics.arizona.edu/ontologies/carex%23' + app.changeToSubClassName(flag))
+                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + color[flag] + '&ancestorIRI=http://biosemantics.arizona.edu/ontologies/carex%23' + app.changeToSubClassName(flag))
                     .then(function (resp) {
                         console.log('search carex resp', resp.data);
                         app.searchColor = resp.data.entries;
@@ -2712,7 +2712,7 @@
                 app.nonColorExistFlag = false;
                 app.defaultNonColorValue = nonColor[flag];
 //                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag])
-                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag] + '&ancestorIRI=http://biosemantics.arizona.edu/ontologies/carex%23' + app.changeToSubClassName(flag))
+                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?term=' + nonColor[flag] + '&ancestorIRI=http://biosemantics.arizona.edu/ontologies/carex%23' + app.changeToSubClassName(flag))
                     .then(function (resp) {
                         console.log('search carex resp', resp.data);
                         app.searchNonColor = resp.data.entries;

@@ -9,7 +9,8 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-12">
-                            <div v-if="matrixShowFlag == false" style="max-width: 1000px; margin-left: auto; margin-right: auto;">
+                            <div v-if="matrixShowFlag == false"
+                                 style="max-width: 1000px; margin-left: auto; margin-right: auto;">
                                 <h3><b>Set up your matrix</b></h3>
                             </div>
                         </div>
@@ -20,12 +21,14 @@
                                                              placeholder="Carex capitata"/>.</b>
                                 </div>
                                 <div class="margin-top-10">
-                                    <b>I have <input v-model="columnCount" style="width: 180px;" placeholder="Enter a default count, like 3"> specimens.</b>
+                                    <b>I have <input v-model="columnCount" style="width: 180px;"
+                                                     placeholder="Enter a default count, like 3"> specimens.</b>
                                 </div>
                                 <div class="margin-top-10 row">
                                     <div class="col-md-12" style="line-height: 38px;">
-                                        <b class="some-container">I 'm measuring <a class="btn btn-primary" v-on:click="showStandardCharacters()"
-                                                             v-tooltip="{ content:standardCharactersTooltip, classes: 'standard-tooltip'}">
+                                        <b class="some-container">I 'm measuring <a class="btn btn-primary"
+                                                                                    v-on:click="showStandardCharacters()"
+                                                                                    v-tooltip="{ content:standardCharactersTooltip, classes: 'standard-tooltip'}">
                                             the standard set of characters
                                         </a> <br/> or</b>
                                     </div>
@@ -41,16 +44,23 @@
                                 </div>
                                 <hr style="border-top: 2px solid; margin-top: 20px;">
                                 <div class="margin-top-10 text-right">
-                                    <a class="btn btn-primary" v-on:click="generateMatrix()" style="width: 200px;">Generate Matrix</a>
-                                    <a class="btn btn-primary" v-on:click="importMatrix()" style="width: 200px; background-color: grey; border-color: grey;">Import (CR) Matrix</a>
-                                    <a class="btn btn-primary" v-on:click="collapsedFlag = true;" style="width: 40px;"><span class="glyphicon glyphicon-chevron-up"></span></a>
+                                    <a class="btn btn-primary" v-on:click="generateMatrix()" style="width: 200px;">Generate
+                                        Matrix</a>
+                                    <a class="btn btn-primary" v-on:click="importMatrix()"
+                                       style="width: 200px; background-color: grey; border-color: grey;">Import (CR)
+                                        Matrix</a>
+                                    <a class="btn btn-primary" v-on:click="collapsedFlag = true;"
+                                       style="width: 40px;"><span class="glyphicon glyphicon-chevron-up"></span></a>
                                 </div>
-                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 0 && ch.username.includes(user.name))">
+                                <div class="margin-top-10"
+                                     v-if="userCharacters.find(ch => ch.standard == 0 && ch.username.includes(user.name))">
                                     <h4><b><u>Characters selected</u></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <a class="btn btn-add display-block" v-on:click="removeAllCharacters()"><span
                                                 class="glyphicon glyphicon-remove"></span></a>
                                     </h4>
-                                    <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 0 && eachCharacter.username.includes(user.name)" v-tooltip="eachCharacter.tooltip"
+                                    <div v-for="eachCharacter in userCharacters"
+                                         v-if="eachCharacter.standard == 0 && eachCharacter.username.includes(user.name)"
+                                         v-tooltip="eachCharacter.tooltip"
                                          style="display: table; font-weight: bold; cursor: pointer;">
                                         {{ eachCharacter.name }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         <a class="btn btn-add display-block"
@@ -58,21 +68,24 @@
                                                 class="glyphicon glyphicon-remove"></span></a>
                                     </div>
                                 </div>
-                                <div class="margin-top-10" v-if="userCharacters.find(ch => ch.standard == 1 || !ch.username.includes(user.name))">
+                                <div class="margin-top-10"
+                                     v-if="userCharacters.find(ch => ch.standard == 1 || !ch.username.includes(user.name))">
                                     <h4><b><u>Selected Standard Characters</u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b>
                                         <a class="btn btn-add display-block"
-                                               v-on:click="removeAllStandardFlag = true;"><span
-                                            class="glyphicon glyphicon-remove"></span></a></h4>
+                                           v-on:click="removeAllStandardFlag = true;"><span
+                                                class="glyphicon glyphicon-remove"></span></a></h4>
 
-                                    <div v-for="eachCharacter in userCharacters" v-if="eachCharacter.standard == 1 || !eachCharacter.username.includes(user.name)" v-tooltip="eachCharacter.tooltip"
+                                    <div v-for="eachCharacter in userCharacters"
+                                         v-if="eachCharacter.standard == 1 || !eachCharacter.username.includes(user.name)"
+                                         v-tooltip="eachCharacter.tooltip"
                                          style="display: table; cursor: pointer;">
                                         <b>{{ eachCharacter.name }} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                             <a class="btn btn-add display-block"
                                                v-on:click="removeStandardCharacter(eachCharacter.id)"><span
                                                     class="glyphicon glyphicon-remove"></span></a></b>
-                                            <!--<a-->
-                                                    <!--v-on:click="removeStandardCharacter(eachCharacter.id)" style="cursor: pointer;">-->
-                                                <!--X </a>-->
+                                        <!--<a-->
+                                        <!--v-on:click="removeStandardCharacter(eachCharacter.id)" style="cursor: pointer;">-->
+                                        <!--X </a>-->
                                     </div>
                                 </div>
 
@@ -81,13 +94,18 @@
                         <div v-if="collapsedFlag == true">
                             <div style="max-width: 1000px; margin-right: auto; margin-left: auto;">
                                 <div class="col-md-1">
-                                    <a class="btn btn-primary" v-on:click="collapsedFlag = false;" style="width: 40px;"><span class="glyphicon glyphicon-chevron-down"></span></a>
+                                    <a class="btn btn-primary" v-on:click="collapsedFlag = false;" style="width: 40px;"><span
+                                            class="glyphicon glyphicon-chevron-down"></span></a>
                                 </div>
                                 <div class="col-md-2">
-                                    <input v-model="taxonName" v-on:blur="changeTaxonName()" style="line-height: 38px; border: none;">
+                                    <input v-model="taxonName" v-on:blur="changeTaxonName()"
+                                           style="line-height: 38px; border: none;">
                                 </div>
                                 <div class="col-md-3">
-                                    <input v-model="columnCount" v-on:keyup.enter="changeColumnCount()" v-on:blur="changeColumnCount()" style="width: 40px; margin-left: 30px; line-height: 38px; border:none;"> Specimens
+                                    <input v-model="columnCount" v-on:keyup.enter="changeColumnCount()"
+                                           v-on:blur="changeColumnCount()"
+                                           style="width: 40px; margin-left: 30px; line-height: 38px; border:none;">
+                                    Specimens
                                 </div>
                                 <div class="col-md-5">
                                     <model-select :options="standardCharacters"
@@ -102,12 +120,16 @@
                     </div>
                 </div>
                 <!--<hr v-if="matrixShowFlag == true" style="margin-top: 40px; margin-bottom: 40px; border-top: 2px solid;">-->
-                <div v-if="matrixShowFlag == true" style="border-bottom: 2px solid; width: 100%; margin-top: 40px;"></div>
+                <div v-if="matrixShowFlag == true"
+                     style="border-bottom: 2px solid; width: 100%; margin-top: 40px;"></div>
 
-                <div style="padding-left: 15px; padding-right: 15px; display: inline-flex; width: 100%;" v-if="matrixShowFlag == true">
+                <div style="padding-left: 15px; padding-right: 15px; display: inline-flex; width: 100%;"
+                     v-if="matrixShowFlag == true">
                     <div v-bind:class="{'width-95per': descriptionFlag == false}" style="min-width: 70%;">
                         <ul class="nav nav-tabs">
-                            <li v-for="eachTag in userTags" v-bind:class="{ active: currentTab == eachTag.tag_name }"><a data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name }}</a></li>
+                            <li v-for="eachTag in userTags" v-bind:class="{ active: currentTab == eachTag.tag_name }"><a
+                                    data-toggle="tab" v-on:click="showTableForTab(eachTag.tag_name)">{{ eachTag.tag_name
+                                }}</a></li>
                         </ul>
                         <div class="table-responsive">
                             <table class="table table-bordered cr-table">
@@ -133,23 +155,28 @@
                                         style="cursor: pointer; display: flex; ">
                                         <div style="width: 30px;">
                                             <div style="height: 22px; line-height: 22px;">
-                                                <span v-on:click="upUserValue(value.character_id)" class="glyphicon glyphicon-chevron-up"></span>
+                                                <span v-on:click="upUserValue(value.character_id)"
+                                                      class="glyphicon glyphicon-chevron-up"></span>
                                             </div>
                                             <div style="height: 22px; line-height: 22px;">
-                                                <span v-on:click="downUserValue(value.character_id)" class="glyphicon glyphicon-chevron-down"></span>
+                                                <span v-on:click="downUserValue(value.character_id)"
+                                                      class="glyphicon glyphicon-chevron-down"></span>
                                             </div>
                                         </div>
                                         <div style="line-height: 44px;">
                                             {{ value.value }}
                                         </div>
                                         <div>
-                                            <a class="btn btn-add" v-on:click="editCharacter(row[row.length - 1], true, row[row.length - 1].standard)" style="line-height: 30px;">
+                                            <a class="btn btn-add"
+                                               v-on:click="editCharacter(row[row.length - 1], true, row[row.length - 1].standard)"
+                                               style="line-height: 30px;">
                                                 <span class="glyphicon glyphicon-edit"></span>
                                             </a>
                                         </div>
                                         <div class="btn-group">
                                             <a v-if="checkHaveUnit(value.value) && !value.value.startsWith('Number of') && !value.value.startsWith('Ratio of')"
-                                               class="btn btn-add dropdown-toggle" style="line-height: 30px;" data-toggle="dropdown">
+                                               class="btn btn-add dropdown-toggle" style="line-height: 30px;"
+                                               data-toggle="dropdown">
                                                 <span><b>{{ value.unit }}</b></span>
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </a>
@@ -161,14 +188,20 @@
                                             </ul>
                                         </div>
                                         <div v-if="checkHaveUnit(value.value)" class="btn-group">
-                                            <a class="btn btn-add dropdown-toggle" style="line-height: 30px;" data-toggle="dropdown">
+                                            <a class="btn btn-add dropdown-toggle" style="line-height: 30px;"
+                                               data-toggle="dropdown">
                                                 <span><b>{{ value.summary }}</b></span>
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </a>
                                             <ul class="dropdown-menu" role="menu">
-                                                <li><a v-on:click="changeSummary(value.character_id, 'range-percentile')">range-percentile</a></li>
-                                                <li><a v-on:click="changeSummary(value.character_id, 'mean')">mean</a></li>
-                                                <li><a v-on:click="changeSummary(value.character_id, 'median')">median</a></li>
+                                                <li>
+                                                    <a v-on:click="changeSummary(value.character_id, 'range-percentile')">range-percentile</a>
+                                                </li>
+                                                <li><a v-on:click="changeSummary(value.character_id, 'mean')">mean</a>
+                                                </li>
+                                                <li>
+                                                    <a v-on:click="changeSummary(value.character_id, 'median')">median</a>
+                                                </li>
                                             </ul>
                                         </div>
                                         <div style="margin-left: 5px; line-height: 44px;">
@@ -188,15 +221,18 @@
                     <div style="border-left: 2px solid; margin-left: 5px;">
                         <div style="padding-top: 100px;">
                             <!--<div>-->
-                                <!--<a class="btn btn-primary" v-on:click="expandTable()"><span class="glyphicon glyphicon-chevron-right"></span></a>-->
+                            <!--<a class="btn btn-primary" v-on:click="expandTable()"><span class="glyphicon glyphicon-chevron-right"></span></a>-->
                             <!--</div>-->
                             <!--<div style="margin-top: 5px;">-->
-                                <!--<a class="btn btn-primary" v-on:click="expandDescription()"><span class="glyphicon glyphicon-chevron-left"></span></a>-->
+                            <!--<a class="btn btn-primary" v-on:click="expandDescription()"><span class="glyphicon glyphicon-chevron-left"></span></a>-->
                             <!--</div>-->
-                            <a class="btn btn-default" style="border: none;" v-on:click="expandDescription()"><span class="glyphicon glyphicon-option-vertical" style="color: #1f648b;"></span></a>
+                            <a class="btn btn-default" style="border: none;" v-on:click="expandDescription()"><span
+                                    class="glyphicon glyphicon-option-vertical" style="color: #1f648b;"></span></a>
                         </div>
                     </div>
-                    <div v-if="descriptionFlag == true" style="position:relative; min-width: 25%; max-width: 600px; overflow-y: scroll; word-wrap: break-word;" class="panel">
+                    <div v-if="descriptionFlag == true"
+                         style="position:relative; min-width: 25%; max-width: 600px; overflow-y: scroll; word-wrap: break-word;"
+                         class="panel">
                         <div class="panel-heading"><b>Generated Description</b></div>
                         <div class="panel-body" style="min-height: 100px;" v-html="descriptionText">
                         </div>
@@ -223,7 +259,8 @@
                                                 <br>
                                                 <div class="row">
                                                     <div class="col-md-4">
-                                                        <input style="height: 26px; width: 100%;" type="text" list="first_characters" v-model="firstCharacter"/>
+                                                        <input style="height: 26px; width: 100%;" type="text"
+                                                               list="first_characters" v-model="firstCharacter"/>
                                                         <datalist id="first_characters">
                                                             <option value="Length">Length</option>
                                                             <option value="Width">Width</option>
@@ -232,11 +269,11 @@
                                                             <option value="Distance">Distance</option>
                                                         </datalist>
                                                         <!--<select v-model="firstCharacter" style="height: 26px;">-->
-                                                            <!--<option>Length</option>-->
-                                                            <!--<option>Width</option>-->
-                                                            <!--<option>Depth</option>-->
-                                                            <!--<option>Diameter</option>-->
-                                                            <!--<option>Distance</option>-->
+                                                        <!--<option>Length</option>-->
+                                                        <!--<option>Width</option>-->
+                                                        <!--<option>Depth</option>-->
+                                                        <!--<option>Diameter</option>-->
+                                                        <!--<option>Distance</option>-->
                                                         <!--</select>-->
                                                     </div>
                                                     <div class="col-md-3">
@@ -280,28 +317,37 @@
                                                     <div class="col-md-6 radial-menu">
                                                         <ul style="margin-left: auto; margin-right: auto;">
                                                             <li><a v-on:click="showDetails('', metadataFlag)"></a></li>
-                                                            <li class="method" v-bind:class="{'back-grey': !checkHaveUnit(character.name)}"><a
-                                                                    :disabled="!checkHaveUnit(character.name)"
-                                                                    v-on:click="showDetails('method', metadataFlag)">1.
-                                                                Method<br><span class="glyphicon glyphicon-edit"></span></a>
+                                                            <li class="method"
+                                                                v-bind:class="{'back-grey': !checkHaveUnit(character.name)}">
+                                                                <a
+                                                                        :disabled="!checkHaveUnit(character.name)"
+                                                                        v-on:click="showDetails('method', metadataFlag)">1.
+                                                                    Method<br><span
+                                                                            class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
-                                                            <li class="unit" v-bind:class="{'back-grey': !checkHaveUnit(character.name)}"><a
-                                                                    :disabled="!checkHaveUnit(character.name)"
-                                                                    v-on:click="showDetails('unit', metadataFlag)">2.
-                                                                Unit<br><span class="glyphicon glyphicon-edit"></span></a>
+                                                            <li class="unit"
+                                                                v-bind:class="{'back-grey': !checkHaveUnit(character.name)}">
+                                                                <a
+                                                                        :disabled="!checkHaveUnit(character.name)"
+                                                                        v-on:click="showDetails('unit', metadataFlag)">2.
+                                                                    Unit<br><span
+                                                                            class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
                                                             <li class="tag"><a
                                                                     v-on:click="showDetails('tag', metadataFlag)">3.
-                                                                Tag<br><span class="glyphicon glyphicon-edit"></span></a>
+                                                                Tag<br><span
+                                                                        class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
                                                             <li class="summary"><a
                                                                     v-on:click="showDetails('summary', metadataFlag)">4.
-                                                                Summary<br>Function<br><span class="glyphicon glyphicon-edit"></span></a>
+                                                                Summary<br>Function<br><span
+                                                                        class="glyphicon glyphicon-edit"></span></a>
                                                             </li>
                                                             <li class="creator"><a
                                                                     v-on:click="showDetails('creator', metadataFlag)">Creator</a>
                                                             </li>
-                                                            <li><a v-on:click="showDetails('usage', metadataFlag)">Usage</a>
+                                                            <li>
+                                                                <a v-on:click="showDetails('usage', metadataFlag)">Usage</a>
                                                             </li>
                                                             <li>
                                                                 <a v-on:click="showDetails('history', metadataFlag)">History</a>
@@ -324,12 +370,14 @@
                                                 <div class="row">
                                                     <div class="col-md-12 text-right" style="margin-top: 15px;">
                                                         <a v-if="viewFlag == false"
-                                                           v-on:click="saveCharacter(metadataFlag)" class="btn btn-primary">Save</a>
+                                                           v-on:click="saveCharacter(metadataFlag)"
+                                                           class="btn btn-primary">Save</a>
                                                         <a v-if="viewFlag == true" v-on:click="use(item)"
                                                            class="btn btn-primary">Use this</a>
                                                         <a v-if="viewFlag == true" v-on:click="enhance(item)"
                                                            class="btn btn-primary">Clone and enhance</a>
-                                                        <a v-on:click="cancelCharacter()" class="btn btn-danger">Cancel</a>
+                                                        <a v-on:click="cancelCharacter()"
+                                                           class="btn btn-danger">Cancel</a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -353,7 +401,8 @@
                                             <div class="modal-body">
                                                 <div v-if="!character.method_as">
                                                     <div>
-                                                        <b>Please review the method definition carefully. Is this what you would
+                                                        <b>Please review the method definition carefully. Is this what
+                                                            you would
                                                             like
                                                             to save for <i>{{ character.name }}</i>?</b>
                                                     </div>
@@ -376,7 +425,8 @@
                                                 </div>
                                                 <div v-if="character.method_as">
                                                     <div>
-                                                        <b>Please review the method definition carefully. Is this what you
+                                                        <b>Please review the method definition carefully. Is this what
+                                                            you
                                                             would like
                                                             to save for <i>{{ character.name }}</i>?</b>
                                                     </div>
@@ -390,7 +440,8 @@
                                                     <a class="btn btn-primary ok-btn"
                                                        v-on:click="methodConfirm()">
                                                         &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
-                                                    <a v-on:click="cancelConfirmMethod()" class="btn btn-danger">Cancel</a>
+                                                    <a v-on:click="cancelConfirmMethod()"
+                                                       class="btn btn-danger">Cancel</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -408,13 +459,15 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div>
-                                                    You've select <b>{{ character.unit }}</b> as the Unit for <i>{{ character.name }}</i>.
+                                                    You've select <b>{{ character.unit }}</b> as the Unit for <i>{{
+                                                    character.name }}</i>.
                                                 </div>
                                                 <div class="modal-footer">
                                                     <a class="btn btn-primary ok-btn"
                                                        v-on:click="unitConfirm()">
                                                         &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
-                                                    <a v-on:click="cancelConfirmUnit()" class="btn btn-danger">Cancel</a>
+                                                    <a v-on:click="cancelConfirmUnit()"
+                                                       class="btn btn-danger">Cancel</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -433,7 +486,8 @@
                                         </div>
                                         <div class="modal-body">
                                             <div>
-                                                You've select <b>{{ character.standard_tag }}</b> as the Tag for <i>{{ character.name }}</i>.
+                                                You've select <b>{{ character.standard_tag }}</b> as the Tag for <i>{{
+                                                character.name }}</i>.
                                             </div>
                                             <div class="modal-footer">
                                                 <a class="btn btn-primary ok-btn"
@@ -458,7 +512,8 @@
                                     </div>
                                     <div class="modal-body">
                                         <div v-if="character.summary">
-                                            You've select <b>{{ character.summary }}</b> as the Summary for <i>{{ character.name }}</i>.
+                                            You've select <b>{{ character.summary }}</b> as the Summary for <i>{{
+                                            character.name }}</i>.
                                         </div>
                                         <div v-if="!character.summary">
                                             Summary function not selected.
@@ -491,7 +546,8 @@
                                             <a class="btn btn-primary ok-btn"
                                                v-on:click="removeAllStandardCharacters()">
                                                 &nbsp; &nbsp; Confirm &nbsp; &nbsp; </a>
-                                            <a v-on:click="removeAllStandardFlag = false;" class="btn btn-danger">Cancel</a>
+                                            <a v-on:click="removeAllStandardFlag = false;"
+                                               class="btn btn-danger">Cancel</a>
                                         </div>
                                     </div>
                                 </div>
@@ -505,67 +561,118 @@
                             <div class="modal-wrapper">
                                 <div class="modal-container">
                                     <div class="modal-header">
-                                        Value Details
+                                        Formulate a value: select existing phrases or use your own terms(need
+                                        definition)
                                     </div>
                                     <div class="modal-body">
                                         <div v-for="(eachColor, index) in colorDetails">
                                             <div>
-                                                <input v-on:focus="changeColorSection(eachColor, 'negation', $event)"
-                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachColor.negation" placeholder="">
-                                                <input v-on:focus="changeColorSection(eachColor, 'pre_constraint', $event)"
-                                                       style="width: 90px;"
-                                                       v-model="eachColor.pre_constraint"
-                                                       list="pre_list">
-                                                <datalist id="pre_list" v-if="preList.length > 0">
-                                                    <option v-for="each in preList" :value="each">{{ each }}</option>
-                                                </datalist>
-                                                <input v-on:focus="changeColorSection(eachColor, 'brightness', $event)"
-                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'brightness')"
-                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachColor.brightness" placeholder="bright">
-                                                <input v-on:focus="changeColorSection(eachColor, 'reflectance', $event)"
-                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'reflectance')"
-                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachColor.reflectance" placeholder="shiny">
-                                                <input v-on:focus="changeColorSection(eachColor, 'saturation', $event)"
-                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'saturation')"
-                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachColor.saturation" placeholder="pale">
-                                                <input v-on:focus="changeColorSection(eachColor, 'colored', $event)"
-                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'colored')"
-                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachColor.colored" placeholder="blue">
-                                                <input v-on:focus="changeColorSection(eachColor, 'multi_colored', $event)"
-                                                       v-on:keyup.enter="searchColorSelection(eachColor, 'multi_colored')"
-                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachColor.multi_colored" placeholder="stripped">
-                                                <input v-on:focus="changeColorSection(eachColor, 'post_constraint', $event)"
-                                                       style="width: 90px;"
-                                                       v-model="eachColor.post_constraint"
-                                                       list="post_list">
-                                                <datalist id="post_list" v-if="postList.length > 0">
-                                                    <option v-for="each in postList" :value="each">{{ each }}</option>
-                                                </datalist>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachColor, 'negation', $event)"
+                                                           style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
+                                                           v-model="eachColor.negation" placeholder="">
+                                                    <h5>
+                                                        negation
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachColor, 'pre_constraint', $event)"
+                                                           style="width: 90px;"
+                                                           v-model="eachColor.pre_constraint"
+                                                           list="pre_list">
+                                                    <datalist id="pre_list">
+                                                        <option value="longitudinally">longitudinally</option>
+                                                        <option value="when young">when young</option>
+                                                        <option v-for="each in preList" :value="each">{{ each }}
+                                                        </option>
+                                                    </datalist>
+                                                    <h5>
+                                                        pre-constraint
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachColor, 'brightness', $event)"
+                                                           v-on:keyup.enter="searchColorSelection(eachColor, 'brightness')"
+                                                           style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
+                                                           v-model="eachColor.brightness" placeholder="bright">
+                                                    <h5>
+                                                        brightness
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachColor, 'reflectance', $event)"
+                                                           v-on:keyup.enter="searchColorSelection(eachColor, 'reflectance')"
+                                                           style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
+                                                           v-model="eachColor.reflectance" placeholder="shiny">
+                                                    <h5>
+                                                        reflectance
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachColor, 'saturation', $event)"
+                                                           v-on:keyup.enter="searchColorSelection(eachColor, 'saturation')"
+                                                           style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
+                                                           v-model="eachColor.saturation" placeholder="pale">
+                                                    <h5>
+                                                        saturation
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachColor, 'colored', $event)"
+                                                           v-on:keyup.enter="searchColorSelection(eachColor, 'colored')"
+                                                           style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
+                                                           v-model="eachColor.colored" placeholder="blue">
+                                                    <h5>
+                                                        color
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachColor, 'multi_colored', $event)"
+                                                           v-on:keyup.enter="searchColorSelection(eachColor, 'multi_colored')"
+                                                           style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
+                                                           v-model="eachColor.multi_colored" placeholder="stripped">
+                                                    <h5>
+                                                        pattern
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachColor, 'post_constraint', $event)"
+                                                           style="width: 90px;"
+                                                           v-model="eachColor.post_constraint"
+                                                           list="post_list">
+                                                    <datalist id="post_list" v-if="postList.length > 0">
+                                                        <option v-for="each in postList" :value="each">{{ each }}
+                                                        </option>
+                                                    </datalist>
+                                                    <h5>
+                                                        post-constraint
+                                                    </h5>
+                                                </div>
                                             </div>
                                             <div v-if="eachColor.detailFlag == 'negation'" style="margin-top: 10px;">
-                                                <input type="radio" id="not" v-model="eachColor.negation" v-bind:value="'Not'"/> <label for="not">Not</label> <br/>
-                                                <input type="radio" id="unselect-not" v-model="eachColor.negation" v-bind:value="''"/> <label for="unselect-not">Unselect Not</label>
+                                                <input type="radio" id="not" v-model="eachColor.negation"
+                                                       v-bind:value="'Not'"/> <label for="not">Not</label> <br/>
+                                                <input type="radio" id="unselect-not" v-model="eachColor.negation"
+                                                       v-bind:value="''"/> <label for="unselect-not">Unselect
+                                                Not</label>
                                             </div>
                                             <div v-if="(eachColor.detailFlag == 'brightness'
                                             || eachColor.detailFlag == 'reflectance'
                                             || eachColor.detailFlag == 'saturation'
                                             || eachColor.detailFlag == 'colored'
-                                            || eachColor.detailFlag == 'multi_colored') && colorExistFlag"  style="margin-top: 10px;">
+                                            || eachColor.detailFlag == 'multi_colored') && colorExistFlag"
+                                                 style="margin-top: 10px;">
                                                 <!--<input style="width: 300px;" v-model="colorSearchText" placeholder="Enter a term to filter the term tree"/>-->
                                                 <tree
                                                         :data="treeData"
                                                         :options="colorTreeOption"
                                                         :filter="eachColor[eachColor.detailFlag]"
                                                         ref="tree"
-                                                        @node:selected="onTreeNodeSelected">
+                                                        @node:selected="onTreeNodeSelected"
+                                                        style="max-height: 300px;">
                                                     <div slot-scope="{ node }" class="node-container">
-                                                        <div class="node-text" v-tooltip="node.text">{{ node.text }}</div>
+                                                        <div class="node-text" v-tooltip="node.text">{{ node.text }}
+                                                        </div>
                                                     </div>
                                                 </tree>
                                             </div>
@@ -573,45 +680,70 @@
                                             || eachColor.detailFlag == 'reflectance'
                                             || eachColor.detailFlag == 'saturation'
                                             || eachColor.detailFlag == 'colored'
-                                            || eachColor.detailFlag == 'multi_colored') && !colorExistFlag"  style="margin-top: 10px;">
+                                            || eachColor.detailFlag == 'multi_colored') && !colorExistFlag"
+                                                 style="margin-top: 10px;">
 
                                                 <div v-if="searchColorFlag == 1">
                                                     <div v-for="eachSynonym in colorSynonyms">
-                                                        <input type="radio" v-bind:id="eachSynonym.term" v-bind:value="eachSynonym.term" v-model="eachColor[eachColor.detailFlag]">
-                                                        <label v-bind:for="eachSynonym.term">{{ eachSynonym.term }} ({{ eachSynonym.parentTerm }}): </label> {{ eachSynonym.definition }}
-                                                        <a class="btn" v-on:click="expandCommentSection(eachSynonym, eachColor.detailFlag)">C</a>
+                                                        <b>Did you mean?</b>
+                                                        <input type="radio" v-bind:id="eachSynonym.term"
+                                                               v-bind:value="eachSynonym.term"
+                                                               v-model="eachColor[eachColor.detailFlag]">
+                                                        <label v-bind:for="eachSynonym.term"> {{ eachSynonym.term }} ({{
+                                                            eachSynonym.parentTerm }}): </label> {{
+                                                        eachSynonym.definition ? eachSynonym.definition : 'No definition' }}
+                                                        <a class="btn"
+                                                           v-on:click="expandCommentSection(eachSynonym, eachColor.detailFlag)"><span
+                                                                class="glyphicon glyphicon-comment"></span></a>
                                                         <div v-if="eachSynonym.commentFlag == true">
-                                                            Description: <input v-model="colorComment[index][eachColor.detailFlag]" style="width: 100%;">
+                                                            Don't you like this term? improve or add definition for it:
+                                                            <input
+                                                                    v-model="colorComment[index][eachColor.detailFlag]"
+                                                                    style="width: 100%;">
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div v-if="searchColorFlag == 2">
                                                     Here is what we known about <b>{{ exactColor.term }}</b>
-                                                    Definition: <input v-model="colorDefinition[index][eachColor.detailFlag]" style="width: 70%;">
+                                                    Definition: <input
+                                                        v-model="colorDefinition[index][eachColor.detailFlag]"
+                                                        style="width: 70%;">
 
                                                 </div>
                                                 <div v-if="searchColorFlag !=2 ">
-                                                    <input type="radio" id="user-defined" v-bind:value="defaultColorValue + '(user defined)'" v-on:change="selectUserDefinedTerm(eachColor, eachColor.detailFlag, defaultColorValue)" v-model="eachColor[eachColor.detailFlag]">
-                                                    <label for="user-defined">Use a different term of my own:</label>
+                                                    <input type="radio" id="user-defined"
+                                                           v-bind:value="defaultColorValue + '(user defined)'"
+                                                           v-on:change="selectUserDefinedTerm(eachColor, eachColor.detailFlag, defaultColorValue)"
+                                                           v-model="eachColor[eachColor.detailFlag]">
+                                                    <label for="user-defined">Just use my term:</label>
                                                     <div for="user-defined">
+                                                        Definition: <input
+                                                            v-model="colorDefinition[index][eachColor.detailFlag]">
                                                         Taxon: <input v-model="colorTaxon[index][eachColor.detailFlag]">
-                                                        Sample Text: <input v-model="colorSampleText[index][eachColor.detailFlag]">
+                                                        Sample Text: <input
+                                                            v-model="colorSampleText[index][eachColor.detailFlag]"><br/>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <a class="btn btn-primary ok-btn"
-                                           v-on:click="removeColorValue()">
-                                            Remove Value  </a>
-                                        <a class="btn btn-primary ok-btn"
-                                           v-on:click="saveColorValue()">
-                                             Save  </a>
-                                        <a class="btn btn-primary ok-btn"
-                                           v-on:click="saveNewColorValue()">
-                                             Save & New  </a>
-                                        <a v-on:click="colorDetailsFlag = false;" class="btn btn-danger">Cancel</a>
+                                        <div class="row">
+                                            <div class="col-md-6" style="text-align: left;">
+                                                <a class="btn btn-primary ok-btn"
+                                                   v-on:click="removeColorValue()">
+                                                    Remove Value </a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a class="btn btn-primary ok-btn"
+                                                   v-on:click="saveColorValue()">
+                                                    Save </a>
+                                                <a class="btn btn-primary ok-btn"
+                                                   v-on:click="saveNewColorValue()">
+                                                    Save & New </a>
+                                                <a v-on:click="colorDetailsFlag = false;" class="btn btn-danger">Cancel</a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -624,89 +756,146 @@
                             <div class="modal-wrapper">
                                 <div class="modal-container">
                                     <div class="modal-header">
-                                        Value Details
+                                        Formulate a value: select existing phrases or use your own terms(need
+                                        definition)
                                     </div>
                                     <div class="modal-body">
                                         <div v-for="(eachValue, index) in nonColorDetails">
                                             <div>
-                                                <input v-on:focus="changeColorSection(eachValue, 'negation', $event)"
-                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachValue.negation" placeholder="">
-                                                <input v-on:focus="changeColorSection(eachValue, 'pre_constraint', $event)"
-                                                       style="width: 90px;"
-                                                       v-model="eachValue.pre_constraint"
-                                                       list="pre_non_list">
-                                                <datalist id="pre_non_list">
-                                                    <option v-for="each in preList" :value="each">{{ each }}</option>
-                                                </datalist>
-                                                <input v-on:focus="changeNonColorSection(eachValue, 'main_value', $event)"
-                                                       v-on:keyup.enter="searchNonColorSelection(eachValue, 'main_value')"
-                                                       style="width: 90px; border:none; border-bottom: 1px solid;"
-                                                       v-model="eachValue.main_value" placeholder="texture">
-                                                <input v-on:focus="changeColorSection(eachValue, 'post_constraint', $event)"
-                                                       style="width: 90px;"
-                                                       v-model="eachValue.post_constraint"
-                                                       list="post_non_list">
-                                                <datalist id="post_non_list" v-if="postList.length > 0">
-                                                    <option v-for="each in postList" :value="each">{{ each }}</option>
-                                                </datalist>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachValue, 'negation', $event)"
+                                                           style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
+                                                           v-model="eachValue.negation" placeholder="">
+                                                    <h5>
+                                                        negation
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachValue, 'pre_constraint', $event)"
+                                                           style="width: 90px;"
+                                                           v-model="eachValue.pre_constraint"
+                                                           list="pre_non_list">
+                                                    <datalist id="pre_non_list">
+                                                        <option v-for="each in preList" :value="each">{{ each }}
+                                                        </option>
+                                                    </datalist>
+                                                    <h5>
+                                                        pre-constraint
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeNonColorSection(eachValue, 'main_value', $event)"
+                                                           v-on:keyup.enter="searchNonColorSelection(eachValue, 'main_value')"
+                                                           style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
+                                                           v-model="eachValue.main_value"
+                                                           :placeholder="eachValue.placeholderName">
+                                                    <h5>
+                                                        {{ eachValue.placeholderName }}
+                                                    </h5>
+                                                </div>
+                                                <div style="display: inline-block;">
+                                                    <input v-on:focus="changeColorSection(eachValue, 'post_constraint', $event)"
+                                                           style="width: 90px;"
+                                                           v-model="eachValue.post_constraint"
+                                                           list="post_non_list">
+                                                    <datalist id="post_non_list" v-if="postList.length > 0">
+                                                        <option v-for="each in postList" :value="each">{{ each }}
+                                                        </option>
+                                                    </datalist>
+                                                    <h5>
+                                                        post-constraint
+                                                    </h5>
+                                                </div>
                                             </div>
                                             <div v-if="eachValue.detailFlag == 'negation'" style="margin-top: 10px;">
-                                                <input type="radio" id="non-not" v-model="eachValue.negation" v-bind:value="'Not'"/> <label for="non-not">Not</label> <br/>
-                                                <input type="radio" id="non-unselect-not" v-model="eachValue.negation" v-bind:value="''"/> <label for="non-unselect-not">Unselect Not</label>
+                                                <input type="radio" id="non-not" v-model="eachValue.negation"
+                                                       v-bind:value="'Not'"/> <label for="non-not">Not</label> <br/>
+                                                <input type="radio" id="non-unselect-not" v-model="eachValue.negation"
+                                                       v-bind:value="''"/> <label for="non-unselect-not">Unselect
+                                                Not</label>
                                             </div>
-                                            <div v-if="(eachValue.detailFlag == 'main_value') && nonColorExistFlag"  style="margin-top: 10px;">
+                                            <div v-if="(eachValue.detailFlag == 'main_value') && nonColorExistFlag"
+                                                 style="margin-top: 10px;">
                                                 <!--<input style="width: 300px;" v-model="nonColorSearchText" placeholder="Enter a term to filter the term tree"/>-->
                                                 <tree
                                                         :data="textureTreeData"
                                                         :options="colorTreeOption"
                                                         :filter="eachValue.main_value"
                                                         ref="tree"
-                                                        @node:selected="onTextureTreeNodeSelected">
+                                                        @node:selected="onTextureTreeNodeSelected"
+                                                        style="max-height: 300px;">
                                                     <div slot-scope="{ node }" class="node-container">
-                                                        <div class="node-text" v-tooltip="node.text">{{ node.text }}</div>
+                                                        <div class="node-text" v-tooltip="node.text">{{ node.text }}
+                                                        </div>
                                                     </div>
                                                 </tree>
                                             </div>
-                                            <div v-if="(eachValue.detailFlag == 'main_value') && !nonColorExistFlag"  style="margin-top: 10px;">
+                                            <div v-if="(eachValue.detailFlag == 'main_value') && !nonColorExistFlag"
+                                                 style="margin-top: 10px;">
 
                                                 <div v-if="searchNonColorFlag == 1">
                                                     <div v-for="eachSynonym in nonColorSynonyms">
-                                                        <input type="radio" v-bind:id="eachSynonym.term" v-bind:value="eachSynonym.term" v-model="eachValue[eachValue.detailFlag]">
-                                                        <label v-bind:for="eachSynonym.term">{{ eachSynonym.term }} ({{ eachSynonym.parentTerm }}): </label> {{ eachSynonym.definition }}
-                                                        <a class="btn" v-on:click="expandCommentSection(eachSynonym, eachValue.detailFlag)">C</a>
+                                                        <b>Did you mean? </b>
+                                                        <input type="radio" v-bind:id="eachSynonym.term"
+                                                               v-bind:value="eachSynonym.term"
+                                                               v-model="eachValue[eachValue.detailFlag]">
+                                                        <label v-bind:for="eachSynonym.term">{{ eachSynonym.term }} ({{
+                                                            eachSynonym.parentTerm }}): </label> {{
+                                                        eachSynonym.definition ? eachSynonym.definition : 'No definition' }}
+                                                        <a class="btn"
+                                                           v-on:click="expandCommentSection(eachSynonym, eachValue.detailFlag)"><span
+                                                                class="glyphicon glyphicon-comment"></span></a>
                                                         <div v-if="eachSynonym.commentFlag == true">
-                                                            Description: <input v-model="nonColorComment[index][eachValue.detailFlag]" style="width: 100%;">
+                                                            Don't you like this term? improve or add definition for it:
+                                                            <input
+                                                                    v-model="nonColorComment[index][eachValue.detailFlag]"
+                                                                    style="width: 100%;">
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div v-if="searchNonColorFlag == 2">
                                                     Here is what we known about <b>{{ exactNonColor.term }}</b>
-                                                    Definition: <input v-model="nonColorDefinition[index][eachValue.detailFlag]" style="width: 70%;">
+                                                    Definition: <input
+                                                        v-model="nonColorDefinition[index][eachValue.detailFlag]"
+                                                        style="width: 70%;">
 
                                                 </div>
                                                 <div v-if="searchNonColorFlag !=2 ">
-                                                    <input type="radio" id="non-user-defined" v-bind:value="defaultNonColorValue + '(user defined)'" v-on:change="selectUserDefinedTerm(eachValue, eachValue.detailFlag, defaultNonColorValue)" v-model="eachValue[eachValue.detailFlag]">
-                                                    <label for="non-user-defined">Use a different term of my own:</label>
+                                                    <input type="radio" id="non-user-defined"
+                                                           v-bind:value="defaultNonColorValue + '(user defined)'"
+                                                           v-on:change="selectUserDefinedTerm(eachValue, eachValue.detailFlag, defaultNonColorValue)"
+                                                           v-model="eachValue[eachValue.detailFlag]">
+                                                    <label for="non-user-defined">Just use my term:</label>
                                                     <div for="user-defined">
-                                                        Taxon: <input v-model="nonColorTaxon[index][eachValue.detailFlag]">
-                                                        Sample Text: <input v-model="nonColorSampleText[index][eachValue.detailFlag]">
+                                                        Definition: <input
+                                                            v-model="nonColorDefinition[index][eachValue.detailFlag]">
+                                                        Taxon: <input
+                                                            v-model="nonColorTaxon[index][eachValue.detailFlag]">
+                                                        Sample Text: <input
+                                                            v-model="nonColorSampleText[index][eachValue.detailFlag]">
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <a class="btn btn-primary ok-btn"
-                                           v-on:click="removeNonColorValue()">
-                                            Remove Value  </a>
-                                        <a class="btn btn-primary ok-btn"
-                                           v-on:click="saveNonColorValue()">
-                                            Save  </a>
-                                        <a class="btn btn-primary ok-btn"
-                                           v-on:click="saveNewNonColorValue()">
-                                            Save & New  </a>
-                                        <a v-on:click="nonColorDetailsFlag = false;" class="btn btn-danger">Cancel</a>
+                                        <div class="row">
+                                            <div class="col-md-6" style="text-align: left;">
+                                                <a class="btn btn-primary ok-btn"
+                                                   v-on:click="removeNonColorValue()">
+                                                    Remove Value </a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a class="btn btn-primary ok-btn"
+                                                   v-on:click="saveNonColorValue()">
+                                                    Save </a>
+                                                <a class="btn btn-primary ok-btn"
+                                                   v-on:click="saveNewNonColorValue()">
+                                                    Save & New </a>
+                                                <a v-on:click="nonColorDetailsFlag = false;"
+                                                   class="btn btn-danger">Cancel</a>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -729,7 +918,7 @@
     import creator from '../Metadata/creator.vue';
     import usage from '../Metadata/usage.vue';
     import history from '../Metadata/history.vue';
-    import { mapState, mapGetters, mapMutations } from 'vuex';
+    import {mapState, mapGetters, mapMutations} from 'vuex';
 
     import {ModelSelect} from '../../libs/vue-search-select-lib'
 
@@ -751,8 +940,7 @@
                 'colorTreeData',
                 'nonColorTreeData',
             ]),
-            ...mapGetters([
-            ]),
+            ...mapGetters([]),
         },
         data: function () {
             return {
@@ -780,17 +968,17 @@
                 columnCount: 0,
                 taxonName: 'Carex capitata',
                 matrixShowFlag: false,
-                headers : [],
-                values : [],
+                headers: [],
+                values: [],
                 collapsedFlag: false,
                 value: {
                     value: ''
                 },
                 isLoading: false,
                 userTags: [],
-                currentTab : '',
+                currentTab: '',
                 descriptionText: '',
-                descriptionFlag : false,
+                descriptionFlag: false,
                 editFlag: false,
                 characterUsername: '',
                 oldCharacter: {},
@@ -800,7 +988,7 @@
                 colorDetails: [],
                 treeData: this.colorTreeData,
                 colorSearchText: null,
-                colorTreeOption:{
+                colorTreeOption: {
                     multiple: true,
                     autoCheckChildren: false,
                     parentSelect: false,
@@ -834,7 +1022,8 @@
                 nonColorTaxon: [],
                 nonColorSampleText: [],
                 nonColorDefinition: [],
-                searchNonColorFlag: 0
+                searchNonColorFlag: 0,
+                sharedFlag: true,
             }
         },
         components: {
@@ -1042,7 +1231,7 @@
                             break;
                         case 'usage':
                             axios.get('/chrecorder/public/api/v1/get-usage/' + app.character.id)
-                                .then(function(resp) {
+                                .then(function (resp) {
                                     app.parentData = [];
                                     app.parentData[0] = resp.data.usage_count;
                                     app.parentData[1] = app.user.name;
@@ -1095,7 +1284,7 @@
                 console.log('postCharacters', postCharacters);
 
                 axios.post('/chrecorder/public/api/v1/character/add-standard', postCharacters)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         console.log('addStandard resp', resp.data);
                         app.userCharacters = resp.data;
                         app.isLoading = false;
@@ -1106,7 +1295,7 @@
                 var app = this;
 
                 axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
@@ -1122,7 +1311,7 @@
                 var app = this;
                 var oldUserTag = app.userCharacters.find(ch => ch.id == characterId).standard_tag;
                 axios.post("/chrecorder/public/api/v1/character/delete/" + app.user.id + "/" + characterId)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.defaultCharacters = resp.data.defaultCharacters;
                         app.refreshDefaultCharacters();
                         app.userCharacters = resp.data.characters;
@@ -1138,7 +1327,7 @@
                             };
                             console.log('remove jsonUserTag', jsonUserTag);
                             axios.post("/chrecorder/public/api/v1/user-tag/remove", jsonUserTag)
-                                .then(function(resp) {
+                                .then(function (resp) {
                                     console.log("remove UserTag", resp.data);
                                 });
                         }
@@ -1150,7 +1339,7 @@
                 var app = this;
                 app.isLoading = true;
                 axios.post('/chrecorder/public/api/v1/character/remove-all')
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.isLoading = false;
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
@@ -1213,7 +1402,7 @@
                     }
 
                 } else {
-                        app.showDetails('unit', app.metadataFlag);
+                    app.showDetails('unit', app.metadataFlag);
                 }
             },
             use(characterId) {
@@ -1289,7 +1478,9 @@
                 sessionStorage.setItem('edit_created_other', false);
                 app.viewFlag = false;
                 app.enhanceFlag = true;
-                setTimeout(function() { app.editCharacter(selectedCharacter); }, 1);
+                setTimeout(function () {
+                    app.editCharacter(selectedCharacter);
+                }, 1);
             },
             methodConfirm() {
                 var app = this;
@@ -1331,7 +1522,7 @@
                 var userId = sessionStorage.getItem("userId");
                 app.confirmSummary = false;
                 axios.get("/chrecorder/public/api/v1/character/" + userId)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         console.log('getCharacter', resp);
                         var currentCharacters = resp.data.characters;
 //                        app.character.standard = 0;
@@ -1361,7 +1552,7 @@
                                 }
 
                                 axios.post('/chrecorder/public/api/v1/character/update-character', app.character)
-                                    .then(function(resp) {
+                                    .then(function (resp) {
                                         app.userTags = resp.data.userTags;
                                         app.userCharacters = resp.data.characters;
                                         app.headers = resp.data.headers;
@@ -1403,7 +1594,7 @@
 
                             if (app.matrixShowFlag) {
                                 axios.post('/chrecorder/public/api/v1/character/add-character', app.character)
-                                    .then(function(resp) {
+                                    .then(function (resp) {
                                         if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
                                             var jsonUserTag = {
                                                 user_id: app.user.id,
@@ -1411,16 +1602,16 @@
                                             };
                                             console.log('jsonUserTag', jsonUserTag);
                                             axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
-                                                .then(function(resp) {
+                                                .then(function (resp) {
                                                     axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                                        .then(function(resp) {
+                                                        .then(function (resp) {
                                                             app.userTags = resp.data;
                                                         });
                                                     console.log("create UserTag", resp.data);
                                                 });
                                         } else {
                                             axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                                .then(function(resp) {
+                                                .then(function (resp) {
                                                     app.userTags = resp.data;
                                                 });
                                         }
@@ -1438,7 +1629,7 @@
                                     });
                             } else {
                                 axios.post("/chrecorder/public/api/v1/character/create", app.character)
-                                    .then(function(resp) {
+                                    .then(function (resp) {
                                         if (!app.userCharacters.find(ch => ch.standard_tag == app.character.standard_tag)) {
                                             var jsonUserTag = {
                                                 user_id: app.user.id,
@@ -1446,7 +1637,7 @@
                                             };
                                             console.log('jsonUserTag', jsonUserTag);
                                             axios.post("/chrecorder/public/api/v1/user-tag/create", jsonUserTag)
-                                                .then(function(resp) {
+                                                .then(function (resp) {
                                                     console.log("create UserTag", resp.data);
                                                 });
                                         }
@@ -1474,7 +1665,7 @@
                         'taxon': app.taxonName
                     };
                     axios.post('/chrecorder/public/api/v1/matrix-store', jsonMatrix)
-                        .then(function(resp) {
+                        .then(function (resp) {
                             app.isLoading = false;
                             console.log('resp storeMatrix', resp.data);
                             app.matrixShowFlag = true;
@@ -1484,7 +1675,7 @@
                             app.values = resp.data.values;
                             console.log('app.userTags', app.userTags);
                             axios.get('/chrecorder/public/api/v1/user-tag/' + app.user.id)
-                                .then(function(resp) {
+                                .then(function (resp) {
                                     app.userTags = resp.data;
                                     app.showTableForTab(app.userTags[0].tag_name);
                                 });
@@ -1503,7 +1694,7 @@
                 var app = this;
                 app.isLoading = true;
                 axios.post('/chrecorder/public/api/v1/delete-header/' + headerId)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         console.log('delete header', resp.data);
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
@@ -1517,7 +1708,7 @@
             changeTaxonName() {
                 var app = this;
                 axios.post('/chrecorder/public/api/v1/change-taxon/' + app.taxonName)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.taxonName = resp.data.taxon;
                     });
             },
@@ -1530,7 +1721,7 @@
                     alert("To reduce the size of the matrix, use the remove button (x) in the matrix.");
                 } else {
                     axios.post('/chrecorder/public/api/v1/add-more-column/' + app.columnCount)
-                        .then(function(resp) {
+                        .then(function (resp) {
                             console.log('addMoreColumn resp', resp.data);
                             app.userCharacters = resp.data.characters;
                             app.headers = resp.data.headers;
@@ -1547,7 +1738,7 @@
                 var currentCharacter = app.userCharacters.find(ch => ch.id == value.character_id);
                 if (app.checkHaveUnit(currentCharacter.name)) {
                     axios.post('/chrecorder/public/api/v1/character/update', value)
-                        .then(function(resp) {
+                        .then(function (resp) {
                             console.log('saveItem', resp.data);
                             if (resp.data.error_input == 1) {
                                 event.target.style.color = 'red';
@@ -1569,7 +1760,7 @@
                 var app = this;
                 app.isLoading = true;
                 axios.post('/chrecorder/public/api/v1/character/remove-all-standard')
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.removeAllStandardFlag = false;
                         app.isLoading = false;
                         app.userCharacters = resp.data.characters;
@@ -1609,7 +1800,7 @@
                 app.isLoading = true;
                 app.currentTab = tagName;
                 axios.post('/chrecorder/public/api/v1/show-tab-character/' + tagName)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.isLoading = false;
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
@@ -1628,7 +1819,7 @@
             removeRowTable(characterId) {
                 var app = this;
                 axios.post('/chrecorder/public/api/v1/character/delete/' + app.user.id + '/' + characterId)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
@@ -1647,7 +1838,7 @@
                     unit: unit
                 };
                 axios.post('/chrecorder/public/api/v1/character/update-unit', jsonPost)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
@@ -1662,7 +1853,7 @@
                     summary: summary
                 };
                 axios.post('/chrecorder/public/api/v1/character/update-summary', jsonPost)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.userCharacters = resp.data.characters;
                         app.headers = resp.data.headers;
                         app.values = resp.data.values;
@@ -1684,7 +1875,7 @@
             },
             swap(valueId, directionFlag = true, maxLength) {
                 var app = this;
-                var showedValues = app.values.filter(function(eachValue) {
+                var showedValues = app.values.filter(function (eachValue) {
                     return app.userCharacters.find(ch => ch.id == eachValue[0].character_id).show_flag == true;
                 });
                 var valueIndex = showedValues.indexOf(app.values.find(value => value[0].character_id == valueId));
@@ -1698,7 +1889,7 @@
                         order: 'down',
                         characterId: tmp[0].character_id,
                     })
-                        .then(function(resp) {
+                        .then(function (resp) {
                             console.log('resp', resp);
                             app.isLoading = false;
                             app.values = resp.data.values;
@@ -1715,7 +1906,7 @@
                         order: 'up',
                         characterId: tmp[0].character_id,
                     })
-                        .then(function(resp) {
+                        .then(function (resp) {
                             app.isLoading = false;
                             app.values = resp.data.values;
                             app.userCharacters = resp.data.characters;
@@ -1788,11 +1979,11 @@
 
                 for (var i = 0; i < app.userTags.length; i++) {
                     app.descriptionText += '<b>' + app.userTags[i].tag_name + ': ' + '</b>';
-                    var filteredCharacters = app.userCharacters.filter(function(eachCharacter){
+                    var filteredCharacters = app.userCharacters.filter(function (eachCharacter) {
                         return eachCharacter.standard_tag == app.userTags[i].tag_name;
                     });
                     for (var j = 0; j < filteredCharacters.length; j++) {
-                        var filteredValues = app.values.filter(function(eachValue) {
+                        var filteredValues = app.values.filter(function (eachValue) {
                             return eachValue[0].character_id == filteredCharacters[j].id;
                         })[0];
                         var tempValueArray = [];
@@ -1855,14 +2046,14 @@
                                     case "mean":
                                         var sum = 0;
                                         var arrayLength = 0;
-                                        for( var l = 0; l < tempValueArray.length; l++ ){
+                                        for (var l = 0; l < tempValueArray.length; l++) {
                                             if (tempValueArray[l] != null && tempValueArray[l] != '' && tempValueArray[l] != undefined) {
-                                                sum += parseInt( tempValueArray[l], 10 ); //don't forget to add the base
+                                                sum += parseInt(tempValueArray[l], 10); //don't forget to add the base
                                                 arrayLength++;
                                             }
                                         }
 
-                                        var avg = parseFloat(sum/arrayLength).toFixed(1);
+                                        var avg = parseFloat(sum / arrayLength).toFixed(1);
                                         app.descriptionText += avg;
                                         if (filteredCharacters[j].unit) {
                                             app.descriptionText += filteredCharacters[j].unit
@@ -1882,7 +2073,7 @@
                                 } else if (filteredCharacters[j].name.startsWith('Diameter')) {
                                     app.descriptionText += ' diameter; ';
                                 } else {
-                                    app.descriptionText += ' ; ' ;
+                                    app.descriptionText += ' ; ';
                                 }
                             } else {
                                 if (tempValueArray.find(v => v == 'green')) {
@@ -1909,9 +2100,9 @@
             exportDescription() {
                 var app = this;
                 axios.post('/chrecorder/public/api/v1/export-description', {template: app.descriptionText, taxon: app.taxonName})
-                    .then(function(resp) {
+                    .then(function (resp) {
                         console.log('resp', resp.data);
-                        if (resp.data.is_scucess == 1){
+                        if (resp.data.is_scucess == 1) {
                             window.location.href = resp.data.doc_url;
                         } else {
                             alert('Error occurred while exporting data!');
@@ -1933,7 +2124,7 @@
                 var app = this;
                 console.log('header', header.header);
                 axios.post('/chrecorder/public/api/v1/update-header', header)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.headers = resp.data.headers;
                     });
             },
@@ -1959,48 +2150,69 @@
                                     console.log('colorSampleText', app.colorSampleText[i][key]);
                                     var date = new Date();
                                     requestBody = {
-                                        "user": app.user.name,
-                                        "ontology": "exp",
+                                        "user": app.sharedFlag ? '' : app.user.name,
+                                        "ontology": "carex",
                                         "term": tempValue[key],
                                         "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + app.changeToSubClassName(key),
-                                        "definition": "",
+                                        "definition": app.colorDefinition[i][key],
                                         "elucidation": "",
                                         "createdBy": app.user.name,
-                                        "creationDate": ("0" + date.getMonth()).slice(-2) + '-' +("0" +  date.getDate()).slice(-2) + '-' + date.getFullYear(),
+                                        "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
                                         "definitionSrc": app.user.name,
                                         "examples": app.colorSampleText[i][key] + ", used in taxon " + app.colorTaxon[i][key],
                                         "logicDefinition": "",
                                     };
                                     axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
-                                        .then(function(resp) {
+                                        .then(function (resp) {
                                             console.log('shark api class resp', resp);
+                                            axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                                user: app.sharedFlag ? '' : app.user.name,
+                                                ontology: 'carex'
+                                            })
+                                                .then(function (resp) {
+                                                    console.log('save api resp', resp);
+                                                });
                                         });
                                 } else if (app.colorDefinition[i][key]) {
                                     requestBody = {
-                                        "user": app.user.name,
-                                        "ontology": "exp",
+                                        "user": app.sharedFlag ? '' : app.user.name,
+                                        "ontology": "carex",
                                         "definition": app.colorDefinition[i][key],
                                         "providedBy": app.user.name,
-                                        "exampleSentence": "root apex rounded",
+                                        "exampleSentence": "",
                                         "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + tempValue[key]
                                     };
                                     axios.post('http://shark.sbs.arizona.edu:8080/definition', requestBody)
-                                        .then(function(resp) {
+                                        .then(function (resp) {
                                             console.log('shark api definition resp', resp);
+                                            axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                                user: '',
+                                                ontology: 'carex'
+                                            })
+                                                .then(function (resp) {
+                                                    console.log('save api resp', resp);
+                                                });
                                         });
                                     console.log('user defined', app.colorDefinition[i][key]);
                                 } else if (app.colorComment[i][key]) {
                                     requestBody = {
-                                        "user": app.user.name,
-                                        "ontology": "exp",
+                                        "user": app.sharedFlag ? '' : app.user.name,
+                                        "ontology": "carex",
                                         "comment": app.colorComment[i][key],
                                         "providedBy": app.user.name,
                                         "exampleSentence": "",
                                         "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + tempValue[key]
                                     };
                                     axios.post('http://shark.sbs.arizona.edu:8080/comment', requestBody)
-                                        .then(function(resp) {
+                                        .then(function (resp) {
                                             console.log('shark api comment resp', resp);
+                                            axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                                user: app.sharedFlag ? '' : app.user.name,
+                                                ontology: 'carex'
+                                            })
+                                                .then(function (resp) {
+                                                    console.log('save api resp', resp);
+                                                });
                                         });
                                     console.log('colorComment', app.colorComment[i][key]);
 
@@ -2012,7 +2224,7 @@
                     postValues.push(tempValue);
                 }
                 axios.post('/chrecorder/public/api/v1/save-color-value', postValues)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.values = resp.data.values;
                         app.colorDetailsFlag = false;
                         console.log('save color value resp', postValues);
@@ -2025,7 +2237,7 @@
 
                 console.log('app.colorDetails[0].value_id', app.colorDetails[0].value_id);
                 axios.post('/chrecorder/public/api/v1/remove-color-value', {value_id: app.colorDetails[0].value_id})
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.values = resp.data.values;
                         app.colorDetailsFlag = false;
                     });
@@ -2050,47 +2262,68 @@
                             tempValue['main_value'] = app.nonColorDetails[i]['main_value'].substr(0, app.nonColorDetails[i]['main_value'].length - 14);
                             var date = new Date();
                             requestBody = {
-                                "user": app.user.name,
-                                "ontology": "exp",
+                                "user": app.sharedFlag ? '' : app.user.name,
+                                "ontology": "carex",
                                 "term": tempValue['main_value'],
                                 "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#texture",
-                                "definition": "",
+                                "definition": app.colorDefinition[i]['main_value'],
                                 "elucidation": "",
                                 "createdBy": app.user.name,
-                                "creationDate": ("0" + date.getMonth()).slice(-2) + '-' +("0" +  date.getDate()).slice(-2) + '-' + date.getFullYear(),
+                                "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
                                 "definitionSrc": app.user.name,
                                 "examples": app.nonColorSampleText[i]['main_value'] + ", used in taxon " + app.nonColorTaxon[i]['main_value'],
                                 "logicDefinition": "",
                             };
                             axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
-                                .then(function(resp) {
+                                .then(function (resp) {
                                     console.log('shark api class resp', resp);
+                                    axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                        user: app.sharedFlag ? '' : app.user.name,
+                                        ontology: 'carex'
+                                    })
+                                        .then(function (resp) {
+                                            console.log('save api resp', resp);
+                                        });
                                 });
                         } else if (app.nonColorDefinition[i]['main_value']) {
                             requestBody = {
-                                "user": app.user.name,
-                                "ontology": "exp",
+                                "user": app.sharedFlag ? '' : app.user.name,
+                                "ontology": "carex",
                                 "definition": app.colorDefinition[i]['main_value'],
                                 "providedBy": app.user.name,
-                                "exampleSentence": "root apex rounded",
+                                "exampleSentence": "",
                                 "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + tempValue['main_value']
                             };
                             axios.post('http://shark.sbs.arizona.edu:8080/definition', requestBody)
-                                .then(function(resp) {
+                                .then(function (resp) {
                                     console.log('shark api definition resp', resp);
+                                    axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                        user: app.sharedFlag ? '' : app.user.name,
+                                        ontology: 'carex'
+                                    })
+                                        .then(function (resp) {
+                                            console.log('save api resp', resp);
+                                        });
                                 });
                         } else if (app.nonColorComment[i]['main_value']) {
                             requestBody = {
-                                "user": app.user.name,
-                                "ontology": "exp",
+                                "user": app.sharedFlag ? '' : app.user.name,
+                                "ontology": "carex",
                                 "comment": app.nonColorComment[i]['main_value'],
                                 "providedBy": app.user.name,
                                 "exampleSentence": "",
                                 "classIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + tempValue['main_value']
                             };
                             axios.post('http://shark.sbs.arizona.edu:8080/comment', requestBody)
-                                .then(function(resp) {
+                                .then(function (resp) {
                                     console.log('shark api comment resp', resp);
+                                    axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                        user: app.sharedFlag ? '' : app.user.name,
+                                        ontology: 'carex'
+                                    })
+                                        .then(function (resp) {
+                                            console.log('save api resp', resp);
+                                        });
                                 });
 
                         }
@@ -2099,7 +2332,7 @@
                     postValues.push(tempValue);
                 }
                 axios.post('/chrecorder/public/api/v1/save-non-color-value', postValues)
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.values = resp.data.values;
                         app.nonColorDetailsFlag = false;
                     });
@@ -2108,7 +2341,7 @@
                 var app = this;
 
                 axios.post('/chrecorder/public/api/v1/remove-non-color-value', {value_id: app.nonColorDetails[0].value_id})
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.values = resp.data.values;
                         app.nonColorDetailsFlag = false;
                     });
@@ -2136,14 +2369,14 @@
                 var currentCharacter = app.userCharacters.find(ch => ch.id == value.character_id);
                 if (!app.checkHaveUnit(currentCharacter.name)) {
                     axios.get('/chrecorder/public/api/v1/get-constraint/' + currentCharacter.name)
-                        .then(function(resp) {
+                        .then(function (resp) {
                             app.preList = resp.data.preList;
                             app.postList = resp.data.postList;
                         });
                     if (currentCharacter.name.startsWith('Color')) {
                         app.colorDetailsFlag = true;
                         axios.get('/chrecorder/public/api/v1/get-color-details/' + value.id)
-                            .then(function(resp) {
+                            .then(function (resp) {
                                 console.log('get-color resp', resp.data);
                                 app.colorDetails = resp.data.colorDetails;
                                 if (app.colorDetails.length == 0) {
@@ -2178,11 +2411,16 @@
                     } else {
                         app.nonColorDetailsFlag = true;
 
+
                         axios.get('/chrecorder/public/api/v1/get-non-color-details/' + value.id)
-                            .then(function(resp) {
+                            .then(function (resp) {
                                 app.nonColorDetails = resp.data.nonColorDetails;
                                 if (app.nonColorDetails.length == 0) {
-                                    app.nonColorDetails.push({value_id: value.id, detailFlag: null});
+                                    app.nonColorDetails.push({
+                                        value_id: value.id,
+                                        detailFlag: null,
+                                        placeholderName: currentCharacter.name.split(' ')[0].toLowerCase()
+                                    });
                                     app.nonColorComment.push({});
                                     app.nonColorTaxon.push({
                                         'main_value': app.taxonName,
@@ -2193,6 +2431,7 @@
                                     for (var i = 0; i < app.nonColorDetails.length; i++) {
                                         app.nonColorDetails[i].taxon = app.taxonName;
                                         app.nonColorDetails[i].detailFlag = null;
+                                        app.nonColorDetails[i].placeholderName = currentCharacter.name.split(' ')[0].toLowerCase();
                                         app.nonColorComment.push({});
                                         app.nonColorTaxon.push({
                                             'main_value': app.taxonName,
@@ -2233,7 +2472,7 @@
 
                 if (app.checkHaveColorValueSet(flag)) {
                     axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + app.changeToSubClassName(flag))
-                        .then(function(resp) {
+                        .then(function (resp) {
                             app.$store.state.colorTreeData = resp.data;
                             color.detailFlag = flag;
                             app.colorExistFlag = true;
@@ -2286,15 +2525,14 @@
 
                 if (flag == 'negation') {
                     event.target.placeholder = '';
-                } else if (flag == 'main_value') {
-                    event.target.placeholder = searchText[0];
                 }
-
-
+//                } else if (flag == 'main_value') {
+//                    event.target.placeholder = searchText[0];
+//                }
 
 
                 axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + searchText[0].toLowerCase())
-                    .then(function(resp) {
+                    .then(function (resp) {
                         app.textureTreeData = resp.data;
                         nonColor.detailFlag = flag;
                         app.nonColorExistFlag = true;
@@ -2318,7 +2556,7 @@
             },
             changeToSubClassName(flag) {
                 var searchFlag = null;
-                switch(flag) {
+                switch (flag) {
                     case 'brightness':
                         searchFlag = 'color brightness';
                         break;
@@ -2344,8 +2582,9 @@
                 var app = this;
                 app.colorExistFlag = false;
                 app.defaultColorValue = color[flag];
-                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + color[flag])
-                    .then(function(resp) {
+//                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + color[flag])
+                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + color[flag] + '&ancestorIRI=http://biosemantics.arizona.edu/ontologies/carex%23' + app.changeToSubClassName(flag))
+                    .then(function (resp) {
                         console.log('search carex resp', resp.data);
                         app.searchColor = resp.data.entries;
                         if (app.searchColor.length == 0) {
@@ -2353,7 +2592,7 @@
                         } else if (app.searchColor.find(eachColor => eachColor.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == color[flag])
                             || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == color[flag])))) {
                             app.searchColorFlag = 1;
-                            app.colorSynonyms = app.searchColor.filter(function(eachColor) {
+                            app.colorSynonyms = app.searchColor.filter(function (eachColor) {
                                 return eachColor.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == color[flag])
                                     || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == color[flag])
                                     || (eachProperty => eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == color[flag])) != null || eachColor.term == color[flag];
@@ -2391,8 +2630,9 @@
                 var app = this;
                 app.nonColorExistFlag = false;
                 app.defaultNonColorValue = nonColor[flag];
-                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag])
-                    .then(function(resp) {
+//                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag])
+                axios.get('http://shark.sbs.arizona.edu:8080/carex/search?user=' + app.user.name + '&term=' + nonColor[flag] + '&ancestorIRI=http://biosemantics.arizona.edu/ontologies/carex%23' + app.changeToSubClassName(flag))
+                    .then(function (resp) {
                         console.log('search carex resp', resp.data);
                         app.searchNonColor = resp.data.entries;
                         if (app.searchNonColor.length == 0) {
@@ -2400,7 +2640,7 @@
                         } else if (app.searchNonColor.find(eachValue => eachValue.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == nonColor[flag])
                             || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == nonColor[flag])))) {
                             app.searchNonColorFlag = 1;
-                            app.nonColorSynonyms = app.searchNonColor.filter(function(eachValue) {
+                            app.nonColorSynonyms = app.searchNonColor.filter(function (eachValue) {
                                 return eachValue.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == nonColor[flag])
                                     || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == nonColor[flag])
                                     || (eachProperty => eachProperty.property.endsWith('hasExactSynonym') && eachProperty.value == nonColor[flag])) != null || eachValue.term == nonColor[flag];
@@ -2532,12 +2772,12 @@
             },
         },
         watch: {
-            colorTreeData( newData ) {
+            colorTreeData(newData) {
                 this.treeData = newData;
                 // do data transformations etc
                 // trigger UI refresh
             },
-            nonColorTreeData( newData ) {
+            nonColorTreeData(newData) {
                 this.textureTreeData = newData;
             }
         },
@@ -2575,7 +2815,7 @@
                         app.standardCharacters.push(temp);
                     }
                     axios.get("/chrecorder/public/api/v1/character/" + app.user.id)
-                        .then(function(resp) {
+                        .then(function (resp) {
                             console.log('resp character', resp.data);
                             app.userCharacters = resp.data.characters;
                             app.headers = resp.data.headers;
@@ -2601,7 +2841,7 @@
                 });
 
             axios.get("/chrecorder/public/api/v1/user-tag/" + app.user.id)
-                .then(function(resp) {
+                .then(function (resp) {
                     app.userTags = resp.data;
                     console.log('userTags', app.userTags);
                 });
@@ -2615,7 +2855,6 @@
 
         },
     }
-
 
 
 </script>

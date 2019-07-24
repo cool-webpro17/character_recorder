@@ -594,7 +594,8 @@
                                                     <input v-on:focus="changeColorSection(eachColor, 'brightness', $event)"
                                                            v-on:keyup.enter="searchColorSelection(eachColor, 'brightness')"
                                                            style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
-                                                           v-model="eachColor.brightness" placeholder="bright">
+                                                           v-model="eachColor.brightness" placeholder="bright"
+                                                           class="color-input">
                                                     <h5>
                                                         brightness
                                                     </h5>
@@ -603,7 +604,8 @@
                                                     <input v-on:focus="changeColorSection(eachColor, 'reflectance', $event)"
                                                            v-on:keyup.enter="searchColorSelection(eachColor, 'reflectance')"
                                                            style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
-                                                           v-model="eachColor.reflectance" placeholder="shiny">
+                                                           v-model="eachColor.reflectance" placeholder="shiny"
+                                                           class="color-input">
                                                     <h5>
                                                         reflectance
                                                     </h5>
@@ -612,7 +614,8 @@
                                                     <input v-on:focus="changeColorSection(eachColor, 'saturation', $event)"
                                                            v-on:keyup.enter="searchColorSelection(eachColor, 'saturation')"
                                                            style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
-                                                           v-model="eachColor.saturation" placeholder="pale">
+                                                           v-model="eachColor.saturation" placeholder="pale"
+                                                           class="color-input">
                                                     <h5>
                                                         saturation
                                                     </h5>
@@ -621,7 +624,8 @@
                                                     <input v-on:focus="changeColorSection(eachColor, 'colored', $event)"
                                                            v-on:keyup.enter="searchColorSelection(eachColor, 'colored')"
                                                            style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
-                                                           v-model="eachColor.colored" placeholder="blue">
+                                                           v-model="eachColor.colored" placeholder="blue"
+                                                           class="color-input">
                                                     <h5>
                                                         color
                                                     </h5>
@@ -630,7 +634,8 @@
                                                     <input v-on:focus="changeColorSection(eachColor, 'multi_colored', $event)"
                                                            v-on:keyup.enter="searchColorSelection(eachColor, 'multi_colored')"
                                                            style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
-                                                           v-model="eachColor.multi_colored" placeholder="stripped">
+                                                           v-model="eachColor.multi_colored" placeholder="stripped"
+                                                           class="color-input">
                                                     <h5>
                                                         pattern
                                                     </h5>
@@ -718,10 +723,15 @@
                                                     <label for="user-defined">Just use my term:</label>
                                                     <div for="user-defined">
                                                         Definition: <input
-                                                            v-model="colorDefinition[index][eachColor.detailFlag]">
-                                                        Taxon: <input v-model="colorTaxon[index][eachColor.detailFlag]">
-                                                        Sample Text: <input
-                                                            v-model="colorSampleText[index][eachColor.detailFlag]"><br/>
+                                                            v-model="colorDefinition[index][eachColor.detailFlag]"
+                                                            class="color-definition-input">
+                                                        Taxon:
+                                                        <input v-model="colorTaxon[index][eachColor.detailFlag]"
+                                                               class="color-definition-input">
+                                                        Sample Text:
+                                                        <input
+                                                            v-model="colorSampleText[index][eachColor.detailFlag]"
+                                                            class="color-definition-input"><br/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -868,11 +878,14 @@
                                                     <label for="non-user-defined">Just use my term:</label>
                                                     <div for="user-defined">
                                                         Definition: <input
-                                                            v-model="nonColorDefinition[index][eachValue.detailFlag]">
+                                                            v-model="nonColorDefinition[index][eachValue.detailFlag]"
+                                                            class="non-color-input-definition">
                                                         Taxon: <input
-                                                            v-model="nonColorTaxon[index][eachValue.detailFlag]">
+                                                            v-model="nonColorTaxon[index][eachValue.detailFlag]"
+                                                            class="non-color-input-definition">
                                                         Sample Text: <input
-                                                            v-model="nonColorSampleText[index][eachValue.detailFlag]">
+                                                            v-model="nonColorSampleText[index][eachValue.detailFlag]"
+                                                            class="non-color-input-definition">
                                                     </div>
                                                 </div>
                                             </div>
@@ -2133,6 +2146,8 @@
 
                 var postValues = [];
 
+                var postFlag = true;
+
                 for (var i = 0; i < app.colorDetails.length; i++) {
                     var tempValue = {};
                     tempValue['value_id'] = app.colorDetails[i]['value_id'];
@@ -2145,35 +2160,49 @@
                             var requestBody = {};
                             console.log('app.colorDetails[i][key]', app.colorDetails[i][key]);
                             if (app.colorDetails[i][key] != null && app.colorDetails[i][key] != '') {
-                                if (app.colorDetails[i][key].endsWith('(user defined)')) {
-                                    tempValue[key] = app.colorDetails[i][key].substr(0, app.colorDetails[i][key].length - 14);
-                                    console.log('colorSampleText', app.colorSampleText[i][key]);
-                                    var date = new Date();
-                                    requestBody = {
-                                        "user": app.sharedFlag ? '' : app.user.name,
-                                        "ontology": "carex",
-                                        "term": tempValue[key],
-                                        "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + app.changeToSubClassName(key),
-                                        "definition": app.colorDefinition[i][key],
-                                        "elucidation": "",
-                                        "createdBy": app.user.name,
-                                        "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
-                                        "definitionSrc": app.user.name,
-                                        "examples": app.colorSampleText[i][key] + ", used in taxon " + app.colorTaxon[i][key],
-                                        "logicDefinition": "",
-                                    };
-                                    axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
-                                        .then(function (resp) {
-                                            console.log('shark api class resp', resp);
-                                            axios.post('http://shark.sbs.arizona.edu:8080/save', {
-                                                user: app.sharedFlag ? '' : app.user.name,
-                                                ontology: 'carex'
-                                            })
-                                                .then(function (resp) {
-                                                    console.log('save api resp', resp);
-                                                });
-                                        });
-                                } else if (app.colorDefinition[i][key]) {
+                                if (app.colorDetails[i][key].endsWith('(user defined)') && postFlag == true) {
+                                    if (app.colorDefinition[i][key] == ''
+                                        || app.colorDefinition[i][key] == null
+                                        || app.colorDefinition[i][key] == undefined
+                                        || app.colorSampleText[i][key] == ''
+                                        || app.colorSampleText[i][key] == null
+                                        || app.colorSampleText[i][key] == undefined
+                                        || app.colorTaxon[i][key] == ''
+                                        || app.colorTaxon[i][key] == null
+                                        || app.colorTaxon[i][key] == undefined) {
+                                         postFlag = false;
+                                    } else if (postFlag == true){
+                                        tempValue[key] = app.colorDetails[i][key].substr(0, app.colorDetails[i][key].length - 14);
+                                        console.log('colorSampleText', app.colorSampleText[i][key]);
+                                        var date = new Date();
+                                        requestBody = {
+                                            "user": app.sharedFlag ? '' : app.user.name,
+                                            "ontology": "carex",
+                                            "term": tempValue[key],
+                                            "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#" + app.changeToSubClassName(key),
+                                            "definition": app.colorDefinition[i][key],
+                                            "elucidation": "",
+                                            "createdBy": app.user.name,
+                                            "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
+                                            "definitionSrc": app.user.name,
+                                            "examples": app.colorSampleText[i][key] + ", used in taxon " + app.colorTaxon[i][key],
+                                            "logicDefinition": "",
+                                        };
+                                        axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
+                                            .then(function (resp) {
+                                                console.log('shark api class resp', resp);
+                                                axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                                    user: app.sharedFlag ? '' : app.user.name,
+                                                    ontology: 'carex'
+                                                })
+                                                    .then(function (resp) {
+                                                        console.log('save api resp', resp);
+                                                    });
+                                            });
+                                    }
+
+
+                                } else if (app.colorDefinition[i][key] && postFlag == true) {
                                     requestBody = {
                                         "user": app.sharedFlag ? '' : app.user.name,
                                         "ontology": "carex",
@@ -2194,7 +2223,7 @@
                                                 });
                                         });
                                     console.log('user defined', app.colorDefinition[i][key]);
-                                } else if (app.colorComment[i][key]) {
+                                } else if (app.colorComment[i][key] && postFlag == true) {
                                     requestBody = {
                                         "user": app.sharedFlag ? '' : app.user.name,
                                         "ontology": "carex",
@@ -2223,12 +2252,17 @@
                     }
                     postValues.push(tempValue);
                 }
-                axios.post('/chrecorder/public/api/v1/save-color-value', postValues)
-                    .then(function (resp) {
-                        app.values = resp.data.values;
-                        app.colorDetailsFlag = false;
-                        console.log('save color value resp', postValues);
-                    });
+                if (postFlag == true) {
+                    axios.post('/chrecorder/public/api/v1/save-color-value', postValues)
+                        .then(function (resp) {
+                            app.values = resp.data.values;
+                            app.colorDetailsFlag = false;
+                            console.log('save color value resp', postValues);
+                        });
+                } else {
+                    $('.color-definition-input').css('border', '1px solid red');
+                }
+
                 console.log('postValues', postValues);
 
             },
@@ -2246,6 +2280,7 @@
                 var app = this;
 
                 var postValues = [];
+                var postFlag = true;
                 for (var i = 0; i < app.nonColorDetails.length; i++) {
                     var tempValue = {};
                     tempValue['value_id'] = app.nonColorDetails[i]['value_id'];
@@ -2258,34 +2293,47 @@
                     tempValue['main_value'] = app.nonColorDetails[i].main_value;
                     var requestBody = {};
                     if (app.nonColorDetails[i]['main_value'] != null && app.nonColorDetails[i]['main_value'] != '') {
-                        if (app.nonColorDetails[i]['main_value'].endsWith('(user defined)')) {
-                            tempValue['main_value'] = app.nonColorDetails[i]['main_value'].substr(0, app.nonColorDetails[i]['main_value'].length - 14);
-                            var date = new Date();
-                            requestBody = {
-                                "user": app.sharedFlag ? '' : app.user.name,
-                                "ontology": "carex",
-                                "term": tempValue['main_value'],
-                                "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#texture",
-                                "definition": app.colorDefinition[i]['main_value'],
-                                "elucidation": "",
-                                "createdBy": app.user.name,
-                                "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
-                                "definitionSrc": app.user.name,
-                                "examples": app.nonColorSampleText[i]['main_value'] + ", used in taxon " + app.nonColorTaxon[i]['main_value'],
-                                "logicDefinition": "",
-                            };
-                            axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
-                                .then(function (resp) {
-                                    console.log('shark api class resp', resp);
-                                    axios.post('http://shark.sbs.arizona.edu:8080/save', {
-                                        user: app.sharedFlag ? '' : app.user.name,
-                                        ontology: 'carex'
-                                    })
-                                        .then(function (resp) {
-                                            console.log('save api resp', resp);
-                                        });
-                                });
-                        } else if (app.nonColorDefinition[i]['main_value']) {
+                        if (app.nonColorDetails[i]['main_value'].endsWith('(user defined)') && postFlag == true) {
+                            if (app.nonColorDefinition[i]['main_value'] == ''
+                                || app.nonColorDefinition[i]['main_value'] == null
+                                || app.nonColorDefinition[i]['main_value'] == undefined
+                                || app.nonColorSampleText[i]['main_value'] == ''
+                                || app.nonColorSampleText[i]['main_value'] == null
+                                || app.nonColorSampleText[i]['main_value'] == undefined
+                                || app.nonColorTaxon[i]['main_value'] == ''
+                                || app.nonColorTaxon[i]['main_value'] == null
+                                || app.nonColorTaxon[i]['main_value'] == undefined) {
+                                postFlag = false;
+                            } else if (postFlag == true) {
+                                tempValue['main_value'] = app.nonColorDetails[i]['main_value'].substr(0, app.nonColorDetails[i]['main_value'].length - 14);
+                                var date = new Date();
+                                requestBody = {
+                                    "user": app.sharedFlag ? '' : app.user.name,
+                                    "ontology": "carex",
+                                    "term": tempValue['main_value'],
+                                    "superclassIRI": "http://biosemantics.arizona.edu/ontologies/carex#texture",
+                                    "definition": app.nonColorDefinition[i]['main_value'],
+                                    "elucidation": "",
+                                    "createdBy": app.user.name,
+                                    "creationDate": ("0" + date.getMonth()).slice(-2) + '-' + ("0" + date.getDate()).slice(-2) + '-' + date.getFullYear(),
+                                    "definitionSrc": app.user.name,
+                                    "examples": app.nonColorSampleText[i]['main_value'] + ", used in taxon " + app.nonColorTaxon[i]['main_value'],
+                                    "logicDefinition": "",
+                                };
+                                axios.post('http://shark.sbs.arizona.edu:8080/class', requestBody)
+                                    .then(function (resp) {
+                                        console.log('shark api class resp', resp);
+                                        axios.post('http://shark.sbs.arizona.edu:8080/save', {
+                                            user: app.sharedFlag ? '' : app.user.name,
+                                            ontology: 'carex'
+                                        })
+                                            .then(function (resp) {
+                                                console.log('save api resp', resp);
+                                            });
+                                    });
+                            }
+
+                        } else if (app.nonColorDefinition[i]['main_value'] && postFlag == true) {
                             requestBody = {
                                 "user": app.sharedFlag ? '' : app.user.name,
                                 "ontology": "carex",
@@ -2305,7 +2353,7 @@
                                             console.log('save api resp', resp);
                                         });
                                 });
-                        } else if (app.nonColorComment[i]['main_value']) {
+                        } else if (app.nonColorComment[i]['main_value'] && postFlag == true) {
                             requestBody = {
                                 "user": app.sharedFlag ? '' : app.user.name,
                                 "ontology": "carex",
@@ -2331,11 +2379,17 @@
 
                     postValues.push(tempValue);
                 }
-                axios.post('/chrecorder/public/api/v1/save-non-color-value', postValues)
-                    .then(function (resp) {
-                        app.values = resp.data.values;
-                        app.nonColorDetailsFlag = false;
-                    });
+
+                if (postFlag == true) {
+                    axios.post('/chrecorder/public/api/v1/save-non-color-value', postValues)
+                        .then(function (resp) {
+                            app.values = resp.data.values;
+                            app.nonColorDetailsFlag = false;
+                        });
+                } else {
+                    $('.non-color-input-definition').css('border', '1px solid red');
+                }
+
             },
             removeNonColorValue() {
                 var app = this;
@@ -2392,6 +2446,7 @@
                                     app.colorSampleText.push({});
                                     app.colorDefinition.push({});
                                 } else {
+                                    $('.color-input').attr('placeholder', '');
                                     for (var i = 0; i < app.colorDetails.length; i++) {
                                         app.colorDetails[i].taxon = app.taxonName;
                                         app.colorDetails[i].detailFlag = null;

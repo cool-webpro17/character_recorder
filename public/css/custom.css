@@ -772,6 +772,10 @@ body {
 .table-responsive {
     min-height: 600px;
 }
+
+.modal-body h5 {
+    text-align: center;
+}
 /*.container .table-responsive {*/
     /*min-height: 500px;*/
 /*}*/

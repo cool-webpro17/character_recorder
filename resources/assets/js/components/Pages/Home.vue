@@ -728,7 +728,7 @@
                                                         Taxon:
                                                         <input v-model="colorTaxon[index][eachColor.detailFlag]"
                                                                class="color-definition-input">
-                                                        Sample Text:
+                                                        Sample Sentence:
                                                         <input
                                                             v-model="colorSampleText[index][eachColor.detailFlag]"
                                                             class="color-definition-input"><br/>
@@ -883,7 +883,7 @@
                                                         Taxon: <input
                                                             v-model="nonColorTaxon[index][eachValue.detailFlag]"
                                                             class="non-color-input-definition">
-                                                        Sample Text: <input
+                                                        Sample Sentence: <input
                                                             v-model="nonColorSampleText[index][eachValue.detailFlag]"
                                                             class="non-color-input-definition">
                                                     </div>
@@ -2434,6 +2434,10 @@
                                 console.log('get-color resp', resp.data);
                                 app.colorDetails = resp.data.colorDetails;
                                 if (app.colorDetails.length == 0) {
+                                    app.colorComment = [];
+                                    app.colorTaxon = [];
+                                    app.colorSampleText = [];
+                                    app.colorDefinition = [];
                                     app.colorDetails.push({value_id: value.id, detailFlag: null});
                                     app.colorComment.push({});
                                     app.colorTaxon.push({
@@ -2447,6 +2451,11 @@
                                     app.colorDefinition.push({});
                                 } else {
                                     $('.color-input').attr('placeholder', '');
+                                    console.log('place holder test');
+                                    app.colorComment = [];
+                                    app.colorTaxon = [];
+                                    app.colorSampleText = [];
+                                    app.colorDefinition = [];
                                     for (var i = 0; i < app.colorDetails.length; i++) {
                                         app.colorDetails[i].taxon = app.taxonName;
                                         app.colorDetails[i].detailFlag = null;
@@ -2471,6 +2480,10 @@
                             .then(function (resp) {
                                 app.nonColorDetails = resp.data.nonColorDetails;
                                 if (app.nonColorDetails.length == 0) {
+                                    app.nonColorComment = [];
+                                    app.nonColorTaxon = [];
+                                    app.nonColorSampleText = [];
+                                    app.nonColorDefinition = [];
                                     app.nonColorDetails.push({
                                         value_id: value.id,
                                         detailFlag: null,
@@ -2483,6 +2496,10 @@
                                     app.nonColorSampleText.push({});
                                     app.nonColorDefinition.push({});
                                 } else {
+                                    app.nonColorComment = [];
+                                    app.nonColorTaxon = [];
+                                    app.nonColorSampleText = [];
+                                    app.nonColorDefinition = [];
                                     for (var i = 0; i < app.nonColorDetails.length; i++) {
                                         app.nonColorDetails[i].taxon = app.taxonName;
                                         app.nonColorDetails[i].detailFlag = null;
@@ -2644,6 +2661,15 @@
                         app.searchColor = resp.data.entries;
                         if (app.searchColor.length == 0) {
                             app.searchColorFlag = 0;
+                            if (color.id && !color[flag].endsWith('(user defined)')) {
+                                for (var i = 0; i < app.colorDetails.length; i++) {
+                                    if (app.colorDetails[i].id == color.id) {
+                                        app.colorDetails[i][flag] = color[flag] + '(user defined)';
+                                    }
+                                }
+                            } else if (!color[flag].endsWith('(user defined)')) {
+                                app.colorDetails[0][flag] = color[flag] + '(user defined)';
+                            }
                         } else if (app.searchColor.find(eachColor => eachColor.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == color[flag])
                             || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == color[flag])))) {
                             app.searchColorFlag = 1;
@@ -2692,6 +2718,15 @@
                         app.searchNonColor = resp.data.entries;
                         if (app.searchNonColor.length == 0) {
                             app.searchNonColorFlag = 0;
+                            if (nonColor.id && !nonColor[flag].endsWith('(user defined)')) {
+                                for (var i = 0; i < app.nonColorDetails.length; i++) {
+                                    if (app.nonColorDetails[i].id == nonColor.id) {
+                                        app.nonColorDetails[i][flag] = nonColor[flag] + '(user defined)';
+                                    }
+                                }
+                            } else if (!nonColor[flag].endsWith('(user defined)')) {
+                                app.nonColorDetails[0][flag] = nonColor[flag] + '(user defined)';
+                            }
                         } else if (app.searchNonColor.find(eachValue => eachValue.resultAnnotations.find(eachProperty => (eachProperty.property.endsWith('hasBroadSynonym') && eachProperty.value == nonColor[flag])
                             || (eachProperty.property.endsWith('has_not_recommended_synonym') && eachProperty.value == nonColor[flag])))) {
                             app.searchNonColorFlag = 1;

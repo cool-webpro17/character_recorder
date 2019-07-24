@@ -80,8 +80,6 @@ class HomeController extends Controller
                             }
                             if ($value->value != '') {
                                 $value->value = substr($value->value, 0, -1);
-                            } else {
-                                $value->value = 'undefined';
                             }
 //                            $value->save();
                         }

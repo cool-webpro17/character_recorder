@@ -96,8 +96,6 @@ class HomeController extends Controller
                             }
                             if ($value->value != '') {
                                 $value->value = substr($value->value, 0, -1);
-                            } else {
-                                $value->value = 'undefined';
                             }
                         }
                     }
@@ -1024,16 +1022,16 @@ class HomeController extends Controller
                 $details = ColorDetails::where('value_id', '=', $eachValue->id)->get();
                 foreach ($details as $each) {
                     if ($each->pre_constraint != null && $each->pre_constraint != '' && $each->pre_constraint != 'undefined' && $each->pre_constraint != 'null') {
-                        if (!in_array($each->pre_constraint, $preList)) {
-                            array_push($preList, $each->pre_constraint);
-
-                        }
+//                        if (!in_array($each->pre_constraint, $preList)) {
+//
+//                        }
+                        array_push($preList, $each->pre_constraint);
                     }
                     if ($each->post_constraint != null && $each->post_constraint != '' && $each->post_constraint != 'undefined' && $each->post_constraint != 'null') {
-                        if (!in_array($each->post_constraint, $postList)) {
-                            array_push($postList, $each->post_constraint);
-
-                        }
+//                        if (!in_array($each->post_constraint, $postList)) {
+//
+//                        }
+                        array_push($postList, $each->post_constraint);
                     }
                 }
             }

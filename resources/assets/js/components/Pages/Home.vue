@@ -582,7 +582,6 @@
                                                            list="pre_list">
                                                     <datalist id="pre_list">
                                                         <option value="longitudinally">longitudinally</option>
-                                                        <option value="when young">when young</option>
                                                         <option v-for="each in preList" :value="each">{{ each }}
                                                         </option>
                                                     </datalist>
@@ -645,7 +644,8 @@
                                                            style="width: 90px;"
                                                            v-model="eachColor.post_constraint"
                                                            list="post_list">
-                                                    <datalist id="post_list" v-if="postList.length > 0">
+                                                    <datalist id="post_list">
+                                                        <option value="when young">when young</option>
                                                         <option v-for="each in postList" :value="each">{{ each }}
                                                         </option>
                                                     </datalist>
@@ -773,7 +773,7 @@
                                         <div v-for="(eachValue, index) in nonColorDetails">
                                             <div>
                                                 <div style="display: inline-block;">
-                                                    <input v-on:focus="changeColorSection(eachValue, 'negation', $event)"
+                                                    <input v-on:focus="changeNonColorSection(eachValue, 'negation', $event)"
                                                            style="width: 90px; border:none; border-bottom: 1px solid; text-align:center;"
                                                            v-model="eachValue.negation" placeholder="">
                                                     <h5>
@@ -781,7 +781,7 @@
                                                     </h5>
                                                 </div>
                                                 <div style="display: inline-block;">
-                                                    <input v-on:focus="changeColorSection(eachValue, 'pre_constraint', $event)"
+                                                    <input v-on:focus="changeNonColorSection(eachValue, 'pre_constraint', $event)"
                                                            style="width: 90px;"
                                                            v-model="eachValue.pre_constraint"
                                                            list="pre_non_list">
@@ -804,7 +804,7 @@
                                                     </h5>
                                                 </div>
                                                 <div style="display: inline-block;">
-                                                    <input v-on:focus="changeColorSection(eachValue, 'post_constraint', $event)"
+                                                    <input v-on:focus="changeNonColorSection(eachValue, 'post_constraint', $event)"
                                                            style="width: 90px;"
                                                            v-model="eachValue.post_constraint"
                                                            list="post_non_list">
@@ -2581,6 +2581,8 @@
                             }
                         }
                         console.log('app.colorDetails', app.colorDetails);
+                    } else {
+                        app.colorDetails[app.colorDetails.length - 1].detailFlag = flag;
                     }
                 }
                 console.log('flag', flag);
@@ -2601,29 +2603,44 @@
 //                } else if (flag == 'main_value') {
 //                    event.target.placeholder = searchText[0];
 //                }
+                app.nonColorExistFlag = false;
 
-
-                axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + searchText[0].toLowerCase())
-                    .then(function (resp) {
-                        app.textureTreeData = resp.data;
-                        nonColor.detailFlag = flag;
-                        app.nonColorExistFlag = true;
-                        if (nonColor.id) {
-                            app.nonColorDetailId = nonColor.id;
-                            for (var i = 0; i < app.nonColorDetails.length; i++) {
-                                if (app.nonColorDetails[i].id == nonColor.id) {
-                                    app.nonColorDetails[i].detailFlag = flag;
-                                    app.nonColorDetails[i][flag] = app.nonColorDetails[i][flag] + ';';
-                                    app.nonColorDetails[i][flag] = app.nonColorDetails[i][flag].substring(0, app.nonColorDetails[i][flag].length - 1);
-                                    if (app.nonColorDetails[i][flag] == 'null' || app.nonColorDetails[i][flag] == null) {
-                                        app.nonColorDetails[i][flag] = '';
+                if (flag == 'main_value') {
+                    axios.get('http://shark.sbs.arizona.edu:8080/carex/getSubclasses?baseIri=http://biosemantics.arizona.edu/ontologies/carex&term=' + searchText[0].toLowerCase())
+                        .then(function (resp) {
+                            app.textureTreeData = resp.data;
+                            nonColor.detailFlag = flag;
+                            app.nonColorExistFlag = true;
+                            if (nonColor.id) {
+                                app.nonColorDetailId = nonColor.id;
+                                for (var i = 0; i < app.nonColorDetails.length; i++) {
+                                    if (app.nonColorDetails[i].id == nonColor.id) {
+                                        app.nonColorDetails[i].detailFlag = flag;
+                                        app.nonColorDetails[i][flag] = app.nonColorDetails[i][flag] + ';';
+                                        app.nonColorDetails[i][flag] = app.nonColorDetails[i][flag].substring(0, app.nonColorDetails[i][flag].length - 1);
+                                        if (app.nonColorDetails[i][flag] == 'null' || app.nonColorDetails[i][flag] == null) {
+                                            app.nonColorDetails[i][flag] = '';
+                                        }
                                     }
                                 }
                             }
-
+                        });
+                } else {
+                    if (nonColor.id) {
+                        app.nonColorDetailId = nonColor.id;
+                        for (var i = 0; i < app.nonColorDetails.length; i++) {
+                            app.nonColorDetails[i].detailFlag = flag;
+                            app.nonColorDetails[i][flag] = app.nonColorDetails[i][flag] + ';';
+                            app.nonColorDetails[i][flag] = app.nonColorDetails[i][flag].substring(0, app.nonColorDetails[i][flag].length - 1);
+                            if (app.nonColorDetails[i][flag] == 'null' || app.nonColorDetails[i][flag] == null) {
+                                app.nonColorDetails[i][flag] = '';
+                            }
                         }
-                    });
-                app.nonColorExistFlag = false;
+                    } else {
+                        app.nonColorDetails[app.nonColorDetails.length - 1].detailFlag = flag;
+                    }
+                }
+
 
             },
             changeToSubClassName(flag) {

@@ -2256,6 +2256,8 @@
                     axios.post('/chrecorder/public/api/v1/save-color-value', postValues)
                         .then(function (resp) {
                             app.values = resp.data.values;
+                            app.preList = resp.data.preList;
+                            app.postList = resp.data.postList;
                             app.colorDetailsFlag = false;
                             console.log('save color value resp', postValues);
                         });
@@ -2273,6 +2275,8 @@
                 axios.post('/chrecorder/public/api/v1/remove-color-value', {value_id: app.colorDetails[0].value_id})
                     .then(function (resp) {
                         app.values = resp.data.values;
+                        app.preList = resp.data.preList;
+                        app.postList = resp.data.postList;
                         app.colorDetailsFlag = false;
                     });
             },
@@ -2384,6 +2388,8 @@
                     axios.post('/chrecorder/public/api/v1/save-non-color-value', postValues)
                         .then(function (resp) {
                             app.values = resp.data.values;
+                            app.preList = resp.data.preList;
+                            app.postList = resp.data.postList;
                             app.nonColorDetailsFlag = false;
                         });
                 } else {
@@ -2397,6 +2403,8 @@
                 axios.post('/chrecorder/public/api/v1/remove-non-color-value', {value_id: app.nonColorDetails[0].value_id})
                     .then(function (resp) {
                         app.values = resp.data.values;
+                        app.preList = resp.data.preList;
+                        app.postList = resp.data.postList;
                         app.nonColorDetailsFlag = false;
                     });
             },

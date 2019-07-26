@@ -1006,8 +1006,8 @@ class HomeController extends Controller
 
         $characters = Character::where('name', '=', $characterName)->get();
 
-        $preList = [];
-        $postList = [];
+        $preList = ['longitudinally'];
+        $postList = ['when young'];
         foreach ($characters as $eachCharacter) {
             $values = Value::where('character_id', '=', $eachCharacter->id)->where('header_id', '<>', 1)->get();
             foreach($values as $eachValue) {
@@ -1041,8 +1041,8 @@ class HomeController extends Controller
     public function getConstraint(Request $request, $characterName) {
         $characters = Character::where('name', '=', $characterName)->get();
 
-        $preList = [];
-        $postList = [];
+        $preList = ['longitudinally'];
+        $postList = ['when young'];
         foreach ($characters as $eachCharacter) {
             $values = Value::where('character_id', '=', $eachCharacter->id)->where('header_id', '<>', 1)->get();
             foreach($values as $eachValue) {
@@ -1110,8 +1110,8 @@ class HomeController extends Controller
 
         $characters = Character::where('name', '=', $characterName)->get();
 
-        $preList = [];
-        $postList = [];
+        $preList = ['longitudinally'];
+        $postList = ['when young'];
         foreach ($characters as $eachCharacter) {
             $values = Value::where('character_id', '=', $eachCharacter->id)->where('header_id', '<>', 1)->get();
             foreach($values as $eachValue) {
@@ -1145,8 +1145,8 @@ class HomeController extends Controller
     public function getDefaultConstraint($characterName) {
         $characters = Character::where('name', '=', $characterName)->get();
 
-        $preList = [];
-        $postList = [];
+        $preList = ['longitudinally'];
+        $postList = ['when young'];
         foreach ($characters as $eachCharacter) {
             $values = Value::where('character_id', '=', $eachCharacter->id)->where('header_id', '<>', 1)->get();
             foreach($values as $eachValue) {

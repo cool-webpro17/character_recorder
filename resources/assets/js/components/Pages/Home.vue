@@ -581,7 +581,6 @@
                                                            v-model="eachColor.pre_constraint"
                                                            list="pre_list">
                                                     <datalist id="pre_list">
-                                                        <option value="longitudinally">longitudinally</option>
                                                         <option v-for="each in preList" :value="each">{{ each }}
                                                         </option>
                                                     </datalist>
@@ -645,7 +644,6 @@
                                                            v-model="eachColor.post_constraint"
                                                            list="post_list">
                                                     <datalist id="post_list">
-                                                        <option value="when young">when young</option>
                                                         <option v-for="each in postList" :value="each">{{ each }}
                                                         </option>
                                                     </datalist>

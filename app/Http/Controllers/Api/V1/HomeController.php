@@ -971,6 +971,7 @@ class HomeController extends Controller
     public function saveColorValue(Request $request) {
         $colorValues = $request->all();
 
+        $characterName = Character::where('id', '=', Value::where('id', '=', $colorValues[0]['value_id'])->first()->character_id)->first()->name;
         foreach ($colorValues as $eachColor) {
             if (array_key_exists('id', $eachColor)) {
                 $color = ColorDetails::where('id', '=', $eachColor['id'])->first();
@@ -1002,10 +1003,32 @@ class HomeController extends Controller
             }
         }
 
+
+        $characters = Character::where('name', '=', $characterName)->get();
+
+        $preList = [];
+        $postList = [];
+        foreach ($characters as $eachCharacter) {
+            $values = Value::where('character_id', '=', $eachCharacter->id)->where('header_id', '<>', 1)->get();
+            foreach($values as $eachValue) {
+                $details = ColorDetails::where('value_id', '=', $eachValue->id)->get();
+                foreach ($details as $each) {
+                    if ($each->pre_constraint != null && $each->pre_constraint != '' && $each->pre_constraint != 'undefined' && $each->pre_constraint != 'null') {
+                        array_push($preList, $each->pre_constraint);
+                    }
+                    if ($each->post_constraint != null && $each->post_constraint != '' && $each->post_constraint != 'undefined' && $each->post_constraint != 'null') {
+                        array_push($postList, $each->post_constraint);
+                    }
+                }
+            }
+        }
+
         $returnValues = $this->getValuesByCharacter();
 
         $data = [
-            'values' => $returnValues
+            'values' => $returnValues,
+            'preList' => $preList,
+            'postList' => $postList,
         ];
 
         return $data;
@@ -1058,6 +1081,8 @@ class HomeController extends Controller
     public function saveNonColorValue(Request $request) {
         $nonColorValues = $request->all();
 
+        $characterName = Character::where('id', '=', Value::where('id', '=', $nonColorValues[0]['value_id'])->first()->character_id)->first()->name;
+
         foreach ($nonColorValues as $eachValue) {
             if (array_key_exists('id', $eachValue)) {
                 $value = NonColorDetails::where('id', '=', $eachValue['id'])->first();
@@ -1081,10 +1106,59 @@ class HomeController extends Controller
             }
         }
 
+        $characters = Character::where('name', '=', $characterName)->get();
+
+        $preList = [];
+        $postList = [];
+        foreach ($characters as $eachCharacter) {
+            $values = Value::where('character_id', '=', $eachCharacter->id)->where('header_id', '<>', 1)->get();
+            foreach($values as $eachValue) {
+                $details = ColorDetails::where('value_id', '=', $eachValue->id)->get();
+                foreach ($details as $each) {
+                    if ($each->pre_constraint != null && $each->pre_constraint != '' && $each->pre_constraint != 'undefined' && $each->pre_constraint != 'null') {
+                        array_push($preList, $each->pre_constraint);
+                    }
+                    if ($each->post_constraint != null && $each->post_constraint != '' && $each->post_constraint != 'undefined' && $each->post_constraint != 'null') {
+                        array_push($postList, $each->post_constraint);
+                    }
+                }
+            }
+        }
+
         $returnValues = $this->getValuesByCharacter();
 
         $data = [
-            'values' => $returnValues
+            'values' => $returnValues,
+            'preList' => $preList,
+            'postList' => $postList,
+        ];
+
+        return $data;
+    }
+
+    public function getDefaultConstraint($characterName) {
+        $characters = Character::where('name', '=', $characterName)->get();
+
+        $preList = [];
+        $postList = [];
+        foreach ($characters as $eachCharacter) {
+            $values = Value::where('character_id', '=', $eachCharacter->id)->where('header_id', '<>', 1)->get();
+            foreach($values as $eachValue) {
+                $details = ColorDetails::where('value_id', '=', $eachValue->id)->get();
+                foreach ($details as $each) {
+                    if ($each->pre_constraint != null && $each->pre_constraint != '' && $each->pre_constraint != 'undefined' && $each->pre_constraint != 'null') {
+                        array_push($preList, $each->pre_constraint);
+                    }
+                    if ($each->post_constraint != null && $each->post_constraint != '' && $each->post_constraint != 'undefined' && $each->post_constraint != 'null') {
+                        array_push($postList, $each->post_constraint);
+                    }
+                }
+            }
+        }
+
+        $data = [
+            'preList' => $preList,
+            'postList' => $postList,
         ];
 
         return $data;
@@ -1097,10 +1171,15 @@ class HomeController extends Controller
 
         $returnValues = $this->getValuesByCharacter();
 
-        $data = [
-            'values' => $returnValues
-        ];
+        $characterName = Character::where('id', '=', Value::where('id', '=', $valueId)->first()->character_id)->first()->name;
 
+        $constraints = $this->getDefaultConstraint($characterName);
+
+        $data = [
+            'values' => $returnValues,
+            'preList' => $constraints['preList'],
+            'postList' => $constraints['postList'],
+        ];
         return $data;
     }
 
@@ -1111,8 +1190,14 @@ class HomeController extends Controller
 
         $returnValues = $this->getValuesByCharacter();
 
+        $characterName = Character::where('id', '=', Value::where('id', '=', $valueId)->first()->character_id)->first()->name;
+
+        $constraints = $this->getDefaultConstraint($characterName);
+
         $data = [
-            'values' => $returnValues
+            'values' => $returnValues,
+            'preList' => $constraints['preList'],
+            'postList' => $constraints['postList'],
         ];
 
         return $data;
